@@ -1,0 +1,52 @@
+License Information for SWORD Example Common Code and Client Implementation 
+===========================================================================
+The SWORD example code contains the SWORD Common code and example client
+implementations. The code in org.purl.sword (and subpackages) 
+and org.w3.atom are licensed using the BSD licence. 
+See the file SWORD_BSDLicense.txt.
+ 
+The SWORD code uses several 3rd party libraries. The libraries and 
+licenses are listed below. 
+
+commons-codec-1.3.jar
+   Containing Project URL: http://commons.apache.org/codec/
+   License: Apache License (See ApacheSoftwareLicense2.0.txt)
+
+commons-fileupload.jar
+   Containing Project URL: http://commons.apache.org/fileupload/
+   License: Apache License (See ApacheSoftwareLicense2.txt)
+
+commons-io-1.3.2.jar
+   Containing Project URL: http://commons.apache.org/io/
+   License: Apache License (See ApacheSoftwareLicense2.txt)
+
+commons-httpclient-3.0.1.jar
+   Containing Project URL: http://jakarta.apache.org/httpcomponents/httpclient-3.x/
+   License: Apache License (See ApacheSoftwareLicense2.txt)
+
+commons-logging.jar
+   Containing Project URL: http://commons.apache.org/logging/
+   License: Apache License (See ApacheSoftwareLicense2.txt)
+
+log4j-1.2.14.jar
+   Containing Project URL: http://logging.apache.org/log4j/1.2/index.html
+   License: Apache License (See ApacheSoftwareLicense2.txt)
+
+swing-worker-1.1.jar 
+   Containing Project URL: https://swingworker.dev.java.net/
+   License: LGPL (see LGPL.txt)
+
+servlet.jar 
+   Containing Project URL: http://java.sun.com/products/servlet/
+   License: Sun Binary Code License Agreement (see ServletJarLicense.txt)
+   
+xom-1.1.jar 
+   Containing Project URL: http://www.xom.nu/
+   License: LGPL (see XOMLicenseText.txt and LGPL.txt)
+   
+Copies of the source code distribution for XOM and SwingWorker 
+are available at the same location that this software was downloaded. 
+More recent versions of these libraries might be available at the 
+XOM and SwingWorker websites. 
+
+END
