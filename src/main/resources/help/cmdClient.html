@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head><title>Command Line Mode</title>
+        <link href="Resources/Stylesheets/Styles.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+        <div class="header"><a href="index.html">Home</a></div>
+        <h1>Command Line Client</h1>
+        <p>The command line version provides support to request service 
+           documents and post files. Each run of the command line version 
+           can either request a service document or post one file to one 
+           or more specified location. Results are output to the screen.</p>
+        <p>The following options are available: </p>
+        <table style="width: 100%;">
+            <col style="width: 259px;" />
+            <col style="width: 50%;" />
+            <tbody>
+                <tr>
+                    <td>-gui</td>
+                    <td>This starts the GUI&#160;version of the application. </td>
+                </tr>
+                <tr>
+                    <td>-cmd</td>
+                    <td>This starts the application in command line mode. </td>
+                </tr>
+                <tr>
+                    <td>-t &lt;service|post|multipost&gt;</td>
+                    <td style="font-style: normal;">The type of service. This is required. It is followed by a value of service, post or multipost. </td>
+                </tr>
+                <tr>
+                    <td>-u &lt;username&gt;</td>
+                    <td>Specifies a username if you are connecting to a server using Basic Authentication. </td>
+                </tr>
+                <tr>
+                    <td>-p &lt;password&gt;</td>
+                    <td>Specifies a password if you are connecting to a server using Basic Authentication.</td>
+                </tr>
+                <tr>
+                    <td>-host &lt;host&gt;</td>
+                    <td>A proxy host, e.g. wwwcache.myproxy.com. Use if you use a proxy server to access remote resources. </td>
+                </tr>
+                <tr>
+                    <td>-port &lt;port&gt;</td>
+                    <td>A proxy port, e.g. 8080. Use if you use a proxy server. </td>
+                </tr>
+                <tr>
+                    <td>-help</td>
+                    <td>Show a useage statement. </td>
+                </tr>
+                <tr>
+                    <td>-file &lt;file&gt;</td>
+                    <td>A file to upload. Use for Post operation. </td>
+                </tr>
+                <tr>
+                    <td>-filetype &lt;type&gt;</td>
+                    <td>A filetype, e.g. application/zip. </td>
+                </tr>
+                <tr>
+                    <td>-verbose</td>
+                    <td>Set verbose to true. Used in Post operation. </td>
+                </tr>
+                <tr>
+                    <td>-noOp</td>
+                    <td>Set NoOp to true. Used in Post operation. </td>
+                </tr>
+                <tr>
+                    <td>-formatNamespace &lt;namespace&gt;</td>
+                    <td>Specify a format namespace. </td>
+                </tr>
+                <tr>
+                    <td>-onBehalfOf &lt;name&gt;</td>
+                    <td>Specify the onBehalfOf name. Used for Post and Service operations. </td>
+                </tr>
+                <tr>
+                    <td>-md5</td>
+                    <td>Use an MD5 checksum when posting data to the server. </td>
+                </tr>
+                <tr>
+                    <td>-slug &lt;slug&gt;</td>
+                    <td>The slug value.</td>
+                </tr>
+                <tr>
+                    <td>-checksumError</td>
+                    <td>Corrupt the MD5 checksum. Used for testing. Only useful if you have also set -md5. </td>
+                </tr>
+                <tr>
+                    <td>-dest &lt;destination&gt;</td>
+                    <td>
+                        <p>A new format for specifying the username, password, onBehalfOf and URL for a post. This is only used for a multipost operation. Multiple -dest arguments can be provided on the command line. The format is: </p>
+                        <p>&lt;username&gt;[onBehalfOf]:&lt;password&gt;@&lt;url&gt;, e.g. </p>
+                        <p>sword[myUser]:sword@http://www.myserver.com/collection and </p>
+                        <p>sword:sword@http://www.myserver.com/collection</p>
+                        <p>The onBehalfOf item is optional. </p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>Example usage: </p>
+        <p><b>Request a service document using Basic Authentication</b> <![CDATA[ ]]></p><pre>java -jar swordclient.jar -cmd -t service -u sword -p sword -href http://sword.aber.ac.uk/sword-basic/app/servicedocument </pre>
+        <p><b>Request a service document using Basic Authentication. Using a proxy. </b>
+        </p><pre>java -jar swordclient.jar -cmd -t service -u sword -p sword -href http://sword.aber.ac.uk/sword-basic/app/servicedocument -host www.mycache.com -port 8080</pre>
+        <p style="font-weight: bold;">Post a zip file using Basic Authentication </p><pre>java -jar swordclient.jar -cmd -t post -u sword -p sword -file BurningStubble.zip -filetype application/zip -href http://sword.aber.ac.uk/sword-basic/deposit</pre>
+        <p style="font-weight: normal;">Post a zip file using Basic Authentication&#160;</p><pre>java -jar swordclient.jar -cmd -t multipost -file BurningStubble.zip -filetype application/zip -dest sword:sword@http://sword.aber.ac.uk/sword-basic/deposit</pre>
+    </body>
+</html>

@@ -1,0 +1,45 @@
+body
+{
+	font-family: Arial;
+}
+
+ol, ul 
+{
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+img
+{
+	border: none;
+}
+
+expandingHead 
+{
+	font-style: italic;
+	font-weight: normal;
+	cursor: hand;
+	text-decoration: none;
+	color: #006600;
+}
+
+expandingBody 
+{
+	color: #777777;
+	font-style: italic;
+}
+
+dropDownHotSpot
+{
+	cursor: hand;
+	font-style: italic;
+	text-decoration: none;
+	color: #006600;
+}
+
+.header
+{
+	border-bottom: 0.1em solid #930;
+	padding-bottom: 0.2em;
+	xbackground-color: #309;
+}

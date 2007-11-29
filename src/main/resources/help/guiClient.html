@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head><title>GUI Mode</title>
+        <link href="Resources/Stylesheets/Styles.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+        <div class="header"><a href="index.html">Home</a></div><h1>GUI Client</h1>
+        <p>The GUI Client mode displays a graphical user interface for you to access service documents and post content to repositories. This page describes the main features for this mode. </p>
+        <h2>Starting in GUI Mode</h2>
+        <p>To run the tool in GUI mode, simply double click the JAR 
+           file or run <i>java -jar swordclient.jar</i>. When the 
+           tool starts, the following screen is displayed. </p>
+        <p>
+            <img src="Resources/sword_client_open.jpg" />
+        </p>
+        <p>The tool has two main operations: request a Service Document and Post a file. These operations are activated by selecting the appropriate button in the toolbar. </p>
+        <p>The content in the screen is divided into three areas: </p>
+        <ul>
+            <li value="1">Top-left: A tree that lists service details 
+               that you have requested and a log of file data that you have posted. </li>
+            <li value="2">Top-right: This panel displays further details 
+               about an element in the tree. The display depends upon what has been selected in the tree. </li>
+            <li value="3">Bottom: This is a general message area. A log of 
+               certain outputs is displayed in this area. Current outputs include status data and a copy of the XML&#160;result from the server. </li>
+        </ul>
+        <h2>Requesting a Service Document</h2>
+        <p>Select the Add Service button in the toolbar. The following dialog is displayed. </p>
+        <p>
+            <img src="Resources/sword_client_service.jpg" />
+        </p>
+        <p>Enter the details and press the Get Service Document button. If there is an error, a dialog will be displayed. Otherwise, the results are shown in the tree, as shown below: </p>
+        <p>
+            <img src="Resources/sword_client_main.jpg" />
+        </p>
+        <p>The top level item (which is a child of the Services node) shows the service details. This service contains two workspaces, each of which contain one Collection. A&#160;Collection node is selected. The details are displayed in the right-hand panel. </p>
+        <h2>Posting a File</h2>
+        <p>Select the Post button in the toolbar or the Post operation from the File menu. The following dialog is displayed.</p>
+        <p>
+            <img src="Resources/sword_client_post.jpg" />
+        </p>
+        <p>The Post operation can be post the same file to several different repositories. The Destinations list shows any destination repositories that have been specified. The list is empty by default. Press the Add button to display the Destination dialog; the screen is shown below. </p>
+        <p>
+            <img src="Resources/sword_client_post_destination.jpg" />
+        </p>
+        <p>Enter the details for the repository location. Press OK to add the entry. The entry is shown on the main Post Document dialog. </p>
+        <p>
+            <img src="Resources/sword_client_post_with_destination.jpg" />
+        </p>
+        <p>You can add and edit multiple destinations. Add the other information and press Post&#160;File to start the post process. </p>
+        <p>The entry is added into the tree. If the destination collection is already displayed in the tree (as a result of requesting a service document) the successful post response will be shown as a child of the collection. Otherwise, the post will be shown as child of the main Services &amp; Posted Files node.  An example file display is shown below. </p>
+        <img src="Resources/sword_client_post_file.jpg" />
+        <h2>Property File</h2>
+        <p>Certain values for the Service and Post dialogs can be 
+           pre-configured in a properties file. The file is SwordClient.properties and is located in the same directory as the swordclient.jar file. The file contains labels for the areas that can be configured. The value on the right of the = character is a comma separated list. The values are added into the relevant combo boxes on the dialogs. The property file is only read as the tool starts. If you make any changes to the properties, restart the application. You can also edit the values from with the GUI client by selecting Options &gt;&#160;Edit Properties. A&#160;dialog is displayed. Change the necessary values and press OK. The changes are saved to the properties file when the application closes. </p>
+        <h2>Debug Output</h2>
+        <p>By default, the tool will grab debug output. This 
+           can be viewed in the Debug panel - to show the panel 
+           select <i>Show Debug Panel</i> from the Options menu. 
+           This will redirect all stdout and stderr to the panel. To disable 
+           this, and allow output to go to the console, specify -nocapture 
+           when running the tool. </p>
+        <p>The tool uses Log4J to produce log messages. You can configure this by modifying the log4j.properties file in the root directory of the application. The distributed configuration is:</p>
+        <pre>log4j.rootLogger=DEBUG, stdout
+
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%5p [%c] %m%n
+
+log4j.logger.httpclient.wire.header=INFO
+log4j.logger.httpclient.wire.content=INFO
+log4j.logger.org.apache.commons.httpclient=INFO</pre>
+        <p>
+        You can view more detail by adjusting the INFO for (httpclient) 
+        to DEBUG on the final two lines. This change must be 
+        made before running the application.</p>
+    </body>
+</html>
