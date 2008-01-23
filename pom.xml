@@ -20,9 +20,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<exclude>
-							org/purl/sword/SwordTest.java
-						</exclude>
+						<exclude>org/purl/sword/SwordTest.java</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
@@ -111,5 +109,30 @@
 			<version>1.3.1</version>
 		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>sourceforge-sword-app</id>
+			<url>
+				scp://shell.sourceforge.net/home/groups/s/sw/sword-app/htdocs/maven2/
+			</url>
+		</repository>
+		<snapshotRepository>
+			<id>sourceforge-spectra-chem</id>
+			<url>
+				scp://shell.sourceforge.net/home/groups/s/sw/sword-app/htdocs/maven2/
+			</url>
+		</snapshotRepository>
+		<site>
+			<id>sourceforge-sword-app</id>
+			<name>SWORD-APP</name>
+			<url>
+				scp://shell.sourceforge.net/home/groups/s/sw/sword-app/htdocs/sword-app
+			</url>
+		</site>
+		<downloadUrl>
+			http://spectra-chem.sourceforge.net/maven2/
+		</downloadUrl>
+	</distributionManagement>
+
 </project>
 
