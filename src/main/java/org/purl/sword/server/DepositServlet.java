@@ -86,21 +86,30 @@ public class DepositServlet extends HttpServlet {
    private static Logger log = Logger.getLogger(DepositServlet.class);
 
    /**
-    *  Initialise the servlet 
-    */
-   public void init() {
-      // Instantiate the correct SWORD Server class
-      String className = getServletContext().getInitParameter("server-class");
-      if (className == null) {
-         log.fatal("Unable to read value of 'sword-server-class' from Servlet context");
-      } else {
-         try {
-            myRepository = (SWORDServer)Class.forName(className).newInstance();
-            log.info("Using " + className + " as the SWORDServer");
-         } catch (Exception e) {
-            log.fatal("Unable to instantiate class from 'sword-server-class': " + className);
-         }
-      }
+	 * Initialise the servlet
+	 * 
+	 * @throws ServletException
+	 */
+	public void init() throws ServletException {
+		// Instantiate the correct SWORD Server class
+		String className = getServletContext().getInitParameter("server-class");
+		if (className == null) {
+			log
+					.fatal("Unable to read value of 'sword-server-class' from Servlet context");
+		} else {
+			try {
+				myRepository = (SWORDServer) Class.forName(className)
+						.newInstance();
+				log.info("Using " + className + " as the SWORDServer");
+			} catch (Exception e) {
+				log
+						.fatal("Unable to instantiate class from 'sword-server-class': "
+								+ className);
+				throw new ServletException(
+						"Unable to instantiate class from 'sword-server-class': "
+								+ className);
+			}
+		}
 
       authN = getServletContext().getInitParameter("authentication-method");
       if ((authN == null) || (authN.equals(""))) {
@@ -114,11 +123,18 @@ public class DepositServlet extends HttpServlet {
       }
       File tempDir = new File(tempDirectory);
       log.info("Upload temporary directory set to: " + tempDir);
+      if(!tempDir.exists()) {
+    	  if(!tempDir.mkdirs()) {
+    		  throw new ServletException("Upload directory did not exist and I can't create it. "+ tempDir);
+    	  }
+      }
       if (!tempDir.isDirectory()) {
          log.fatal("Upload temporary directory is not a directory: " + tempDir);
+         throw new ServletException("Upload temporary directory is not a directory: " + tempDir);
       }
       if (!tempDir.canWrite()) {
          log.fatal("Upload temporary directory cannot be written to: " + tempDir);
+         throw new ServletException("Upload temporary directory cannot be written to: " + tempDir);
       }		
    }
 
@@ -238,7 +254,7 @@ public class DepositServlet extends HttpServlet {
 
             // Get the DepositResponse
             DepositResponse dr = myRepository.doDeposit(d);
-
+            
             // Print out the Deposit Response
             response.setStatus(dr.getHttpResponse());
             // response.setContentType("application/atomserv+xml");
@@ -281,6 +297,7 @@ public class DepositServlet extends HttpServlet {
          response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
          log.error(nsae.toString());
       }
+	  
          }
 
    /**

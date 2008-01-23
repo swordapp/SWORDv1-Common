@@ -51,7 +51,6 @@ import org.apache.log4j.Logger;
 import org.purl.sword.base.HttpHeaders;
 import org.purl.sword.base.SWORDAuthenticationException;
 import org.purl.sword.base.SWORDException;
-import org.purl.sword.server.SWORDServer;
 import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.ServiceDocumentRequest;
 
@@ -71,23 +70,32 @@ public class ServiceDocumentServlet extends HttpServlet {
 	/** Logger */
 	private static Logger log = Logger.getLogger(ServiceDocumentServlet.class);
 	
-	/** 
-	 * Initialise the servlet. 
+	/**
+	 * Initialise the servlet.
+	 * 
+	 * @throws ServletException
 	 */
-	public void init() {
+	public void init() throws ServletException {
 		// Instantiate the correct SWORD Server class
 		String className = getServletContext().getInitParameter("server-class");
 		if (className == null) {
-			log.fatal("Unable to read value of 'sword-server-class' from Servlet context");
+			log
+					.fatal("Unable to read value of 'server-class' from Servlet context");
 		} else {
 			try {
-				myRepository = (SWORDServer)Class.forName(className).newInstance();
+				myRepository = (SWORDServer) Class.forName(className)
+						.newInstance();
 				log.info("Using " + className + " as the SWORDServer");
 			} catch (Exception e) {
-				log.fatal("Unable to instantiate class from 'sword-server-class': " + className);
+				log
+						.fatal("Unable to instantiate class from 'server-class': "
+								+ className);
+				throw new ServletException(
+						"Unable to instantiate class from 'server-class': "
+								+ className);
 			}
 		}
-		
+
 		// Set the authentication method
 		authN = getServletContext().getInitParameter("authentication-method");
 		if ((authN == null) || (authN == "")) {

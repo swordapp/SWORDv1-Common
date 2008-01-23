@@ -39,12 +39,11 @@ package org.purl.sword.base;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import nu.xom.Builder; 
+import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.ParsingException;
 import nu.xom.Serializer;
-
 
 /**
  * A representation of a SWORD Service Document.
@@ -54,134 +53,126 @@ import nu.xom.Serializer;
  * @author Stuart Lewis
  * @author Neil Taylor
  */
-public class ServiceDocument 
-{
-   /** 
-    * The Service object that is held by this object. 
-    */
-   private Service service; 
-   
-   /**
-    * Create a new instance and set the initial service level to Zero. 
-    */
-   public ServiceDocument()
-   {
-      this(ServiceLevel.ZERO);   
-   }
-   
-   /**
-    * Create a new instance and set the specified service level. 
-    * 
-    * @param complianceLevel The service compliance level. 
-    */
-   public ServiceDocument(ServiceLevel complianceLevel)
-   {
-      service = new Service(complianceLevel);   
-   }
-   
-   /**
-    * Create a new instance and store the specified Service document. 
-    * 
-    * @param service The Service object.
-    */
-   public ServiceDocument(Service service)
-   {
-      this.service = service; 
-   }
-   
-   /**
-    * Set the service object associated with this document. 
-    * 
-    * @param service The new Service object. 
-    */
-   public void setService(Service service)
-   {
-      this.service = service; 
-   }
-   
-   /**
-    * Retrieve the Service object associated with this document.  
-    * 
-    * @return The Service object. 
-    */
-   public Service getService()
-   {
-      return service; 
-   }
-   
-   /**
-    * Return the Service Document in it's XML form.
-    * 
-    * @return The ServiceDocument
-    */
-   public String toString() 
-   {
-      return marshall();
-   }  
-   
-   /**
-    * Marshall the data in the Service element and generate a String representation. 
-    * The returned string is UTF-8 format. 
-    * 
-    * @return A string of XML, or <code>null</code> if there was an error
-    *         marshalling the data. 
-    */
-   public String marshall( )
-   {
-      try 
-      {
-         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-         Serializer serializer = new Serializer(stream, "UTF-8");
-         serializer.setIndent(3);
-         serializer.setMaxLength(64);
-         
-         Document doc = new Document(service.marshall());
-         serializer.write(doc);  
-         
-         return stream.toString();
-       }
-       catch (IOException ex) {
-          System.err.println(ex); 
-       }
-       
-       return null;
-   }
-   
-   /**
-    * Convert the specified XML string into a set of objects
-    * used within the service. A new Service object will be 
-    * created and stored. This will dispose of any previous
-    * Service object associated with this object. 
-    * 
-    * @param xml The XML string. 
-    * @throws UnmarshallException If there was a problem unmarshalling the 
-    *                             data. This might be as a result of an 
-    *                             error in parsing the XML string, 
-    *                             extracting information. 
-    */
-   public void unmarshall( String xml )
-   throws UnmarshallException
-   {
-      //
-      try
-      {
-         Builder builder = new Builder(); 
-         Document doc = builder.build(xml, "http://something.com/here");
-         Element root = doc.getRootElement(); 
-         
-         service = new Service( );
-         service.unmarshall(root);
-         
-      }
-      catch( ParsingException ex )
-      {
-         throw new UnmarshallException("Unable to parse the XML", ex );
-      }
-      catch( IOException ex )
-      {
-         throw new UnmarshallException("Error acessing the file?", ex);
+public class ServiceDocument {
+	/**
+	 * The Service object that is held by this object.
+	 */
+	private Service service;
 
-      }
-   }
-   
+	/**
+	 * Create a new instance and set the initial service level to Zero.
+	 */
+	public ServiceDocument() {
+		this(ServiceLevel.ZERO);
+	}
+
+	/**
+	 * Create a new instance and set the specified service level.
+	 * 
+	 * @param complianceLevel
+	 *            The service compliance level.
+	 */
+	public ServiceDocument(ServiceLevel complianceLevel) {
+		service = new Service(complianceLevel);
+	}
+
+	/**
+	 * Create a new instance and store the specified Service document.
+	 * 
+	 * @param service
+	 *            The Service object.
+	 */
+	public ServiceDocument(Service service) {
+		this.service = service;
+	}
+
+	/**
+	 * Set the service object associated with this document.
+	 * 
+	 * @param service
+	 *            The new Service object.
+	 */
+	public void setService(Service service) {
+		this.service = service;
+	}
+
+	/**
+	 * Retrieve the Service object associated with this document.
+	 * 
+	 * @return The Service object.
+	 */
+	public Service getService() {
+		return service;
+	}
+
+	/**
+	 * Return the Service Document in it's XML form.
+	 * 
+	 * @return The ServiceDocument
+	 */
+	public String toString() {
+		return marshall();
+	}
+
+	/**
+	 * Marshall the data in the Service element and generate a String
+	 * representation. The returned string is UTF-8 format.
+	 * 
+	 * @return A string of XML, or <code>null</code> if there was an error
+	 *         marshalling the data.
+	 */
+	public String marshall() {
+		try {
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			Serializer serializer = new Serializer(stream, "UTF-8");
+			serializer.setIndent(3);
+			serializer.setMaxLength(64);
+
+			Document doc = new Document(service.marshall());
+			serializer.write(doc);
+
+			return stream.toString();
+		} catch (IOException ex) {
+			System.err.println(ex);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Convert the specified XML string into a set of objects used within the
+	 * service. A new Service object will be created and stored. This will
+	 * dispose of any previous Service object associated with this object.
+	 * 
+	 * @param xml
+	 *            The XML string.
+	 * @throws UnmarshallException
+	 *             If there was a problem unmarshalling the data. This might be
+	 *             as a result of an error in parsing the XML string, extracting
+	 *             information.
+	 */
+	public void unmarshall(String xml) throws UnmarshallException {
+		//
+		try {
+			Builder builder = new Builder();
+			Document doc = builder.build(xml, "http://something.com/here");
+			Element root = doc.getRootElement();
+			unmarshall(root);
+		} catch (ParsingException ex) {
+			throw new UnmarshallException("Unable to parse the XML", ex);
+		} catch (IOException ex) {
+			throw new UnmarshallException("Error acessing the file?", ex);
+
+		}
+	}
+
+	public void unmarshall(Element element) throws UnmarshallException {
+		service = new Service();
+		try {
+			service.unmarshall(element);
+		} catch (UnmarshallException e) {
+			throw new UnmarshallException("Unable to parse the XML", e);
+		}
+	}
+
 }

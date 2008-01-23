@@ -42,6 +42,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.httpclient.Header;
@@ -61,419 +63,419 @@ import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.UnmarshallException;
 
 /**
- * This is an example Client implementation to demonstrate how to connect to 
- * a SWORD server. The client supports BASIC HTTP Authentication. This can be 
- * initialised by setting a username and password. 
+ * This is an example Client implementation to demonstrate how to connect to a
+ * SWORD server. The client supports BASIC HTTP Authentication. This can be
+ * initialised by setting a username and password.
  * 
  * @author Neil Taylor
  */
-public class Client implements SWORDClient
-{
-   /** 
-    *  The status field for the response code from the recent network access. 
-    */
-   private Status status; 
+public class Client implements SWORDClient {
+	/**
+	 * The status field for the response code from the recent network access.
+	 */
+	private Status status;
 
-   /**
-    * The name of the server to contact. 
-    */
-   private String server; 
+	/**
+	 * The name of the server to contact.
+	 */
+	private String server;
 
-   /**
-    * The port number for the server. 
-    */
-   private int port;
+	/**
+	 * The port number for the server.
+	 */
+	private int port;
 
-   /**
-    * Specifies if the network access should use HTTP authentication.  
-    */
-   private boolean doAuthentication;
+	/**
+	 * Specifies if the network access should use HTTP authentication.
+	 */
+	private boolean doAuthentication;
 
-   /**
-    * The username to use for Basic Authentication. 
-    */
-   private String username; 
+	/**
+	 * The username to use for Basic Authentication.
+	 */
+	private String username;
 
-   /**
-    * User password that is to be used. 
-    */
-   private String password; 
+	/**
+	 * User password that is to be used.
+	 */
+	private String password;
 
-   /**
-    * The client that is used to send data to the specified server. 
-    */
-   private HttpClient client; 
+	/**
+	 * The client that is used to send data to the specified server.
+	 */
+	private HttpClient client;
 
-   /**
-    * The default connection timeout. This can be modified by using the 
-    * setSocketTimeout method. 
-    */
-   public static final int DEFAULT_TIMEOUT = 20000;
-   
-   /**
-    * Logger. 
-    */
-   private static Logger log = Logger.getLogger(Client.class);
-   
-   /**
-    *  Create a new Client. The client will not use 
-    *  authentication by default. 
-    */
-   public Client( ) 
-   {
-      client = new HttpClient(); 
-      client.getParams().setParameter("http.socket.timeout", new Integer(DEFAULT_TIMEOUT));
-      log.info("proxy host: " + client.getHostConfiguration().getProxyHost());
-      log.info("proxy port: " + client.getHostConfiguration().getProxyPort());
-      doAuthentication = false;  
-   }
+	/**
+	 * The default connection timeout. This can be modified by using the
+	 * setSocketTimeout method.
+	 */
+	public static final int DEFAULT_TIMEOUT = 20000;
 
-   /**
-    * Initialise the server that will be used to send the network access. 
-    * 
-    * @param server
-    * @param port
-    */
-   public void setServer( String server, int port )
-   {
-      this.server = server;
-      this.port = port;
-   }
+	/**
+	 * Logger.
+	 */
+	private static Logger log = Logger.getLogger(Client.class);
 
-   /**
-    * Set the user credentials that will be used when making the access to the server.  
-    * 
-    * @param username The username. 
-    * @param password The password. 
-    */
-   public void setCredentials( String username, String password )
-   {
-      this.username = username;
-      this.password = password;
-      doAuthentication = true;
-   }
+	/**
+	 * Create a new Client. The client will not use authentication by default.
+	 */
+	public Client() {
+		client = new HttpClient();
+		client.getParams().setParameter("http.socket.timeout",
+				new Integer(DEFAULT_TIMEOUT));
+		log.info("proxy host: " + client.getHostConfiguration().getProxyHost());
+		log.info("proxy port: " + client.getHostConfiguration().getProxyPort());
+		doAuthentication = false;
+	}
 
-   /**
-    * Set the basic credentials. You must have previously set the server and port 
-    * using setServer. 
-    * 
-    * @param username
-    * @param password
-    */
-   private void setBasicCredentials( String username, String password )
-   {
-      log.info("server: " + server + " port: " + port + " u: '" + username + "' p '" + password + "'");
-      client.getState().setCredentials(
-            new AuthScope(server, port), 
-            new UsernamePasswordCredentials(username, password));
-   }
+	/**
+	 * Initialise the server that will be used to send the network access.
+	 * 
+	 * @param server
+	 * @param port
+	 */
+	public void setServer(String server, int port) {
+		this.server = server;
+		this.port = port;
+	}
 
-   /**
-    * Set a proxy that should be used by the client when trying to access the 
-    * server. If this is not set, the client will attempt to make a direct 
-    * direct connection to the server. The port is set to 80. 
-    * 
-    * @param host The hostname. 
-    */
-   public void setProxy( String host )
-   {
-      setProxy(host, 80);
-   }
+	/**
+	 * Set the user credentials that will be used when making the access to the
+	 * server.
+	 * 
+	 * @param username
+	 *            The username.
+	 * @param password
+	 *            The password.
+	 */
+	public void setCredentials(String username, String password) {
+		this.username = username;
+		this.password = password;
+		doAuthentication = true;
+	}
 
-   /**
-    * Set a proxy that should be used by the client when trying to access the 
-    * server. If this is not set, the client will attempt to make a direct 
-    * direct connection to the server.  
-    * 
-    * @param host The name of the host. 
-    * @param port The port. 
-    */
-   public void setProxy( String host, int port )
-   {
-      client.getHostConfiguration().setProxy(host, port);
-   }
-   
-   /**
-    * Clear the proxy setting. 
-    */
-   public void clearProxy()
-   {
-      client.getHostConfiguration().setProxyHost(null);
-   }
-   
-   /**
-    * Clear any user credentials that have been set for this client.  
-    */
-   public void clearCredentials()
-   {
-	   client.getState().clearProxyCredentials();
-	   doAuthentication = false;
-   }
-   
-   /**
-    * Set the connection timeout for the socket. 
-    * 
-    * @param milliseconds The time, expressed as a number of milliseconds. 
-    */
-   public void setSocketTimeout(int milliseconds)
-   {
-      client.getParams().setParameter("http.socket.timeout", new Integer(milliseconds));
-   }
+	/**
+	 * Set the basic credentials. You must have previously set the server and
+	 * port using setServer.
+	 * 
+	 * @param username
+	 * @param password
+	 */
+	private void setBasicCredentials(String username, String password) {
+		log.info("server: " + server + " port: " + port + " u: '" + username
+				+ "' p '" + password + "'");
+		client.getState().setCredentials(new AuthScope(server, port),
+				new UsernamePasswordCredentials(username, password));
+	}
 
-   /**
-    * Retrieve the service document. The service document is located at the 
-    * specified URL. This calls getServiceDocument(url,onBehalfOf). 
-    * 
-    * @param url The location of the service document. 
-    * @return The ServiceDocument, or <code>null</code> if there
-    *         was a problem accessing the document. e.g. invalid access. 
-    *         
-    * @throws SWORDClientException If there is an error accessing the resource. 
-    */
-   public ServiceDocument getServiceDocument( String url )
-   throws SWORDClientException
-   {
-      return getServiceDocument(url, null);   
-   }
+	/**
+	 * Set a proxy that should be used by the client when trying to access the
+	 * server. If this is not set, the client will attempt to make a direct
+	 * direct connection to the server. The port is set to 80.
+	 * 
+	 * @param host
+	 *            The hostname.
+	 */
+	public void setProxy(String host) {
+		setProxy(host, 80);
+	}
 
-   /**
-    * Retrieve the service document. The service document is located at the 
-    * specified URL. This calls getServiceDocument(url,onBehalfOf). 
-    * 
-    * @param url The location of the service document. 
-    * @return The ServiceDocument, or <code>null</code> if there
-    *         was a problem accessing the document. e.g. invalid access. 
-    *         
-    * @throws SWORDClientException If there is an error accessing the resource.
-    */
-   public ServiceDocument getServiceDocument(String url, String onBehalfOf )
-   throws SWORDClientException
-   {
-      GetMethod httpget = new GetMethod(url);
-      if( doAuthentication ) 
-      {
-         // this does not perform any check on the username password. It 
-         // relies on the server to determine if the values are correct. 
-         setBasicCredentials(username, password);
-         httpget.setDoAuthentication( true ); 
-      }
+	/**
+	 * Set a proxy that should be used by the client when trying to access the
+	 * server. If this is not set, the client will attempt to make a direct
+	 * direct connection to the server.
+	 * 
+	 * @param host
+	 *            The name of the host.
+	 * @param port
+	 *            The port.
+	 */
+	public void setProxy(String host, int port) {
+		client.getHostConfiguration().setProxy(host, port);
+	}
 
-      // if (( onBehalfOf != null ) && ( ! onBehalfOf.trim().equals("") )) 
-      if( containsValue(onBehalfOf) )
-      {
-         log.info("Setting on-behalf-of: " + onBehalfOf );
-         httpget.addRequestHeader( new Header( HttpHeaders.X_ON_BEHALF_OF, onBehalfOf ) );      
-      }
+	/**
+	 * Clear the proxy setting.
+	 */
+	public void clearProxy() {
+		client.getHostConfiguration().setProxyHost(null);
+	}
 
-      ServiceDocument doc = null; 
+	/**
+	 * Clear any user credentials that have been set for this client.
+	 */
+	public void clearCredentials() {
+		client.getState().clearProxyCredentials();
+		doAuthentication = false;
+	}
 
-      try
-      {
-         client.executeMethod(httpget);
+	/**
+	 * Set the connection timeout for the socket.
+	 * 
+	 * @param milliseconds
+	 *            The time, expressed as a number of milliseconds.
+	 */
+	public void setSocketTimeout(int milliseconds) {
+		client.getParams().setParameter("http.socket.timeout",
+				new Integer(milliseconds));
+	}
 
-         // store the status code
-         status = new Status(httpget.getStatusCode(), httpget.getStatusText()); 
+	/**
+	 * Retrieve the service document. The service document is located at the
+	 * specified URL. This calls getServiceDocument(url,onBehalfOf).
+	 * 
+	 * @param url
+	 *            The location of the service document.
+	 * @return The ServiceDocument, or <code>null</code> if there was a
+	 *         problem accessing the document. e.g. invalid access.
+	 * 
+	 * @throws SWORDClientException
+	 *             If there is an error accessing the resource.
+	 */
+	public ServiceDocument getServiceDocument(String url)
+			throws SWORDClientException {
+		return getServiceDocument(url, null);
+	}
 
-         if( status.getCode() == HttpStatus.SC_OK ) 
-         {
-            String message = readResponse(httpget.getResponseBodyAsStream());
-            log.info("returned message is: " + message);
-            
-            doc = new ServiceDocument(); 
-            doc.unmarshall(message);
-         }
-      }
-      catch(HttpException ex)
-      {
-         throw new SWORDClientException( ex.getMessage(), ex );
-      }
-      catch(IOException ioex) 
-      {  
-         throw new SWORDClientException( ioex.getMessage(), ioex );
-      }
-      catch( UnmarshallException uex )
-      {
-         throw new SWORDClientException( uex.getMessage(), uex );
-      }
-      finally
-      {
-         httpget.releaseConnection();  
-      }
+	/**
+	 * Retrieve the service document. The service document is located at the
+	 * specified URL. This calls getServiceDocument(url,onBehalfOf).
+	 * 
+	 * @param url
+	 *            The location of the service document.
+	 * @return The ServiceDocument, or <code>null</code> if there was a
+	 *         problem accessing the document. e.g. invalid access.
+	 * 
+	 * @throws SWORDClientException
+	 *             If there is an error accessing the resource.
+	 */
+	public ServiceDocument getServiceDocument(String url, String onBehalfOf)
+			throws SWORDClientException {
+		URL serviceDocURL = null;
+		try {
+			serviceDocURL = new URL(url);
+		} catch (MalformedURLException e) {
+			// Try relative URL
+			URL baseURL = null;
+			try {
+				baseURL = new URL("http", server, Integer.valueOf(port), "/");
+				serviceDocURL = new URL(baseURL, (url == null) ? "" : url);
+			} catch (MalformedURLException e1) {
+				// No dice, can't even form base URL...
+				throw new SWORDClientException(url + " is not a valid URL ("
+						+ e1.getMessage()
+						+ "), and could not form a relative one from: "
+						+ baseURL + " / " + url, e1);
+			}
+		}
+		
+		GetMethod httpget = new GetMethod(serviceDocURL.toExternalForm());
+		if (doAuthentication) {
+			// this does not perform any check on the username password. It
+			// relies on the server to determine if the values are correct.
+			setBasicCredentials(username, password);
+			httpget.setDoAuthentication(true);
+		}
 
-      return doc;  
-   }
+		// if (( onBehalfOf != null ) && ( ! onBehalfOf.trim().equals("") ))
+		if (containsValue(onBehalfOf)) {
+			log.info("Setting on-behalf-of: " + onBehalfOf);
+			httpget.addRequestHeader(new Header(HttpHeaders.X_ON_BEHALF_OF,
+					onBehalfOf));
+		}
 
-   /**
-    * Post a file to the server. The different elements of the post are 
-    * encoded in the specified message.
-    * 
-    * @param message The message that contains the post information. 
-    * 
-    * @throws SWORDClientException if there is an error during the 
-    *                              post operation. 
-    */
-   public DepositResponse postFile( PostMessage message )
-   throws SWORDClientException
-   {
-      if( message == null )
-      {
-         throw new SWORDClientException("Message cannot be null.");
-      }
+		ServiceDocument doc = null;
 
-      PostMethod httppost = new PostMethod( message.getDestination() );
+		try {
+			client.executeMethod(httpget);
+			// store the status code
+			status = new Status(httpget.getStatusCode(), httpget
+					.getStatusText());
 
-      if( doAuthentication ) 
-      {
-         setBasicCredentials(username, password);
-         httppost.setDoAuthentication( true );
-      }
+			if (status.getCode() == HttpStatus.SC_OK) {
+				String message = readResponse(httpget.getResponseBodyAsStream());
+				log.info("returned message is: " + message);
+				doc = new ServiceDocument();
+				doc.unmarshall(message);
+			} else {
+				throw new SWORDClientException(
+						"Received error from service document request: "
+								+ status);
+			}
+		} catch (HttpException ex) {
+			throw new SWORDClientException(ex.getMessage(), ex);
+		} catch (IOException ioex) {
+			throw new SWORDClientException(ioex.getMessage(), ioex);
+		} catch (UnmarshallException uex) {
+			throw new SWORDClientException(uex.getMessage(), uex);
+		} finally {
+			httpget.releaseConnection();
+		}
 
-      DepositResponse response = null; 
-      FileInputStream stream = null;
+		return doc;
+	}
 
-      try
-      {
-         if( message.isUseMD5() )
-         {
-            String md5 = ChecksumUtils.generateMD5(message.getFilepath());
-            if ( message.getChecksumError() ) {
-               md5 = "1234567890";
-            }
-            log.debug("checksum error is: " + md5);
-            if( md5 != null )
-            {
-               httppost.addRequestHeader( new Header( HttpHeaders.CONTENT_MD5, md5 ) );
-            }
-         }
+	/**
+	 * Post a file to the server. The different elements of the post are encoded
+	 * in the specified message.
+	 * 
+	 * @param message
+	 *            The message that contains the post information.
+	 * 
+	 * @throws SWORDClientException
+	 *             if there is an error during the post operation.
+	 */
+	public DepositResponse postFile(PostMessage message)
+			throws SWORDClientException {
+		if (message == null) {
+			throw new SWORDClientException("Message cannot be null.");
+		}
 
-         String filename = message.getFilename();
-         if( filename != "" )
-         {
-        	   httppost.addRequestHeader(new Header(HttpHeaders.CONTENT_DISPOSITION, " filename=" + filename ));
-         }
+		PostMethod httppost = new PostMethod(message.getDestination());
 
-         if( containsValue( message.getSlug() ) )
-         {
-            httppost.addRequestHeader( new Header( HttpHeaders.SLUG, message.getSlug() ));
-         }
+		if (doAuthentication) {
+			setBasicCredentials(username, password);
+			httppost.setDoAuthentication(true);
+		}
 
-         httppost.addRequestHeader( new Header( HttpHeaders.X_NO_OP, Boolean.toString(message.isNoOp()) )); 
-         httppost.addRequestHeader( new Header( HttpHeaders.X_VERBOSE, Boolean.toString(message.isVerbose()) ));
+		DepositResponse response = null;
+		FileInputStream stream = null;
 
-         String formatNamespace = message.getFormatNamespace();
-         if( formatNamespace != null && formatNamespace.length() > 0)
-         {
-            httppost.addRequestHeader( new Header(HttpHeaders.X_FORMAT_NAMESPACE, formatNamespace));
-         }
+		try {
+			if (message.isUseMD5()) {
+				String md5 = ChecksumUtils.generateMD5(message.getFilepath());
+				if (message.getChecksumError()) {
+					md5 = "1234567890";
+				}
+				log.debug("checksum error is: " + md5);
+				if (md5 != null) {
+					httppost.addRequestHeader(new Header(
+							HttpHeaders.CONTENT_MD5, md5));
+				}
+			}
 
-         String onBehalfOf = message.getOnBehalfOf();
-         if( containsValue(onBehalfOf) )
-         {
-            httppost.addRequestHeader( new Header(HttpHeaders.X_ON_BEHALF_OF, onBehalfOf));
-         }
+			String filename = message.getFilename();
+			if (filename != "") {
+				httppost.addRequestHeader(new Header(
+						HttpHeaders.CONTENT_DISPOSITION, " filename="
+								+ filename));
+			}
 
-         stream = new FileInputStream(message.getFilepath());
+			if (containsValue(message.getSlug())) {
+				httppost.addRequestHeader(new Header(HttpHeaders.SLUG, message
+						.getSlug()));
+			}
 
-         InputStreamRequestEntity requestEntity = 
-            new InputStreamRequestEntity(stream, message.getFiletype() );
-         httppost.setRequestEntity(requestEntity);
+			httppost.addRequestHeader(new Header(HttpHeaders.X_NO_OP, Boolean
+					.toString(message.isNoOp())));
+			httppost.addRequestHeader(new Header(HttpHeaders.X_VERBOSE, Boolean
+					.toString(message.isVerbose())));
 
-         client.executeMethod(httppost);
-         status = new Status(httppost.getStatusCode(), httppost.getStatusText()); 
+			String formatNamespace = message.getFormatNamespace();
+			if (formatNamespace != null && formatNamespace.length() > 0) {
+				httppost.addRequestHeader(new Header(
+						HttpHeaders.X_FORMAT_NAMESPACE, formatNamespace));
+			}
 
-         log.info("Checking the status code: " + status.getCode() );
+			String onBehalfOf = message.getOnBehalfOf();
+			if (containsValue(onBehalfOf)) {
+				httppost.addRequestHeader(new Header(
+						HttpHeaders.X_ON_BEHALF_OF, onBehalfOf));
+			}
 
-         if( status.getCode() == HttpStatus.SC_ACCEPTED || 
-               status.getCode() == HttpStatus.SC_CREATED ) 
-         {
-            String messageBody = readResponse(httppost.getResponseBodyAsStream());
-            response = new DepositResponse(status.getCode()); // added call for the status code.
-            response.unmarshall(messageBody);
-         }
+			stream = new FileInputStream(message.getFilepath());
 
-      }
-      catch(NoSuchAlgorithmException nex )
-      {
-         throw new SWORDClientException("Unable to use MD5. " + nex.getMessage(), nex );
-      }
-      catch(HttpException ex)
-      {
-         throw new SWORDClientException( ex.getMessage(), ex );
-      }
-      catch(IOException ioex) 
-      {  
-         throw new SWORDClientException( ioex.getMessage(), ioex );
-      }
-      catch(UnmarshallException uex)
-      {
-         throw new SWORDClientException( uex.getMessage(), uex);
-      }
-      finally
-      {
-         httppost.releaseConnection();  
+			InputStreamRequestEntity requestEntity = new InputStreamRequestEntity(
+					stream, message.getFiletype());
+			httppost.setRequestEntity(requestEntity);
 
-         try
-         {
-            if( stream != null )
-            {
-               stream.close();
-            }
-         }
-         catch( IOException ioe )
-         {
-            log.error("Error closing a stream");
-            throw new SWORDClientException( ioe.getMessage(), ioe);
-         }
-      }
+			client.executeMethod(httppost);
+			status = new Status(httppost.getStatusCode(), httppost
+					.getStatusText());
 
-      return response;  
-   }
+			log.info("Checking the status code: " + status.getCode());
 
-   /**
-    * Read a response from the stream and return it as a string. 
-    * 
-    * @param stream The stream that contains the response. 
-    * @return The string extracted from the screen. 
-    * 
-    * @throws UnsupportedEncodingException
-    * @throws IOException
-    */
-   private String readResponse( InputStream stream )
-   throws UnsupportedEncodingException, IOException
-   {
-      BufferedReader reader = new BufferedReader( 
-            new InputStreamReader(stream, "UTF-8"));
-      String line = null;
-      StringBuffer buffer = new StringBuffer();
-      while( (line = reader.readLine()) != null )
-      {
-         buffer.append(line);
-         buffer.append("\n");
-      }
-      return buffer.toString();
-   }
+			if (status.getCode() == HttpStatus.SC_ACCEPTED
+					|| status.getCode() == HttpStatus.SC_CREATED) {
+				String messageBody = readResponse(httppost
+						.getResponseBodyAsStream());
+				response = new DepositResponse(status.getCode()); 
+				// added call for the status code.
+				response.unmarshall(messageBody);
+			}
+			else {
+				throw new SWORDClientException("Error occured; server returned : "+ status);
+			}
+			return response;
 
-   /**
-    * Return the status information that was returned from the most 
-    * recent request sent to the server. 
-    * 
-    * @return The status code returned from the most recent access. 
-    */
-   public Status getStatus( )
-   {
-      return status;
-   }
-   
-   /**
-    * Check to see if the specified item contains a non-empty string. 
-    * @param item The string to check. 
-    * @return True if the string is not null and has a length greater than 
-    *         0 after any whitespace is trimmed from the start and end.
-    *         Otherwise, false.  
-    */
-   private boolean containsValue(String item)
-   {
-	  return ( ( item != null ) && ( item.trim().length() > 0 ) ); 
-   }
+		} catch (NoSuchAlgorithmException nex) {
+			throw new SWORDClientException("Unable to use MD5. "
+					+ nex.getMessage(), nex);
+		} catch (HttpException ex) {
+			throw new SWORDClientException(ex.getMessage(), ex);
+		} catch (IOException ioex) {
+			throw new SWORDClientException(ioex.getMessage(), ioex);
+		} catch (UnmarshallException uex) {
+			throw new SWORDClientException(uex.getMessage(), uex);
+		} finally {
+			httppost.releaseConnection();
+
+			try {
+				if (stream != null) {
+					stream.close();
+				}
+			} catch (IOException ioe) {
+				log.error("Error closing a stream");
+				throw new SWORDClientException(ioe.getMessage(), ioe);
+			}
+		}
+
+	}
+
+	/**
+	 * Read a response from the stream and return it as a string.
+	 * 
+	 * @param stream
+	 *            The stream that contains the response.
+	 * @return The string extracted from the screen.
+	 * 
+	 * @throws UnsupportedEncodingException
+	 * @throws IOException
+	 */
+	private String readResponse(InputStream stream)
+			throws UnsupportedEncodingException, IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				stream, "UTF-8"));
+		String line = null;
+		StringBuffer buffer = new StringBuffer();
+		while ((line = reader.readLine()) != null) {
+			buffer.append(line);
+			buffer.append("\n");
+		}
+		return buffer.toString();
+	}
+
+	/**
+	 * Return the status information that was returned from the most recent
+	 * request sent to the server.
+	 * 
+	 * @return The status code returned from the most recent access.
+	 */
+	public Status getStatus() {
+		return status;
+	}
+
+	/**
+	 * Check to see if the specified item contains a non-empty string.
+	 * 
+	 * @param item
+	 *            The string to check.
+	 * @return True if the string is not null and has a length greater than 0
+	 *         after any whitespace is trimmed from the start and end.
+	 *         Otherwise, false.
+	 */
+	private boolean containsValue(String item) {
+		return ((item != null) && (item.trim().length() > 0));
+	}
 
 }

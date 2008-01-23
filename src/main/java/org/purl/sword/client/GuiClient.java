@@ -891,7 +891,7 @@ public class GuiClient extends JFrame implements ClientType,
 				if (!helpDir.mkdirs()) {
 					throw new IOException("Couldn't create tmp dir: " + helpDir);
 				}
-				deployHelp(helpDir);
+				extractHelp(helpDir);
 				String osname = System.getProperty("os.name");
 				log.info("osname is: " + osname);
 				String runCmd = "";
@@ -927,7 +927,7 @@ public class GuiClient extends JFrame implements ClientType,
 		 * @throws URISyntaxException
 		 * @throws IOException
 		 */
-		private void deployHelp(File helpDir) throws URISyntaxException,
+		private void extractHelp(File helpDir) throws URISyntaxException,
 				IOException {
 			ClassLoader cl = getClass().getClassLoader();
 			URL help = cl.getResource("help");
