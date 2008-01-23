@@ -60,16 +60,16 @@ import org.purl.sword.base.ServiceDocumentRequest;
  * @author Stuart Lewis
  */
 public class ServiceDocumentServlet extends HttpServlet {
-	
+
 	/** The repository */
 	private SWORDServer myRepository;
-	
+
 	/** Authentication type. */
 	private String authN;
-	
+
 	/** Logger */
 	private static Logger log = Logger.getLogger(ServiceDocumentServlet.class);
-	
+
 	/**
 	 * Initialise the servlet.
 	 * 
@@ -87,9 +87,8 @@ public class ServiceDocumentServlet extends HttpServlet {
 						.newInstance();
 				log.info("Using " + className + " as the SWORDServer");
 			} catch (Exception e) {
-				log
-						.fatal("Unable to instantiate class from 'server-class': "
-								+ className);
+				log.fatal("Unable to instantiate class from 'server-class': "
+						+ className);
 				throw new ServletException(
 						"Unable to instantiate class from 'server-class': "
 								+ className);
@@ -103,95 +102,98 @@ public class ServiceDocumentServlet extends HttpServlet {
 		}
 		log.info("Authentication type set to: " + authN);
 	}
-	
+
 	/**
-	 * Process the get request. 
+	 * Process the get request.
 	 */
 	protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response) throws ServletException, IOException
-    {
+			HttpServletResponse response) throws ServletException, IOException {
 		// Create the ServiceDocumentRequest
 		ServiceDocumentRequest sdr = new ServiceDocumentRequest();
-		
+
 		// Are there any authentication details?
 		String usernamePassword = getUsernamePassword(request);
 		if ((usernamePassword != null) && (!usernamePassword.equals(""))) {
 			int p = usernamePassword.indexOf(":");
 			if (p != -1) {
 				sdr.setUsername(usernamePassword.substring(0, p));
-				sdr.setPassword(usernamePassword.substring(p+1));
-			} 
-        } else if (authenticateWithBasic()) {
+				sdr.setPassword(usernamePassword.substring(p + 1));
+			}
+		} else if (authenticateWithBasic()) {
 			String s = "Basic realm=\"SWORD\"";
-	    	response.setHeader("WWW-Authenticate", s);
-	    	response.setStatus(401);
-	    	return;
+			response.setHeader("WWW-Authenticate", s);
+			response.setStatus(401);
+			return;
 		}
-    	
+
 		// Set the x-on-behalf-of header
-		sdr.setOnBehalfOf(request.getHeader(HttpHeaders.X_ON_BEHALF_OF.toString()));
-		
+		sdr.setOnBehalfOf(request.getHeader(HttpHeaders.X_ON_BEHALF_OF
+				.toString()));
+
 		// Set the IP address
 		sdr.setIPAddress(request.getRemoteAddr());
-		
-        // Get the ServiceDocument
+
+		// Get the ServiceDocument
 		try {
 			ServiceDocument sd = myRepository.doServiceDocument(sdr);
-			
+
 			// Print out the Service Document
 			// response.setContentType("application/atomserv+xml");
 			response.setContentType("application/xml");
 			PrintWriter out = response.getWriter();
-	        out.write(sd.marshall());
-	        out.flush();
+			out.write(sd.marshall());
+			out.flush();
 		} catch (SWORDAuthenticationException sae) {
 			if (authN.equals("Basic")) {
-		    	String s = "Basic realm=\"SWORD\"";
-		    	response.setHeader("WWW-Authenticate", s);
-		    	response.setStatus(401);
+				String s = "Basic realm=\"SWORD\"";
+				response.setHeader("WWW-Authenticate", s);
+				response.setStatus(401);
 			}
 		} catch (SWORDException se) {
+			se.printStackTrace();
 			// Throw a HTTP 500
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, se
+					.getMessage());
 		}
-    }
-   
-	/** 
-	 * Process the post request. This will return an unimplemented response. 
+	}
+
+	/**
+	 * Process the post request. This will return an unimplemented response.
 	 */
-    protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response) throws ServletException, IOException
-    {
-    	// Send a '501 Not Implemented'
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		// Send a '501 Not Implemented'
 		response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
-    }
-	
-    /**
-     * Utiliy method to return the username and password (separated by a colon ':')
-     * 
-     * @param request
-     * @return The username and password combination
-     */
+	}
+
+	/**
+	 * Utiliy method to return the username and password (separated by a colon
+	 * ':')
+	 * 
+	 * @param request
+	 * @return The username and password combination
+	 */
 	private String getUsernamePassword(HttpServletRequest request) {
-        try {
-            String authHeader = request.getHeader("Authorization");
-            if (authHeader != null) {
-                StringTokenizer st = new StringTokenizer(authHeader);
-                if (st.hasMoreTokens()) {
-                    String basic = st.nextToken();
-                    if (basic.equalsIgnoreCase("Basic")) {
-                        String credentials = st.nextToken();
-                        String userPass = new String(Base64.decodeBase64(credentials.getBytes()));
-                        return userPass;
-                    }
-                }
-            }
-        } catch (Exception e) {
-        	log.debug(e.toString());
-        }
-        return null;
-    }
-	
+		try {
+			String authHeader = request.getHeader("Authorization");
+			if (authHeader != null) {
+				StringTokenizer st = new StringTokenizer(authHeader);
+				if (st.hasMoreTokens()) {
+					String basic = st.nextToken();
+					if (basic.equalsIgnoreCase("Basic")) {
+						String credentials = st.nextToken();
+						String userPass = new String(Base64
+								.decodeBase64(credentials.getBytes()));
+						return userPass;
+					}
+				}
+			}
+		} catch (Exception e) {
+			log.debug(e.toString());
+		}
+		return null;
+	}
+
 	/**
 	 * Utility method to deicde if we are using HTTP Basic authentication
 	 * 
