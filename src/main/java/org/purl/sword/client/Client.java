@@ -162,7 +162,7 @@ public class Client implements SWORDClient {
 	 * @param password
 	 */
 	private void setBasicCredentials(String username, String password) {
-		log.info("server: " + server + " port: " + port + " u: '" + username
+		log.debug("server: " + server + " port: " + port + " u: '" + username
 				+ "' p '" + password + "'");
 		client.getState().setCredentials(new AuthScope(server, port),
 				new UsernamePasswordCredentials(username, password));
@@ -294,7 +294,7 @@ public class Client implements SWORDClient {
 
 			if (status.getCode() == HttpStatus.SC_OK) {
 				String message = readResponse(httpget.getResponseBodyAsStream());
-				log.info("returned message is: " + message);
+				log.debug("returned message is: " + message);
 				doc = new ServiceDocument();
 				doc.unmarshall(message);
 			} else {
