@@ -123,8 +123,8 @@ public class Client implements SWORDClient {
 		client = new HttpClient();
 		client.getParams().setParameter("http.socket.timeout",
 				new Integer(DEFAULT_TIMEOUT));
-		log.info("proxy host: " + client.getHostConfiguration().getProxyHost());
-		log.info("proxy port: " + client.getHostConfiguration().getProxyPort());
+		log.debug("proxy host: " + client.getHostConfiguration().getProxyHost());
+		log.debug("proxy port: " + client.getHostConfiguration().getProxyPort());
 		doAuthentication = false;
 	}
 
@@ -279,7 +279,7 @@ public class Client implements SWORDClient {
 
 		// if (( onBehalfOf != null ) && ( ! onBehalfOf.trim().equals("") ))
 		if (containsValue(onBehalfOf)) {
-			log.info("Setting on-behalf-of: " + onBehalfOf);
+			log.debug("Setting on-behalf-of: " + onBehalfOf);
 			httpget.addRequestHeader(new Header(HttpHeaders.X_ON_BEHALF_OF,
 					onBehalfOf));
 		}
