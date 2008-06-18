@@ -62,6 +62,7 @@ import org.purl.sword.base.HttpHeaders;
 import org.purl.sword.base.SWORDAuthenticationException;
 import org.purl.sword.base.SWORDContentTypeException;
 import org.purl.sword.base.SWORDException;
+import org.purl.sword.server.SWORDServer;
 
 /**
  * DepositServlet
@@ -268,8 +269,7 @@ public class DepositServlet extends HttpServlet {
 
 				// Print out the Deposit Response
 				response.setStatus(dr.getHttpResponse());
-				// response.setContentType("application/atomserv+xml");
-				response.setContentType("application/xml");
+				response.setContentType("application/atom+xml; charset=UTF-8");
 				PrintWriter out = response.getWriter();
 				out.write(dr.marshall());
 				out.flush();
