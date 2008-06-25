@@ -47,6 +47,7 @@ import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -81,7 +82,7 @@ public class DepositServlet extends HttpServlet {
 	private String tempDirectory;
 
 	/** Counter */
-	private static int counter = 0;
+	private static AtomicInteger counter = new AtomicInteger(0);
 
 	/** Logger */
 	private static Logger log = Logger.getLogger(DepositServlet.class);
@@ -93,7 +94,7 @@ public class DepositServlet extends HttpServlet {
 	 */
 	public void init() throws ServletException {
 		// Instantiate the correct SWORD Server class
-		String className = getServletContext().getInitParameter("server-class");
+		String className = getServletContext().getInitParameter("sword-server-class");
 		if (className == null) {
 			log
 					.fatal("Unable to read value of 'sword-server-class' from Servlet context");
@@ -187,7 +188,7 @@ public class DepositServlet extends HttpServlet {
 			// Write the file to the temp directory
 			// TODO: Improve the filename creation
 			String filename = tempDirectory + "SWORD-"
-					+ request.getRemoteAddr() + "-" + counter++;
+					+ request.getRemoteAddr() + "-" + counter.addAndGet(1);
 			InputStream inputStream = request.getInputStream();
 			OutputStream outputStream = new FileOutputStream(filename);
 			int data;
