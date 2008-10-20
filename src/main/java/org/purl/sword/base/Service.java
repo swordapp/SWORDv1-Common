@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007, Aberystwyth University
+ * Copyright (c) 2008, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -37,12 +37,10 @@
 package org.purl.sword.base;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
-import org.purl.sword.base.Namespaces;
-
-import nu.xom.Element; 
+import nu.xom.Element;
 import nu.xom.Elements;
 
 import org.apache.log4j.Logger;
@@ -57,9 +55,9 @@ import org.apache.log4j.Logger;
 public class Service extends XmlElement implements SwordElementInterface
 {
    /**
-    * The service compliance level. 
+    * The SWORD version. 
     */
-   private ServiceLevel complianceLevel; 
+   private String version; 
    
    /**
     * The noOp value. 
@@ -92,7 +90,7 @@ public class Service extends XmlElement implements SwordElementInterface
    /**
     * Local name part of level element. 
     */
-   public static final String ELEMENT_SWORD_LEVEL = "level";
+   public static final String ELEMENT_SWORD_VERSION = "version";
    
    /**
     * Local name part of verbose element.
@@ -119,7 +117,7 @@ public class Service extends XmlElement implements SwordElementInterface
       isVerbose = false;
       isNoOp = false; 
       workspaces = new ArrayList<Workspace>();
-      complianceLevel = ServiceLevel.UNDEFINED;
+      version = "";
    }
    
    /**
@@ -127,10 +125,10 @@ public class Service extends XmlElement implements SwordElementInterface
     * 
     * @param complianceLevel The service compliance level. 
     */
-   public Service( ServiceLevel complianceLevel)
+   public Service(String version)
    {
       this();
-      this.complianceLevel = complianceLevel;
+      this.version = version;
    }
    
    /**
@@ -141,32 +139,32 @@ public class Service extends XmlElement implements SwordElementInterface
     * @param noOp             The noOp.
     * @param verbose          The verbose element. 
     */
-   public Service( ServiceLevel complianceLevel, boolean noOp, boolean verbose ) 
+   public Service(String version, boolean noOp, boolean verbose) 
    {
       this();
-      this.complianceLevel = complianceLevel; 
+      this.version = version; 
       setNoOp(noOp);
       setVerbose(verbose);
    }
 
    /**
-    * Get the service compliance level. 
+    * Get the SWORD version. 
     * 
-    * @return The compliance level. 
+    * @return The version. 
     */
-   public ServiceLevel getComplianceLevel()
+   public String getVersion()
    {
-      return complianceLevel;
+      return version;
    }
 
    /**
-    * Set the service compliance level. 
+    * Set the SWORD version. 
     * 
-    * @param The compliance level. 
+    * @param version The version. 
     */
-   public void setComplianceLevel(ServiceLevel complianceLevel)
+   public void setVersion(String version)
    {
-      this.complianceLevel = complianceLevel;
+      this.version = version;
    }
 
    /**
@@ -285,69 +283,36 @@ public class Service extends XmlElement implements SwordElementInterface
       service.addNamespaceDeclaration(Namespaces.PREFIX_DC_TERMS, Namespaces.NS_DC_TERMS);
       service.addNamespaceDeclaration(Namespaces.PREFIX_SWORD, Namespaces.NS_SWORD);
       
-      if( complianceLevel != ServiceLevel.UNDEFINED )
+      if ((version != null) && (!version.trim().equals("")))
       {
-    	   Element compliance = new Element(
-    			   Namespaces.PREFIX_SWORD + ":" + ELEMENT_SWORD_LEVEL, Namespaces.NS_SWORD);
-         compliance.appendChild(Integer.toString(complianceLevel.number()));
-         service.appendChild(compliance);
+    	   Element versionElement = new Element(
+    			   Namespaces.PREFIX_SWORD + ":" + ELEMENT_SWORD_VERSION, Namespaces.NS_SWORD);
+    	   versionElement.appendChild(version);
+    	   service.appendChild(versionElement);
       }
       
-      if( isVerboseSet() )
+      if (isVerboseSet())
       {
-         Element verboseElement = new Element(
+    	  Element verboseElement = new Element(
         		 Namespaces.PREFIX_SWORD + ":" + ELEMENT_SWORD_VERBOSE, Namespaces.NS_SWORD); 
-         verboseElement.appendChild(Boolean.toString(verbose));
-         service.appendChild(verboseElement);
+    	  verboseElement.appendChild(Boolean.toString(verbose));
+    	  service.appendChild(verboseElement);
       }
       
-      if( isNoOpSet() ) 
+      if (isNoOpSet()) 
       {
-         Element noOpElement = new Element(
+    	  Element noOpElement = new Element(
         		 Namespaces.PREFIX_SWORD + ":" + ELEMENT_SWORD_NO_OP, Namespaces.NS_SWORD);
-         noOpElement.appendChild(Boolean.toString(noOp)); 
-         service.appendChild(noOpElement);
+    	  noOpElement.appendChild(Boolean.toString(noOp)); 
+    	  service.appendChild(noOpElement);
       }
       
-      for( Workspace item : workspaces )
+      for (Workspace item : workspaces)
       {
-         service.appendChild(item.marshall());
+    	  service.appendChild(item.marshall());
       }
+      
       return service;    
-   }
-   
-   
-   /**
-    * Get a service level that corresponds to the specified value. Used 
-    * during the unmarshall process. 
-    * 
-    * @param level The integer version of a service level. 
-    * 
-    * @return If the parameter matches one of the defined levels, 
-    *    a ServiceLevel of ONE or ZERO is returned. Otherwise, 
-    *    ServiceLevel.UNDEFINED is returned. 
-    */
-   private ServiceLevel getServiceLevel( int level ) 
-   {
-      ServiceLevel theLevel = ServiceLevel.UNDEFINED; 
-      
-      switch( level )
-      {
-         case 0: 
-            theLevel = ServiceLevel.ZERO;
-            break;
-               
-         case 1: 
-            theLevel = ServiceLevel.ONE;
-            break;
-               
-         default: 
-            theLevel = ServiceLevel.UNDEFINED;
-            log.error("Invalid value for sword:level" );
-            break;
-      }
-      
-      return theLevel; 
    }
      
    /**
@@ -360,7 +325,7 @@ public class Service extends XmlElement implements SwordElementInterface
    public void unmarshall( Element service )
    throws UnmarshallException
    {
-      if( ! isInstanceOf(service, localName, Namespaces.NS_APP))
+      if (!isInstanceOf(service, localName, Namespaces.NS_APP))
       {
          throw new UnmarshallException( "Not an app:service element" );
       }
@@ -369,7 +334,7 @@ public class Service extends XmlElement implements SwordElementInterface
       {
          workspaces.clear(); 
          
-         // retrieve all of the sub-elements
+         // Retrieve all of the sub-elements
          Elements elements = service.getChildElements();
          Element element = null; 
          int length = elements.size();
@@ -378,10 +343,9 @@ public class Service extends XmlElement implements SwordElementInterface
          {
             element = elements.get(i);
 
-            if( isInstanceOf(element, ELEMENT_SWORD_LEVEL, Namespaces.NS_SWORD ) )
+            if( isInstanceOf(element, ELEMENT_SWORD_VERSION, Namespaces.NS_SWORD ) )
             {
-               int level = unmarshallInteger(element); 
-               complianceLevel = getServiceLevel(level);
+               setVersion(unmarshallString(element));
             }
             else if( isInstanceOf(element, ELEMENT_SWORD_VERBOSE, Namespaces.NS_SWORD))
             {

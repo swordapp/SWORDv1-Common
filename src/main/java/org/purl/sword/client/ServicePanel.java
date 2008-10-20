@@ -489,7 +489,7 @@ implements TreeSelectionListener
 
       buffer.append("<table border=\"1\" width=\"100%\">");
       buffer.append("<tr bgcolor=\"#69a5c8;\"><td colspan=\"2\"><font size=\"+2\">Service Summary</font></td></tr>");
-      addTableRow(buffer, "Service Level", service.getComplianceLevel());
+      addTableRow(buffer, "SWORD Version", service.getVersion());
       addTableRow(buffer, "NoOp Support ", service.isNoOp());
       addTableRow(buffer, "Verbose Support ", service.isVerbose());
 

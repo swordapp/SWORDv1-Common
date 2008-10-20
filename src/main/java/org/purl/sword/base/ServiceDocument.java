@@ -63,17 +63,17 @@ public class ServiceDocument {
 	 * Create a new instance and set the initial service level to Zero.
 	 */
 	public ServiceDocument() {
-		this(ServiceLevel.ZERO);
+		
 	}
 
 	/**
 	 * Create a new instance and set the specified service level.
 	 * 
-	 * @param complianceLevel
-	 *            The service compliance level.
+	 * @param version 
+	 * 			The SWORD version.
 	 */
-	public ServiceDocument(ServiceLevel complianceLevel) {
-		service = new Service(complianceLevel);
+	public ServiceDocument(String version) {
+		service = new Service(version);
 	}
 
 	/**

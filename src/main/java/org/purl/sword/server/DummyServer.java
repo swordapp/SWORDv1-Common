@@ -63,7 +63,6 @@ import org.purl.sword.base.SWORDException;
 import org.purl.sword.base.Service;
 import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.ServiceDocumentRequest;
-import org.purl.sword.base.ServiceLevel;
 import org.purl.sword.base.Workspace;
 
 /**
@@ -79,7 +78,7 @@ import org.purl.sword.base.Workspace;
  */
 public class DummyServer implements SWORDServer {
 
-	/** A counter to count submissions, so the response to a deposito can increment */
+	/** A counter to count submissions, so the response to a deposit can increment */
 	private static int counter = 0;
 
 	/**
@@ -103,8 +102,8 @@ public class DummyServer implements SWORDServer {
 		
 		// Create and return a dummy ServiceDocument
 		ServiceDocument document = new ServiceDocument();
-		Service service = new Service(ServiceLevel.ZERO, true, true);
-	    document.setService(service);
+		Service service = new Service("1.3", true, true);
+		document.setService(service);
 	    
 	    Workspace workspace = new Workspace();
 	    workspace.setTitle("Anonymous submitters workspace");
@@ -124,10 +123,18 @@ public class DummyServer implements SWORDServer {
 		    collection = new Collection(); 
 		    collection.setTitle("Authenticated collection for " + username);
 		    collection.setLocation("http://sword.aber.ac.uk/sword/deposit?user=" + username);
+		    collection.addAccepts("application/zip");
+		    collection.addAccepts("application/xml");
+		    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
+		    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit", 0.8f);
 		    workspace.addCollection(collection);
 		    collection = new Collection(); 
 		    collection.setTitle("Second authenticated collection for " + username);
 		    collection.setLocation("http://sword.aber.ac.uk/sword/deposit?user=" + username + "-2");
+		    collection.addAccepts("application/zip");
+		    collection.addAccepts("application/xml");
+		    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit", 0.123f);
+		    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
 		    workspace.addCollection(collection);
 		    service.addWorkspace(workspace);
 	    }
@@ -141,6 +148,8 @@ public class DummyServer implements SWORDServer {
 		    collection.setLocation("http://sword.aber.ac.uk/sword/deposit?user=" + onBehalfOf);
 		    collection.addAccepts("application/zip");
 		    collection.addAccepts("application/xml");
+		    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
+		    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit", 0.8f);
 		    collection.setAbstract("An abstract goes in here");
 		    collection.setCollectionPolicy("A collection policy");
 		    collection.setMediation(true);

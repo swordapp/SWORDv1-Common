@@ -159,8 +159,8 @@ public class CmdClient implements ClientType
 			log.debug("message is: " + document.marshall());
 			
 			System.out.println("\nThe following Details were retrieved: ");
-			System.out.println("Service Level: "
-					+ document.getService().getComplianceLevel());
+			System.out.println("SWORD Version: "
+					+ document.getService().getVersion());
 			System.out.println("Supports NoOp? " + document.getService().isNoOp());
 			System.out.println("Supports Verbose? "
 					+ document.getService().isVerbose());

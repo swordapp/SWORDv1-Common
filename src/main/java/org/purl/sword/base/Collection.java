@@ -36,14 +36,9 @@
  */
 package org.purl.sword.base;
 
-/**
- *   Author   : $Author: nst $
- *   Date     : $Date: 2007/10/22 07:51:00 $
- *   Revision : $Revision: 1.10 $
- *   Name     : $Name: HEAD $
- */
-
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.List;
 
 import nu.xom.Attribute;
@@ -109,6 +104,11 @@ public class Collection extends XmlElement implements SwordElementInterface
     * The DC Terms Abstract details. 
     */
    private String dcAbstract; 
+   
+   /**
+    * The SWORD acceptsPackaging details.
+    */
+   private Hashtable<String, QualityValue> acceptPackaging;
 
    /**
     * The logger. 
@@ -139,11 +139,16 @@ public class Collection extends XmlElement implements SwordElementInterface
     * Local name for the sword treatment element. 
     */
    public static final String ELEMENT_SWORD_TREATMENT = "treatment";
-   
+
    /**
     * Local name for the sword formatNamespace element. 
     */
    public static final String ELEMENT_SWORD_FORMAT_NAMESPACE = "formatNamespace";
+
+   /**
+    * Local name for the sword acceptPackaging element. 
+    */
+   public static final String ELEMENT_SWORD_ACCEPT_PACKAGING = "acceptPackaging";
    
    /**
     * Label for the Href attribute.  
@@ -162,6 +167,7 @@ public class Collection extends XmlElement implements SwordElementInterface
    {
       super(ELEMENT_NAME);
       accepts = new ArrayList<String>();
+      acceptPackaging = new Hashtable<String, QualityValue>();
       mediationSet = false; 
    }
 
@@ -216,6 +222,44 @@ public class Collection extends XmlElement implements SwordElementInterface
    public void clearAccepts( )
    {
       this.accepts.clear();
+   }
+
+   /**
+    * Retrieve a hashtable that holds all the acceptsPackaging details. 
+    * 
+    * @return A hashtable. The keys are accepted packaging formats,
+    * 	      and the values the quality values (stored as QualityValue objects)
+    */
+   public Hashtable getAcceptPackaging() 
+   {
+      return acceptPackaging;
+   }
+
+   /**
+    * Add an acceptPackaging format. 
+    * 
+    * @param acceptPackaging the packaging format.
+    * @param qualityValue the quality value of accepted packaging format.
+    */
+   public void addAcceptPackaging(String acceptPackaging, float qualityValue) {
+	   this.acceptPackaging.put(acceptPackaging, new QualityValue(qualityValue));
+   }
+
+   /**
+    * Add an acceptPackaging format. A default quality vale is given.
+    * 
+    * @param acceptPackaging the packaging format.
+    */
+   public void addAcceptPackaging(String acceptPackaging) {
+	   this.acceptPackaging.put(acceptPackaging, new QualityValue());
+   }
+
+   /**
+    * Remove all of the accepted packaging formats associated with this Collection. 
+    */
+   public void clearAcceptPackaging( )
+   {
+      this.acceptPackaging.clear();
    }
 
    /**
@@ -390,14 +434,26 @@ public class Collection extends XmlElement implements SwordElementInterface
       collection.appendChild(title.marshall());
 
       Element acceptsElement = null; 
-      for( String item : accepts )
+      for (String item:accepts)
       {
-         acceptsElement = new Element(ELEMENT_APP_ACCEPT, Namespaces.NS_APP);
-         acceptsElement.appendChild(item);
-         collection.appendChild(acceptsElement);
+    	  acceptsElement = new Element(ELEMENT_APP_ACCEPT, Namespaces.NS_APP);
+    	  acceptsElement.appendChild(item);
+    	  collection.appendChild(acceptsElement);
+      }
+      
+      Element acceptPackagingElement = null;
+      Enumeration<String> apEnum = acceptPackaging.keys();
+      while (apEnum.hasMoreElements())
+      {
+    	  String packagingFormat = apEnum.nextElement();
+    	  acceptPackagingElement = new Element(Namespaces.PREFIX_SWORD + ":" + ELEMENT_SWORD_ACCEPT_PACKAGING, Namespaces.NS_SWORD);
+    	  Attribute apAttr = new Attribute("q", "" + acceptPackaging.get(packagingFormat));
+    	  acceptPackagingElement.addAttribute(apAttr);
+    	  acceptPackagingElement.appendChild(packagingFormat);
+    	  collection.appendChild(acceptPackagingElement);
       }
 
-      if( collectionPolicy != null )
+      if (collectionPolicy != null)
       {
          Element colPolicyElement = new Element(Namespaces.PREFIX_SWORD + ":" + 
         		 ELEMENT_SWORD_COLLECTION_POLICY, Namespaces.NS_SWORD);
@@ -405,7 +461,7 @@ public class Collection extends XmlElement implements SwordElementInterface
          collection.appendChild(colPolicyElement);
       }
 
-      if( dcAbstract != null )
+      if (dcAbstract != null)
       {
          Element dcAbstractElement = new Element(Namespaces.PREFIX_DC_TERMS + ":" + 
         		 ELEMENT_DC_TERMS_ABSTRACT, Namespaces.NS_DC_TERMS);
@@ -413,7 +469,7 @@ public class Collection extends XmlElement implements SwordElementInterface
          collection.appendChild(dcAbstractElement);
       }
 
-      if( mediationSet )
+      if (mediationSet)
       {
          Element mediationElement = new Element(Namespaces.PREFIX_SWORD + ":" + 
         		 ELEMENT_SWORD_MEDIATION, Namespaces.NS_SWORD);
@@ -422,7 +478,7 @@ public class Collection extends XmlElement implements SwordElementInterface
       }
 
       // treatment
-      if( treatment != null )
+      if (treatment != null)
       {
          Element treatmentElement = new Element(Namespaces.PREFIX_SWORD + ":" + 
         		 ELEMENT_SWORD_TREATMENT, Namespaces.NS_SWORD);
@@ -431,7 +487,7 @@ public class Collection extends XmlElement implements SwordElementInterface
       }
 
       // namespace 
-      if( namespace != null )
+      if (namespace != null)
       {
          Element namespaceElement = new Element(Namespaces.PREFIX_SWORD + ":" + 
         		 ELEMENT_SWORD_FORMAT_NAMESPACE, Namespaces.NS_SWORD);
@@ -449,10 +505,10 @@ public class Collection extends XmlElement implements SwordElementInterface
     *                             content element or if there are problems
     *                             accessing the data. 
     */
-   public void unmarshall( Element collection )
+   public void unmarshall(Element collection)
    throws UnmarshallException 
    {
-      if( ! isInstanceOf(collection, localName, Namespaces.NS_APP))
+      if (!isInstanceOf(collection, localName, Namespaces.NS_APP))
       {
          log.error("Unexpected element. Expected app:collection. Got " 
                + ((collection != null) ? collection.getQualifiedName() : "null" ));
@@ -467,40 +523,65 @@ public class Collection extends XmlElement implements SwordElementInterface
          for( int i = 0; i < count; i++ ) 
          {
             a = collection.getAttribute(i);
-            if( ATTRIBUTE_HREF.equals(a.getQualifiedName()))
+            if (ATTRIBUTE_HREF.equals(a.getQualifiedName()))
             {
                location = a.getValue();
             }
          }
 
-         accepts.clear(); 
+         clearAccepts();
+         clearAcceptPackaging();
 
          // retrieve all of the sub-elements
          Elements elements = collection.getChildElements();
          Element element = null; 
          int length = elements.size();
 
-         for(int i = 0; i < length; i++ )
+         for (int i = 0; i < length; i++)
          {
             element = elements.get(i);
-            if( isInstanceOf(element, Title.ELEMENT_NAME, Namespaces.NS_ATOM ) )
+            if (isInstanceOf(element, Title.ELEMENT_NAME, Namespaces.NS_ATOM))
             {
                title = new Title();
                title.unmarshall(element);   
             }
-            else if( isInstanceOf(element, ELEMENT_APP_ACCEPT, Namespaces.NS_APP ))
+            else if (isInstanceOf(element, ELEMENT_APP_ACCEPT, Namespaces.NS_APP))
             {
                try
                {
                   String acceptsItem = unmarshallString(element);
                   accepts.add(acceptsItem);
                }
-               catch( UnmarshallException ume )
+               catch(UnmarshallException ume)
                {
                   log.error("Error accessing the content of the accepts element");
                }
             }
-            else if( isInstanceOf(element, ELEMENT_SWORD_COLLECTION_POLICY, Namespaces.NS_SWORD ))
+            else if (isInstanceOf(element, ELEMENT_SWORD_ACCEPT_PACKAGING, Namespaces.NS_SWORD))
+            {
+            	try
+            	{
+            		String acceptsFormat = unmarshallString(element);
+                  	if (element.getAttribute("q") != null)
+                  	{
+                  		float qv = Float.parseFloat(element.getAttribute("q").getValue());
+                  		addAcceptPackaging(acceptsFormat, qv);
+                  	}
+                  	else
+                  	{
+                  		addAcceptPackaging(acceptsFormat);
+                  	}
+            	}
+            	catch (NumberFormatException e)
+            	{
+             		log.error("Error accessing the q value of the acceptPackaging element");
+            	}
+            	catch( UnmarshallException ume )
+            	{
+                  log.error("Error accessing the content of the acceptPackaging element");
+            	}
+            }
+            else if (isInstanceOf(element, ELEMENT_SWORD_COLLECTION_POLICY, Namespaces.NS_SWORD))
             {
                try
                {
@@ -511,7 +592,7 @@ public class Collection extends XmlElement implements SwordElementInterface
                   log.error("Error accessing the content for the collectionPolicy element.");
                }
             }
-            else if( isInstanceOf(element, ELEMENT_DC_TERMS_ABSTRACT, Namespaces.NS_DC_TERMS ))
+            else if (isInstanceOf(element, ELEMENT_DC_TERMS_ABSTRACT, Namespaces.NS_DC_TERMS))
             {
                try
                {
@@ -522,7 +603,7 @@ public class Collection extends XmlElement implements SwordElementInterface
                   log.error("Error accessing the Dublin Core Abstract element.");
                }
             }
-            else if( isInstanceOf(element, ELEMENT_SWORD_MEDIATION, Namespaces.NS_SWORD ))
+            else if (isInstanceOf(element, ELEMENT_SWORD_MEDIATION, Namespaces.NS_SWORD))
             {
                try
                {
@@ -533,7 +614,7 @@ public class Collection extends XmlElement implements SwordElementInterface
                   log.error("Error accessing the boolean value for the mediation element.");
                }
             }
-            else if( isInstanceOf(element, ELEMENT_SWORD_TREATMENT, Namespaces.NS_SWORD ))
+            else if (isInstanceOf(element, ELEMENT_SWORD_TREATMENT, Namespaces.NS_SWORD))
             {
                try
                {
@@ -544,7 +625,7 @@ public class Collection extends XmlElement implements SwordElementInterface
                   log.error("Error accessing the content for the treatment element");
                }
             }
-            else if( isInstanceOf(element, ELEMENT_SWORD_FORMAT_NAMESPACE, Namespaces.NS_SWORD ))
+            else if (isInstanceOf(element, ELEMENT_SWORD_FORMAT_NAMESPACE, Namespaces.NS_SWORD))
             {
                try
                {
@@ -557,7 +638,7 @@ public class Collection extends XmlElement implements SwordElementInterface
             }
          }
       }
-      catch( Exception ex )
+      catch (Exception ex)
       {
          log.error("Unable to parse an element in collection: " + ex.getMessage());
          throw new UnmarshallException("Unable to parse an element in Collection", ex);

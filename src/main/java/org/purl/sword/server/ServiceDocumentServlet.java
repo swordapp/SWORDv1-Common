@@ -79,8 +79,7 @@ public class ServiceDocumentServlet extends HttpServlet {
 		// Instantiate the correct SWORD Server class
 		String className = getServletContext().getInitParameter("sword-server-class");
 		if (className == null) {
-			log
-					.fatal("Unable to read value of 'server-class' from Servlet context");
+			log.fatal("Unable to read value of 'sword-server-class' from Servlet context");
 		} else {
 			try {
 				myRepository = (SWORDServer) Class.forName(className)
