@@ -109,11 +109,19 @@ public class DummyServer implements SWORDServer {
 	    workspace.setTitle("Anonymous submitters workspace");
 	    Collection collection = new Collection(); 
 	    collection.setTitle("Anonymous submitters collection");
-	    collection.setLocation("http://sword.aber.ac.uk/sword/deposit?user=anon");
+	    collection.setLocation("http://localhost:8080/client/deposit/anon");
+	    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
+	    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit");
+	    collection.addAccepts("application/zip");
+	    collection.addAccepts("application/xml");
 	    workspace.addCollection(collection);
 	    collection = new Collection(); 
 	    collection.setTitle("Anonymous submitters other collection");
-	    collection.setLocation("http://sword.aber.ac.uk/sword/deposit?user=anonymous");
+	    collection.setLocation("http://localhost:8080/client/deposit/anonymous");
+	    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
+	    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit");
+	    collection.addAccepts("application/zip");
+	    collection.addAccepts("application/xml");
 	    workspace.addCollection(collection);
 	    service.addWorkspace(workspace);
 	     
@@ -122,7 +130,7 @@ public class DummyServer implements SWORDServer {
 		    workspace.setTitle("Authenticated workspace for " + username);
 		    collection = new Collection(); 
 		    collection.setTitle("Authenticated collection for " + username);
-		    collection.setLocation("http://sword.aber.ac.uk/sword/deposit?user=" + username);
+		    collection.setLocation("http://localhost:8080/client/deposit/" + username);
 		    collection.addAccepts("application/zip");
 		    collection.addAccepts("application/xml");
 		    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
@@ -130,7 +138,7 @@ public class DummyServer implements SWORDServer {
 		    workspace.addCollection(collection);
 		    collection = new Collection(); 
 		    collection.setTitle("Second authenticated collection for " + username);
-		    collection.setLocation("http://sword.aber.ac.uk/sword/deposit?user=" + username + "-2");
+		    collection.setLocation("http://localhost:8080/sword/deposit/" + username + "-2");
 		    collection.addAccepts("application/zip");
 		    collection.addAccepts("application/xml");
 		    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit", 0.123f);
