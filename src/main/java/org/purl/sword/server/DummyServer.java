@@ -114,6 +114,9 @@ public class DummyServer implements SWORDServer {
 	    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit");
 	    collection.addAccepts("application/zip");
 	    collection.addAccepts("application/xml");
+	    collection.setAbstract("A collection that anonymous users can deposit into");
+	    collection.setTreatment("This is a dummy server");
+	    collection.setCollectionPolicy("No guarantee of service, or that deposits will be retained for any length of time.");
 	    workspace.addCollection(collection);
 	    collection = new Collection(); 
 	    collection.setTitle("Anonymous submitters other collection");
@@ -122,6 +125,9 @@ public class DummyServer implements SWORDServer {
 	    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit");
 	    collection.addAccepts("application/zip");
 	    collection.addAccepts("application/xml");
+	    collection.setAbstract("Another collection that anonymous users can deposit into");
+	    collection.setTreatment("This is a dummy server");
+	    collection.setCollectionPolicy("No guarantee of service, or that deposits will be retained for any length of time.");
 	    workspace.addCollection(collection);
 	    service.addWorkspace(workspace);
 	     
@@ -135,6 +141,9 @@ public class DummyServer implements SWORDServer {
 		    collection.addAccepts("application/xml");
 		    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
 		    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit", 0.8f);
+		    collection.setAbstract("A collection that " + username + " can deposit into");
+		    collection.setTreatment("This is a dummy server");
+		    collection.setCollectionPolicy("No guarantee of service, or that deposits will be retained for any length of time.");
 		    workspace.addCollection(collection);
 		    collection = new Collection(); 
 		    collection.setTitle("Second authenticated collection for " + username);
@@ -143,6 +152,9 @@ public class DummyServer implements SWORDServer {
 		    collection.addAccepts("application/xml");
 		    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit", 0.123f);
 		    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
+		    collection.setAbstract("A collection that " + username + " can deposit into");
+		    collection.setTreatment("This is a dummy server");
+		    collection.setCollectionPolicy("No guarantee of service, or that deposits will be retained for any length of time.");
 		    workspace.addCollection(collection);
 		    service.addWorkspace(workspace);
 	    }
