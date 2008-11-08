@@ -39,11 +39,6 @@ package org.purl.sword.base;
 import nu.xom.Element;
 import nu.xom.Node;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
-
 /**
  * Parent class for all classes that represent an XML element. This provides
  * some common utility methods that are useful for marshalling and 

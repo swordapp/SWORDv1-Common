@@ -36,7 +36,6 @@
  */
 package org.purl.sword.base;
 
-import java.text.DecimalFormat;
 
 /**
  * A representation of a quality value.
