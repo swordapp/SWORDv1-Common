@@ -80,6 +80,11 @@ public class Service extends XmlElement implements SwordElementInterface
    private boolean isVerbose; 
    
    /**
+    * MaxUpload size allowed by the repository
+    */
+   private int maxUploadSize = -1;
+   
+   /**
     * List of Workspaces. 
     */
    private List<Workspace> workspaces; 
@@ -101,6 +106,11 @@ public class Service extends XmlElement implements SwordElementInterface
     * Local name part of noOp element.
     */
    public static final String ELEMENT_SWORD_NO_OP = "noOp";
+
+   /**
+    * MaxUploadSize
+    */
+   public static final String ELEMENT_SWORD_MAX_UPLOAD_SIZE = "maxUploadSize";
    
    /**
     * Name for this element. 
@@ -234,6 +244,26 @@ public class Service extends XmlElement implements SwordElementInterface
    }
    
    /**
+    * Set the maximum file upload size in kB
+    * 
+    * @param maxUploadSize Max upload file size in kB
+    */
+   public void setMaxUploadSize(int maxUploadSize)
+   {
+      this.maxUploadSize = maxUploadSize;
+   }
+   
+   /**
+    * Get the maximum upload file size (in kB)
+    * 
+    * @return the maximum file upload size
+    */
+   public int getMaxUploadSize()
+   {
+	   return maxUploadSize;
+   }
+   
+   /**
     * Get an Iterator over the workspaces. 
     * 
     * @return The workspace. 
@@ -307,6 +337,14 @@ public class Service extends XmlElement implements SwordElementInterface
     	  service.appendChild(noOpElement);
       }
       
+      if (maxUploadSize != -1) 
+      {
+    	  Element maxUploadSizeElement = new Element(
+        		 Namespaces.PREFIX_SWORD + ":" + ELEMENT_SWORD_MAX_UPLOAD_SIZE, Namespaces.NS_SWORD);
+    	  maxUploadSizeElement.appendChild("" + maxUploadSize); 
+    	  service.appendChild(maxUploadSizeElement);
+      }
+      
       for (Workspace item : workspaces)
       {
     	  service.appendChild(item.marshall());
@@ -339,23 +377,27 @@ public class Service extends XmlElement implements SwordElementInterface
          Element element = null; 
          int length = elements.size();
          
-         for(int i = 0; i < length; i++ )
+         for (int i = 0; i < length; i++ )
          {
             element = elements.get(i);
 
-            if( isInstanceOf(element, ELEMENT_SWORD_VERSION, Namespaces.NS_SWORD ) )
+            if (isInstanceOf(element, ELEMENT_SWORD_VERSION, Namespaces.NS_SWORD ) )
             {
                setVersion(unmarshallString(element));
             }
-            else if( isInstanceOf(element, ELEMENT_SWORD_VERBOSE, Namespaces.NS_SWORD))
+            else if (isInstanceOf(element, ELEMENT_SWORD_VERBOSE, Namespaces.NS_SWORD))
             {
                setVerbose(unmarshallBoolean(element)); 
             }
-            else if( isInstanceOf(element, ELEMENT_SWORD_NO_OP, Namespaces.NS_SWORD))
+            else if (isInstanceOf(element, ELEMENT_SWORD_NO_OP, Namespaces.NS_SWORD))
             {
                setNoOp(unmarshallBoolean(element));
             }
-            else if( isInstanceOf(element, Workspace.ELEMENT_NAME, Namespaces.NS_APP ))
+            else if (isInstanceOf(element, ELEMENT_SWORD_MAX_UPLOAD_SIZE, Namespaces.NS_SWORD))
+            {
+               setMaxUploadSize(unmarshallInteger(element));
+            }
+            else if (isInstanceOf(element, Workspace.ELEMENT_NAME, Namespaces.NS_APP ))
             {
                Workspace workspace = new Workspace( );
                workspace.unmarshall(element);

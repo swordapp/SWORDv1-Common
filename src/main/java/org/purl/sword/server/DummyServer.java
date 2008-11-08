@@ -103,7 +103,6 @@ public class DummyServer implements SWORDServer {
 		// Create and return a dummy ServiceDocument
 		ServiceDocument document = new ServiceDocument();
 		Service service = new Service("1.3", true, true);
-		service.setMaxUploadSize(1024);
 		document.setService(service);
 	    
 	    Workspace workspace = new Workspace();

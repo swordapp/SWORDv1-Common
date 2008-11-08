@@ -67,6 +67,9 @@ public class ServiceDocumentServlet extends HttpServlet {
 	/** Authentication type. */
 	private String authN;
 
+	/** Maximum file upload size in kB **/
+	private int maxUploadSize;
+
 	/** Logger */
 	private static Logger log = Logger.getLogger(ServiceDocumentServlet.class);
 
@@ -100,6 +103,22 @@ public class ServiceDocumentServlet extends HttpServlet {
 			authN = "None";
 		}
 		log.info("Authentication type set to: " + authN);
+		
+		String maxUploadSizeStr = getServletContext().getInitParameter("maxUploadSize");
+		if ((maxUploadSizeStr == null) || 
+		    (maxUploadSizeStr.equals("")) || 
+		    (maxUploadSizeStr.equals("-1"))) {
+			maxUploadSize = -1;
+			log.warn("No maxUploadSize set, so setting max file upload size to unlimited.");
+		} else {
+			try {
+				maxUploadSize = Integer.parseInt(maxUploadSizeStr);
+				log.info("Setting max file upload size to " + maxUploadSize);
+			} catch (NumberFormatException nfe) {
+				maxUploadSize = -1;
+				log.warn("maxUploadSize not a number, so setting max file upload size to unlimited.");
+			}
+		}
 	}
 
 	/**
@@ -135,7 +154,10 @@ public class ServiceDocumentServlet extends HttpServlet {
 		// Get the ServiceDocument
 		try {
 			ServiceDocument sd = myRepository.doServiceDocument(sdr);
-
+			if ((sd.getService().getMaxUploadSize() == -1) && (maxUploadSize != -1)) {
+				sd.getService().setMaxUploadSize(maxUploadSize);
+			}
+		
 			// Print out the Service Document
 			response.setContentType("application/atomsvc+xml; charset=UTF-8");
 			PrintWriter out = response.getWriter();

@@ -77,6 +77,9 @@ public class DepositServlet extends HttpServlet {
 
 	/** Authentication type */
 	private String authN;
+	
+	/** Maximum file upload size in kB **/
+	private int maxUploadSize;
 
 	/** Temp directory */
 	private String tempDirectory;
@@ -118,6 +121,22 @@ public class DepositServlet extends HttpServlet {
 			authN = "None";
 		}
 		log.info("Authentication type set to: " + authN);
+
+		String maxUploadSizeStr = getServletContext().getInitParameter("maxUploadSize");
+		if ((maxUploadSizeStr == null) || 
+		    (maxUploadSizeStr.equals("")) || 
+		    (maxUploadSizeStr.equals("-1"))) {
+			maxUploadSize = -1;
+			log.warn("No maxUploadSize set, so setting max file upload size to unlimited.");
+		} else {
+			try {
+				maxUploadSize = Integer.parseInt(maxUploadSizeStr);
+				log.info("Setting max file upload size to " + maxUploadSize);
+			} catch (NumberFormatException nfe) {
+				maxUploadSize = -1;
+				log.warn("maxUploadSize not a number, so setting max file upload size to unlimited.");
+			}
+		}
 
 		tempDirectory = getServletContext().getInitParameter(
 				"upload-temp-directory");
@@ -197,7 +216,15 @@ public class DepositServlet extends HttpServlet {
 			}
 			inputStream.close();
 			outputStream.close();
-
+			
+			// Check the size is OK
+			File file = new File(filename);
+		    long fLength = file.length() / 1024;
+		    if ((maxUploadSize != -1) && (fLength > maxUploadSize)) {
+		    	response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+		    	return;
+		    }
+		    
 			// Check the MD5 hash
 			String receivedMD5 = ChecksumUtils.generateMD5(filename);
 			log.debug("Received filechecksum: " + receivedMD5);
@@ -206,10 +233,8 @@ public class DepositServlet extends HttpServlet {
 			log.debug("Received file checksum header: " + md5);
 			if ((md5 != null) && (!md5.equals(receivedMD5))) {
 				response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
-				response.setHeader(HttpHeaders.X_ERROR_CODE,
-						"ErrorChecksumMismatch");
-				log
-						.debug("Bad MD5 for file. Aborting with appropriate error message");
+				response.setHeader(HttpHeaders.X_ERROR_CODE, "ErrorChecksumMismatch");
+				log.debug("Bad MD5 for file. Aborting with appropriate error message");
 			} else {
 				// Set the file
 				File f = new File(filename);
