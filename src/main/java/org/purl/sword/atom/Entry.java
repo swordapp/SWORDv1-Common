@@ -281,7 +281,8 @@ public class Entry extends XmlElement implements SwordElementInterface
    public void unmarshall(Element entry)
    throws UnmarshallException
    {
-      if( ! isInstanceOf(entry, localName, Namespaces.NS_ATOM))
+	  if (!((isInstanceOf(entry, localName, Namespaces.NS_ATOM)) || 
+		    (isInstanceOf(entry, "error", Namespaces.NS_SWORD))))
       {
          log.error("Unexpected element. Expected atom:entry. Got " + 
                ((entry != null ) ? entry.getQualifiedName() : "null"));
