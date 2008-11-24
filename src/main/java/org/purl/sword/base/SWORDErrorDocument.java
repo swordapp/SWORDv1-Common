@@ -66,6 +66,14 @@ public class SWORDErrorDocument extends SWORDEntry
    private String errorURI;
    
    /**
+    * Create the error document (intended to be used when unmarshalling an error document
+    * as this will set the errorURI)
+    */
+   public SWORDErrorDocument() {
+	   super(Namespaces.PREFIX_SWORD, ELEMENT_NAME);
+	}
+   
+   /**
     * Create the error document
     * 
     * @param errorURI The URI of the error
@@ -74,7 +82,6 @@ public class SWORDErrorDocument extends SWORDEntry
 	   super(Namespaces.PREFIX_SWORD, ELEMENT_NAME);
 	   this.errorURI = errorURI;
    }
-   
    
    /**
     * Overrides the marshall method in the parent SWORDEntry. This will 
