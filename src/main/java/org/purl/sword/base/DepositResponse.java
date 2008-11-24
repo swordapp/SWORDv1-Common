@@ -150,8 +150,7 @@ public class DepositResponse
     * @param xml The XML data as a string. 
     * @throws UnmarshallException If there was an error unmarshalling the data. 
     */
-   public void unmarshall(String xml)
-   throws UnmarshallException
+   public void unmarshall(String xml) throws UnmarshallException
    {
       try
       {  
@@ -162,6 +161,34 @@ public class DepositResponse
          entry = new SWORDEntry( );
          entry.unmarshall(root);
 
+      }
+      catch( ParsingException ex )
+      {
+         throw new UnmarshallException("Unable to parse the XML", ex );
+      }
+      catch( IOException ex )
+      {
+         throw new UnmarshallException("Error acessing the file?", ex);
+      }	   
+   }
+
+   /**
+    * Unmarshall the specified XML data into a SWORD error document. 
+    * 
+    * @param xml The XML data as a string. 
+    * @throws UnmarshallException If there was an error unmarshalling the data. 
+    */
+   public void unmarshallErrorDocument(String xml) throws UnmarshallException
+   {
+      try
+      {  
+         Builder builder = new Builder(); 
+         Document doc = builder.build(xml, "http://purl.org/net/sword/");
+         Element root = doc.getRootElement(); 
+
+         SWORDErrorDocument sed = new SWORDErrorDocument();
+         sed.unmarshall(root);
+         entry = sed;
       }
       catch( ParsingException ex )
       {
