@@ -256,4 +256,16 @@ public class XmlElement
       qName += name;
       return qName;
    }
+   
+   /**
+    * Get the qualified name for the given prefix and name
+    * 
+    * @param prefix the prefix
+    * @param name the name
+    * @return the qualified name
+    */
+   public String getQualifiedNameWithPrefix(String prefix, String name)
+   {
+	   return prefix + ":" + name;
+   }
 }

@@ -56,34 +56,54 @@ public class SWORDEntry extends Entry
     * if the document records that no operation was taken for the 
     * deposit other than to generate a response. 
     */
-   private boolean noOp; 
+   protected boolean noOp; 
    
    /**
     * Use to supply a verbose description. 
     */
-   private String verboseDescription; 
+   protected String verboseDescription; 
    
    /**
     * Used for a human readable statement about what treatment 
     * the deposited resource has received. Include either a
     * text description or a URI. 
     */
-   private String treatment;
+   protected String treatment;
    
    /**
     * Used to record the format namespace. 
     */
-   private String formatNamespace; 
+   protected String formatNamespace; 
 
    /**
     * Used to determine if the noOp value has been set.
     */
-   private boolean noOpSet; 
+   protected boolean noOpSet; 
 
    /**
     * The logger.
     */
    private static Logger log = Logger.getLogger(SWORDEntry.class);
+   
+   /**
+    * Create a new SWORDEntry with the given namespace and element. This method is
+    * not normally used, instead the default constructor should be used as this will
+    * set the namespace and element correctly.
+    * 
+    * @param namespace The namespace of the element
+    * @param element The element name
+    */
+   public SWORDEntry(String namespace, String element)
+   {
+	   super(namespace, element);
+   }
+   
+   /**
+    * A default constructor.
+    */
+   public SWORDEntry()
+   {
+   }
    
    /**
     * Get the current value of NoOp.  
@@ -169,40 +189,44 @@ public class SWORDEntry extends Entry
    public Element marshall()
    {
       Element entry = super.marshall(); 
-      
-      if( treatment != null )
-      {
-         Element treatmentElement = new Element(
-        		 Namespaces.PREFIX_SWORD + ":treatment", Namespaces.NS_SWORD);
-         treatmentElement.appendChild(treatment);
-         entry.appendChild(treatmentElement); 
-      }
-      
-      if( formatNamespace != null )
-      {
-         Element formatNamespaceElement = new Element(
-        		 Namespaces.PREFIX_SWORD + ":formatNamespace", Namespaces.NS_SWORD);
-         formatNamespaceElement.appendChild(formatNamespace);
-         entry.appendChild(formatNamespaceElement);
-      }
-      
-      if( verboseDescription != null )
-      {
-         Element verboseDescriptionElement = new Element(
-        		 Namespaces.PREFIX_SWORD + ":verboseDescription", Namespaces.NS_SWORD);
-         verboseDescriptionElement.appendChild(verboseDescription);
-         entry.appendChild(verboseDescriptionElement);
-      }
-      
-      if( noOpSet )
-      {
-         Element noOpElement = new Element(
-        		 Namespaces.PREFIX_SWORD + ":noOp", Namespaces.NS_SWORD);
-         noOpElement.appendChild(Boolean.toString(noOp));
-         entry.appendChild(noOpElement);
-      }
-      
       return entry;
+   }
+   
+   protected void marshallElements(Element entry)
+   {
+	   super.marshallElements(entry);
+	   
+	   if (treatment != null)
+	      {
+	         Element treatmentElement = new Element(
+	        		 Namespaces.PREFIX_SWORD + ":treatment", Namespaces.NS_SWORD);
+	         treatmentElement.appendChild(treatment);
+	         entry.appendChild(treatmentElement); 
+	      }
+	      
+	      if (formatNamespace != null)
+	      {
+	         Element formatNamespaceElement = new Element(
+	        		 Namespaces.PREFIX_SWORD + ":formatNamespace", Namespaces.NS_SWORD);
+	         formatNamespaceElement.appendChild(formatNamespace);
+	         entry.appendChild(formatNamespaceElement);
+	      }
+	      
+	      if (verboseDescription != null)
+	      {
+	         Element verboseDescriptionElement = new Element(
+	        		 Namespaces.PREFIX_SWORD + ":verboseDescription", Namespaces.NS_SWORD);
+	         verboseDescriptionElement.appendChild(verboseDescription);
+	         entry.appendChild(verboseDescriptionElement);
+	      }
+	      
+	      if (noOpSet)
+	      {
+	         Element noOpElement = new Element(
+	        		 Namespaces.PREFIX_SWORD + ":noOp", Namespaces.NS_SWORD);
+	         noOpElement.appendChild(Boolean.toString(noOp));
+	         entry.appendChild(noOpElement);
+	      }
    }
 
    /**
