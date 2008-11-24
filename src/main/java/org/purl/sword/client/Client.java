@@ -59,6 +59,7 @@ import org.apache.log4j.Logger;
 import org.purl.sword.base.ChecksumUtils;
 import org.purl.sword.base.DepositResponse;
 import org.purl.sword.base.HttpHeaders;
+import org.purl.sword.base.SWORDErrorDocument;
 import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.UnmarshallException;
 
@@ -341,6 +342,8 @@ public class Client implements SWORDClient {
 		DepositResponse response = null;
 		FileInputStream stream = null;
 
+		String messageBody = "";
+		
 		try {
 			if (message.isUseMD5()) {
 				String md5 = ChecksumUtils.generateMD5(message.getFilepath());
@@ -397,14 +400,17 @@ public class Client implements SWORDClient {
 
 			if (status.getCode() == HttpStatus.SC_ACCEPTED
 					|| status.getCode() == HttpStatus.SC_CREATED) {
-				String messageBody = readResponse(httppost
+				messageBody = readResponse(httppost
 						.getResponseBodyAsStream());
 				response = new DepositResponse(status.getCode()); 
 				// added call for the status code.
 				response.unmarshall(messageBody);
 			}
 			else {
-				throw new SWORDClientException("Error occured; server returned : "+ status);
+				messageBody = readResponse(httppost
+						.getResponseBodyAsStream());
+				response = new DepositResponse(status.getCode());
+				response.unmarshallErrorDocument(messageBody);
 			}
 			return response;
 
@@ -416,7 +422,7 @@ public class Client implements SWORDClient {
 		} catch (IOException ioex) {
 			throw new SWORDClientException(ioex.getMessage(), ioex);
 		} catch (UnmarshallException uex) {
-			throw new SWORDClientException(uex.getMessage(), uex);
+			throw new SWORDClientException(uex.getMessage() + "(<pre>" + messageBody + "</pre>)", uex);
 		} finally {
 			httppost.releaseConnection();
 
