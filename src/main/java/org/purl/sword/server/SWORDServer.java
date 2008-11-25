@@ -3,7 +3,7 @@ package org.purl.sword.server;
 import org.purl.sword.base.Deposit;
 import org.purl.sword.base.DepositResponse;
 import org.purl.sword.base.SWORDAuthenticationException;
-import org.purl.sword.base.SWORDContentTypeException;
+import org.purl.sword.base.SWORDErrorException;
 import org.purl.sword.base.SWORDException;
 import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.ServiceDocumentRequest;
@@ -38,11 +38,11 @@ public interface SWORDServer {
 	 * @param deposit The Deposit object
 	 * 
 	 * @exception SWORDAuthenticationException Thrown if the authentication fails
-	 * @exception SWORDException Thrown in an un-handalable Exception occurs. 
+	 * @exception SWORDException Thrown if an un-handalable Exception occurs. 
 	 *            This will be dealt with by sending a HTTP 500 Server Exception
 	 * 
 	 * @return The response to the deposit
 	 */
 	public DepositResponse doDeposit(Deposit deposit)
-		throws SWORDAuthenticationException, SWORDContentTypeException, SWORDException;
+		throws SWORDAuthenticationException, SWORDErrorException, SWORDException;
 }

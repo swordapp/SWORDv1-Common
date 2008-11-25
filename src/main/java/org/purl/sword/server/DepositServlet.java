@@ -45,6 +45,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,14 +58,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.purl.sword.atom.Summary;
+import org.purl.sword.atom.Title;
 import org.purl.sword.base.ChecksumUtils;
 import org.purl.sword.base.Deposit;
 import org.purl.sword.base.DepositResponse;
+import org.purl.sword.base.ErrorCodes;
 import org.purl.sword.base.HttpHeaders;
 import org.purl.sword.base.SWORDAuthenticationException;
-import org.purl.sword.base.SWORDContentTypeException;
+import org.purl.sword.base.SWORDErrorDocument;
 import org.purl.sword.base.SWORDException;
-import org.purl.sword.server.SWORDServer;
+import org.purl.sword.base.SWORDErrorException;
 
 /**
  * DepositServlet
@@ -99,8 +104,7 @@ public class DepositServlet extends HttpServlet {
 		// Instantiate the correct SWORD Server class
 		String className = getServletContext().getInitParameter("sword-server-class");
 		if (className == null) {
-			log
-					.fatal("Unable to read value of 'sword-server-class' from Servlet context");
+			log.fatal("Unable to read value of 'sword-server-class' from Servlet context");
 		} else {
 			try {
 				myRepository = (SWORDServer) Class.forName(className)
@@ -170,8 +174,7 @@ public class DepositServlet extends HttpServlet {
 	/**
 	 * Process the Get request. This will return an unimplemented response.
 	 */
-	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Send a '501 Not Implemented'
 		response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
 	}
@@ -179,8 +182,7 @@ public class DepositServlet extends HttpServlet {
 	/**
 	 * Process a post request.
 	 */
-	protected void doPost(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Create the Deposit request
 		Deposit d = new Deposit();
 		Date date = new Date();
@@ -201,12 +203,16 @@ public class DepositServlet extends HttpServlet {
 			response.setStatus(401);
 			return;
 		}
+		
+		// Set up some variables
+		String filename = null;
+		File f = null;
+		FileInputStream fis = null;
 
 		// Do the processing
 		try {
 			// Write the file to the temp directory
-			// TODO: Improve the filename creation
-			String filename = tempDirectory + "SWORD-"
+			filename = tempDirectory + "SWORD-"
 					+ request.getRemoteAddr() + "-" + counter.addAndGet(1);
 			InputStream inputStream = request.getInputStream();
 			OutputStream outputStream = new FileOutputStream(filename);
@@ -221,7 +227,12 @@ public class DepositServlet extends HttpServlet {
 			File file = new File(filename);
 		    long fLength = file.length() / 1024;
 		    if ((maxUploadSize != -1) && (fLength > maxUploadSize)) {
-		    	response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+		    	this.makeErrorDocument(ErrorCodes.MAX_UPLOAD_SIZE_EXCEEDED, 
+		    			               HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, 
+		    			               "The uploaded file exceeded the maximum file size this server will accept (the file is " + 
+		    			               fLength + "kB but the server will only accept files as large as " + 
+		    			               maxUploadSize + "kB)",
+		    			               response);
 		    	return;
 		    }
 		    
@@ -232,22 +243,24 @@ public class DepositServlet extends HttpServlet {
 			String md5 = request.getHeader("Content-MD5");
 			log.debug("Received file checksum header: " + md5);
 			if ((md5 != null) && (!md5.equals(receivedMD5))) {
-				response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
-				response.setHeader(HttpHeaders.X_ERROR_CODE, "ErrorChecksumMismatch");
+				//TODO put an error doc in here
+				this.makeErrorDocument(ErrorCodes.ERROR_CHECKSUM_MISMATCH, 
+						               HttpServletResponse.SC_PRECONDITION_FAILED,
+						               "The received MD5 checksum for the deposited file did not match the checksum sent by the deposit client",
+						               response);
 				log.debug("Bad MD5 for file. Aborting with appropriate error message");
+				return;
 			} else {
 				// Set the file
-				File f = new File(filename);
-				FileInputStream fis = new FileInputStream(f);
+				f = new File(filename);
+				fis = new FileInputStream(f);
 				d.setFile(fis);
 
 				// Set the X-On-Behalf-Of header
-				d.setOnBehalfOf(request.getHeader(HttpHeaders.X_ON_BEHALF_OF
-						.toString()));
+				d.setOnBehalfOf(request.getHeader(HttpHeaders.X_ON_BEHALF_OF.toString()));
 
 				// Set the X-Format-Namespace header
-				d.setFormatNamespace(request
-						.getHeader(HttpHeaders.X_FORMAT_NAMESPACE));
+				d.setFormatNamespace(request.getHeader(HttpHeaders.X_FORMAT_NAMESPACE));
 
 				// Set the X-No-Op header
 				String noop = request.getHeader(HttpHeaders.X_NO_OP);
@@ -299,47 +312,77 @@ public class DepositServlet extends HttpServlet {
 				PrintWriter out = response.getWriter();
 				out.write(dr.marshall());
 				out.flush();
-
-				// Close the input stream if it still open
-				fis.close();
-
-				// Try deleting the temp file
-				f = new File(filename);
-				f.delete();
 			}
 		} catch (SWORDAuthenticationException sae) {
-			// Ask for credentials
+			// Ask for credentials again
 			if (authN.equals("Basic")) {
 				String s = "Basic realm=\"SWORD\"";
 				response.setHeader("WWW-Authenticate", s);
 				response.setStatus(401);
 			}
-		} catch (SWORDContentTypeException scte) {
-			// Throw a 415
-			response.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+		} catch (SWORDErrorException see) {
+			// Get the details and send the right SWORD error document
+			log.error(see.toString());
+			this.makeErrorDocument(see.getErrorURI(), 
+		               			   see.getStatus(),
+		               			   see.getDescription(),
+		                           response);
+			return;
 		} catch (SWORDException se) {
-			// Throw a HTTP 500
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, se
-					.getMessage());
-
-			// Is there an appropriate error header to return?
-			if (se.getErrorCode() != null) {
-				response.setHeader(HttpHeaders.X_ERROR_CODE, se.getErrorCode());
-			}
-			se.printStackTrace();
-			log.error(se.toString());
-		} catch (IOException ioe) {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			log.error(ioe.toString());
+			log.error(se.toString());
 		} catch (NoSuchAlgorithmException nsae) {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			log.error(nsae.toString());
 		}
+		
+		finally {
+			// Close the input stream if it still open
+			if (fis != null) {
+				fis.close();
+			}
 
+			// Try deleting the temp file
+			if (filename != null) {
+				f = new File(filename);
+				f.delete();
+			}
+		}
+	}
+	
+	/**
+	 * Utility method to construct a SWORDErrorDocument
+	 * 
+	 * @param errorURI The error URI to pass
+	 * @param status The HTTP status to return
+	 * @param summary The textual description to give the user
+	 * @param response The HttpServletResponse to send the error document to
+	 * @throws IOException 
+	 */
+	private void makeErrorDocument(String errorURI, int status,
+			                       String summary, HttpServletResponse response) throws IOException
+	{
+		SWORDErrorDocument sed = new SWORDErrorDocument(errorURI);
+		Title title = new Title();
+		title.setContent("ERROR");
+		sed.setTitle(title);
+		Calendar calendar = Calendar.getInstance();
+		String utcformat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+		SimpleDateFormat zulu = new SimpleDateFormat(utcformat);
+		String serializeddate = zulu.format(calendar.getTime());
+		sed.setUpdated(serializeddate);
+		Summary sum = new Summary();
+		sum.setContent(summary);
+		sed.setSummary(sum);
+		response.setStatus(status);
+    	response.setContentType("application/atom+xml; charset=UTF-8");
+		PrintWriter out = response.getWriter();
+    	out.write(sed.marshall().toXML());
+		out.flush();
 	}
 
 	/**
-	 * Utiliy method to return the username and password (separated by a colon
+	 * Utility method to return the username and password (separated by a colon
 	 * ':')
 	 * 
 	 * @param request
@@ -367,7 +410,7 @@ public class DepositServlet extends HttpServlet {
 	}
 
 	/**
-	 * Utility method to deicde if we are using HTTP Basic authentication
+	 * Utility method to decide if we are using HTTP Basic authentication
 	 * 
 	 * @return if HTTP Basic authentication is in use or not
 	 */
@@ -382,13 +425,12 @@ public class DepositServlet extends HttpServlet {
 	/**
 	 * Utility method to construct the URL called for this Servlet
 	 * 
-	 * @param req
-	 *            The request object
+	 * @param req The request object
 	 * @return The URL
 	 */
 	private static String getUrl(HttpServletRequest req) {
 		String reqUrl = req.getRequestURL().toString();
-		String queryString = req.getQueryString(); // d=789
+		String queryString = req.getQueryString();
 		if (queryString != null) {
 			reqUrl += "?" + queryString;
 		}

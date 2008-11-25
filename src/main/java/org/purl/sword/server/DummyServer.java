@@ -44,6 +44,8 @@ import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.purl.sword.atom.Author;
 import org.purl.sword.atom.Content;
 import org.purl.sword.atom.Contributor;
@@ -59,6 +61,7 @@ import org.purl.sword.base.DepositResponse;
 import org.purl.sword.base.ErrorCodes;
 import org.purl.sword.base.SWORDAuthenticationException;
 import org.purl.sword.base.SWORDEntry;
+import org.purl.sword.base.SWORDErrorException;
 import org.purl.sword.base.SWORDException;
 import org.purl.sword.base.Service;
 import org.purl.sword.base.ServiceDocument;
@@ -87,9 +90,11 @@ public class DummyServer implements SWORDServer {
 	 * for the onBehalfOf user.
 	 * 
 	 * @param onBehalfOf The user that the client is acting on behalf of
-	 * @throws SWORDAuthenticationException 
+	 * @throws SWORDAuthenticationException If the credentials are bad
+	 * @throws SWORDErrorException If something goes wrong, such as 
 	 */
-	public ServiceDocument doServiceDocument(ServiceDocumentRequest sdr) throws SWORDAuthenticationException {
+	public ServiceDocument doServiceDocument(ServiceDocumentRequest sdr) 
+	                           throws SWORDAuthenticationException, SWORDException {
 		// Authenticate the user
 		String username = sdr.getUsername();
 		String password = sdr.getPassword();
@@ -181,7 +186,8 @@ public class DummyServer implements SWORDServer {
 	    return document;
 	}
 
-	public DepositResponse doDeposit(Deposit deposit) throws SWORDAuthenticationException, SWORDException {
+	public DepositResponse doDeposit(Deposit deposit) 
+	             throws SWORDAuthenticationException, SWORDErrorException, SWORDException {
 		// Authenticate the user
 		String username = deposit.getUsername();
 		String password = deposit.getPassword();
@@ -190,6 +196,14 @@ public class DummyServer implements SWORDServer {
 			 (!username.equalsIgnoreCase(password))) ) {
 			// User not authenticated
 			throw new SWORDAuthenticationException("Bad credentials");
+		}
+		
+		// Check this is a collection that takes obo deposits, else thrown an error
+		if (((deposit.getOnBehalfOf() != null) && (!deposit.getOnBehalfOf().equals(""))) && 
+	        (!deposit.getLocation().contains("deposit?user="))) {
+			throw new SWORDErrorException(ErrorCodes.MEDIATION_NOT_ALLOWED,
+					                      HttpServletResponse.SC_PRECONDITION_FAILED,
+					                      "Mediated deposit not allowed to this collection");
 		}
 		
 		// Get the filenames
