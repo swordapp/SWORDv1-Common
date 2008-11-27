@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007, Aberystwyth University
+ * Copyright (c) 2008, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -51,8 +51,6 @@ import org.purl.sword.atom.Title;
 
 /**
  * A representation of a SWORD Collection.
- * 
- * http://www.ukoln.ac.uk/repositories/digirep/index/SWORD_APP_Profile_0.7
  * 
  * @author Stuart Lewis
  * @author Neil Taylor
@@ -106,6 +104,11 @@ public class Collection extends XmlElement implements SwordElementInterface
    private String dcAbstract; 
    
    /**
+    * The SWORD service (nested service document) details. 
+    */
+   private String service; 
+   
+   /**
     * The SWORD acceptsPackaging details.
     */
    private Hashtable<String, QualityValue> acceptPackaging;
@@ -129,6 +132,11 @@ public class Collection extends XmlElement implements SwordElementInterface
     * Local name for the DC terms abstract element. 
     */
    public static final String ELEMENT_DC_TERMS_ABSTRACT = "abstract";
+   
+   /**
+    * Local name for the sword service element. 
+    */
+   public static final String ELEMENT_SWORD_SERVICE = "service";
    
    /**
     * Local name for the sword mediation element. 
@@ -360,6 +368,26 @@ public class Collection extends XmlElement implements SwordElementInterface
    }
 
    /**
+    * Get the sword service.
+    *  
+    * @return The service. 
+    */
+   public String getService()
+   {
+      return service;   
+   }
+
+   /**
+    * Set the sword service. 
+    * 
+    * @param serviceString The service. 
+    */
+   public void setService(String serviceString)
+   {
+      this.service = serviceString;
+   }
+
+   /**
     * Set the title. This will set the title type to ContentType.TEXT. 
     * 
     * @param title The title. 
@@ -467,6 +495,14 @@ public class Collection extends XmlElement implements SwordElementInterface
         		 ELEMENT_DC_TERMS_ABSTRACT, Namespaces.NS_DC_TERMS);
          dcAbstractElement.appendChild(dcAbstract);
          collection.appendChild(dcAbstractElement);
+      }
+
+      if (service != null)
+      {
+         Element serviceElement = new Element(Namespaces.PREFIX_SWORD + ":" + 
+        		 ELEMENT_SWORD_SERVICE, Namespaces.NS_SWORD);
+         serviceElement.appendChild(service);
+         collection.appendChild(serviceElement);
       }
 
       if (mediationSet)
@@ -601,6 +637,17 @@ public class Collection extends XmlElement implements SwordElementInterface
                catch( UnmarshallException ume )
                {
                   log.error("Error accessing the Dublin Core Abstract element.");
+               }
+            }
+            else if (isInstanceOf(element, ELEMENT_SWORD_SERVICE, Namespaces.NS_SWORD))
+            {
+               try
+               {
+                  service = unmarshallString(element);
+               }
+               catch( UnmarshallException ume )
+               {
+                  log.error("Error accessing the SWORD service element.");
                }
             }
             else if (isInstanceOf(element, ELEMENT_SWORD_MEDIATION, Namespaces.NS_SWORD))
