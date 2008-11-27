@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007, Aberystwyth University
+ * Copyright (c) 2008, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -110,65 +110,85 @@ public class DummyServer implements SWORDServer {
 		Service service = new Service("1.3", true, true);
 		document.setService(service);
 	    
-	    Workspace workspace = new Workspace();
-	    workspace.setTitle("Anonymous submitters workspace");
-	    Collection collection = new Collection(); 
-	    collection.setTitle("Anonymous submitters collection");
-	    collection.setLocation("http://localhost:8080/client/deposit/anon");
-	    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
-	    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit");
-	    collection.addAccepts("application/zip");
-	    collection.addAccepts("application/xml");
-	    collection.setAbstract("A collection that anonymous users can deposit into");
-	    collection.setTreatment("This is a dummy server");
-	    collection.setCollectionPolicy("No guarantee of service, or that deposits will be retained for any length of time.");
-	    workspace.addCollection(collection);
-	    collection = new Collection(); 
-	    collection.setTitle("Anonymous submitters other collection");
-	    collection.setLocation("http://localhost:8080/client/deposit/anonymous");
-	    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
-	    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit");
-	    collection.addAccepts("application/zip");
-	    collection.addAccepts("application/xml");
-	    collection.setAbstract("Another collection that anonymous users can deposit into");
-	    collection.setTreatment("This is a dummy server");
-	    collection.setCollectionPolicy("No guarantee of service, or that deposits will be retained for any length of time.");
-	    workspace.addCollection(collection);
-	    service.addWorkspace(workspace);
-	     
-	    if (sdr.getUsername() != null) {
-	    	workspace = new Workspace();
-		    workspace.setTitle("Authenticated workspace for " + username);
-		    collection = new Collection(); 
-		    collection.setTitle("Authenticated collection for " + username);
-		    collection.setLocation("http://localhost:8080/client/deposit/" + username);
+	    
+	    if (sdr.getLocation().contains("?nested=")) {
+	    	Workspace workspace = new Workspace();
+		    workspace.setTitle("Nested service document workspace");
+		    Collection collection = new Collection();
+		    collection.setTitle("Nested collection: " + sdr.getLocation().substring(sdr.getLocation().indexOf('?') + 1));
+		    collection.setLocation("http://localhost:8080/client/deposit/nested");
+		    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
+		    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit");
 		    collection.addAccepts("application/zip");
 		    collection.addAccepts("application/xml");
-		    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
-		    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit", 0.8f);
-		    collection.setAbstract("A collection that " + username + " can deposit into");
+		    collection.setAbstract("A nested collection that users can deposit into");
 		    collection.setTreatment("This is a dummy server");
 		    collection.setCollectionPolicy("No guarantee of service, or that deposits will be retained for any length of time.");
 		    workspace.addCollection(collection);
-		    collection = new Collection(); 
-		    collection.setTitle("Second authenticated collection for " + username);
-		    collection.setLocation("http://localhost:8080/sword/deposit/" + username + "-2");
+		    service.addWorkspace(workspace);
+	    } else {
+	    	Workspace workspace = new Workspace();
+		    workspace.setTitle("Anonymous submitters workspace");
+		    Collection collection = new Collection(); 
+		    collection.setTitle("Anonymous submitters collection");
+		    collection.setLocation("http://localhost:8080/client/deposit/anon");
+		    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
+		    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit");
 		    collection.addAccepts("application/zip");
 		    collection.addAccepts("application/xml");
-		    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit", 0.123f);
+		    collection.setAbstract("A collection that anonymous users can deposit into");
+		    collection.setTreatment("This is a dummy server");
+		    collection.setCollectionPolicy("No guarantee of service, or that deposits will be retained for any length of time.");
+		    collection.setService("http://localhost:8080/client/servicedocument?nested=anon");
+		    workspace.addCollection(collection);
+		    collection = new Collection(); 
+		    collection.setTitle("Anonymous submitters other collection");
+		    collection.setLocation("http://localhost:8080/client/deposit/anonymous");
 		    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
-		    collection.setAbstract("A collection that " + username + " can deposit into");
+		    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit");
+		    collection.addAccepts("application/zip");
+		    collection.addAccepts("application/xml");
+		    collection.setAbstract("Another collection that anonymous users can deposit into");
 		    collection.setTreatment("This is a dummy server");
 		    collection.setCollectionPolicy("No guarantee of service, or that deposits will be retained for any length of time.");
 		    workspace.addCollection(collection);
+		    service.addWorkspace(workspace);
+		    
+		    if (sdr.getUsername() != null) {
+		    	workspace = new Workspace();
+			    workspace.setTitle("Authenticated workspace for " + username);
+			    collection = new Collection(); 
+			    collection.setTitle("Authenticated collection for " + username);
+			    collection.setLocation("http://localhost:8080/client/deposit/" + username);
+			    collection.addAccepts("application/zip");
+			    collection.addAccepts("application/xml");
+			    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
+			    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit", 0.8f);
+			    collection.setAbstract("A collection that " + username + " can deposit into");
+			    collection.setTreatment("This is a dummy server");
+			    collection.setCollectionPolicy("No guarantee of service, or that deposits will be retained for any length of time.");
+			    collection.setService("http://localhost:8080/client/servicedocument?nested=authenticated");
+			    workspace.addCollection(collection);
+			    collection = new Collection(); 
+			    collection.setTitle("Second authenticated collection for " + username);
+			    collection.setLocation("http://localhost:8080/sword/deposit/" + username + "-2");
+			    collection.addAccepts("application/zip");
+			    collection.addAccepts("application/xml");
+			    collection.addAcceptPackaging("http://purl.org/net/sword-types/bagit", 0.123f);
+			    collection.addAcceptPackaging("http://purl.org/net/sword-types/METSDSpaceSIP");
+			    collection.setAbstract("A collection that " + username + " can deposit into");
+			    collection.setTreatment("This is a dummy server");
+			    collection.setCollectionPolicy("No guarantee of service, or that deposits will be retained for any length of time.");
+			    workspace.addCollection(collection);
+		    }
 		    service.addWorkspace(workspace);
 	    }
 	    
 	    String onBehalfOf = sdr.getOnBehalfOf();
 	    if ((onBehalfOf != null) && (!onBehalfOf.equals(""))) {
-		    workspace = new Workspace();
+		    Workspace workspace = new Workspace();
 		    workspace.setTitle("Personal workspace for " + onBehalfOf);
-		    collection = new Collection(); 
+		    Collection collection = new Collection(); 
 		    collection.setTitle("Personal collection for " + onBehalfOf);
 		    collection.setLocation("http://sword.aber.ac.uk/sword/deposit?user=" + onBehalfOf);
 		    collection.addAccepts("application/zip");
