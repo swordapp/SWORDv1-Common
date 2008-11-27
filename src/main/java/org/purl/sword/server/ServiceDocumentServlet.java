@@ -151,6 +151,9 @@ public class ServiceDocumentServlet extends HttpServlet {
 		// Set the IP address
 		sdr.setIPAddress(request.getRemoteAddr());
 
+		// Set the deposit location
+		sdr.setLocation(getUrl(request));
+
 		// Get the ServiceDocument
 		try {
 			ServiceDocument sd = myRepository.doServiceDocument(sdr);
@@ -225,5 +228,20 @@ public class ServiceDocumentServlet extends HttpServlet {
 		} else {
 			return false;
 		}
+	}
+	
+	/**
+	 * Utility method to construct the URL called for this Servlet
+	 * 
+	 * @param req The request object
+	 * @return The URL
+	 */
+	private static String getUrl(HttpServletRequest req) {
+		String reqUrl = req.getRequestURL().toString();
+		String queryString = req.getQueryString();
+		if (queryString != null) {
+			reqUrl += "?" + queryString;
+		}
+		return reqUrl;
 	}
 }

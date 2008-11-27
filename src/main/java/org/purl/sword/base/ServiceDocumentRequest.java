@@ -55,6 +55,10 @@ public class ServiceDocumentRequest
    
    /** The IP Address */
    private String  IPAddress;
+   
+   /** The location */
+   private String location;
+   
 
    /**
     * Retrieve the username. 
@@ -127,4 +131,23 @@ public class ServiceDocumentRequest
    public void setIPAddress(String IPAddress) {
 	   this.IPAddress = IPAddress;
    }
+   
+   /**
+    * Get the location of the service document
+    * 
+    * @return the location of the service document
+    */
+   public String getLocation() {
+	   return location;
+   }
+   
+   /**
+    * Set the location of the service document
+    *
+    * @param String the location
+    */
+   public void setLocation(String location) {
+	   this.location = location;
+   }
+
 }
