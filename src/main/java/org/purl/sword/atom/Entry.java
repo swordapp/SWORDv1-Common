@@ -77,11 +77,16 @@ public class Entry extends XmlElement implements SwordElementInterface
     * Local name for the atom updated element. 
     */
    public static final String ELEMENT_UPDATED = "updated";
-   
+
    /**
     * Local name for the atom category element. 
     */
    public static final String ELEMENT_CATEGORY = "category";
+
+   /**
+    * Local name for the atom generator element. 
+    */
+   public static final String ELEMENT_GENERATOR = "generator";
    
    /**
     * A list of authors associated with this entry. There can be 0 
@@ -98,6 +103,11 @@ public class Entry extends XmlElement implements SwordElementInterface
     * A single content element for the Entry. 
     */
    private Content content; 
+
+   /**
+    * A single content element for the Entry. 
+    */
+   private Generator generator; 
 
    /**
     * A list of contributors associated with this entry. There can be 0 or
@@ -215,6 +225,11 @@ public class Entry extends XmlElement implements SwordElementInterface
 	         entry.appendChild(content.marshall());
 	      }
 
+	      if (generator != null)
+	      {
+	         entry.appendChild(generator.marshall());
+	      }
+
 	      for (Author contributor : contributors)
 	      {
 	         entry.appendChild(contributor.marshall());
@@ -326,6 +341,11 @@ public class Entry extends XmlElement implements SwordElementInterface
             {
                content = new Content();
                content.unmarshall(element); 
+            }
+            else if (isInstanceOf(element, Generator.ELEMENT_NAME, Namespaces.NS_ATOM))
+            {
+               generator = new Generator();
+               generator.unmarshall(element); 
             }
             else if (isInstanceOf(element, Contributor.ELEMENT_NAME, Namespaces.NS_ATOM))
             {
@@ -473,6 +493,25 @@ public class Entry extends XmlElement implements SwordElementInterface
    public void setContent(Content content) 
    {
       this.content = content;
+   } 
+
+   /**
+    * Get the generator for this Entry. 
+    * 
+    * @return The generator element. 
+    */
+   public Generator getGenerator() 
+   {
+      return generator;
+   }
+
+   /**
+    * Set the generator for this Entry. 
+    * @param generator
+    */
+   public void setGenerator(Generator generator) 
+   {
+      this.generator = generator;
    } 
 
    /**

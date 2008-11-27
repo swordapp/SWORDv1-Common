@@ -110,7 +110,6 @@ public class DummyServer implements SWORDServer {
 		Service service = new Service("1.3", true, true);
 		document.setService(service);
 	    
-	    
 	    if (sdr.getLocation().contains("?nested=")) {
 	    	Workspace workspace = new Workspace();
 		    workspace.setTitle("Nested service document workspace");
@@ -297,11 +296,11 @@ public class DummyServer implements SWORDServer {
 			se.addContributor(c);
 		}
 		
-		Source source = new Source();
 		Generator generator = new Generator();
-		generator.setContent("org.purl.sword.server.DummyServer");
-		source.setGenerator(generator);
-		se.setSource(source);
+		generator.setContent("Stuart's Dummy SWORD Server");
+		generator.setUri("http://dummy-sword-server.example.com/");
+		generator.setVersion("1.3");
+		se.setGenerator(generator);
 		
 		Content content = new Content();
 		try {
