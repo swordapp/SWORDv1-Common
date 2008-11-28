@@ -389,7 +389,8 @@ public class Client implements SWORDClient {
 			String userAgent = message.getUserAgent();
 			if (containsValue(userAgent)) {
 				httppost.addRequestHeader(new Header(
-						HttpHeaders.USER_AGENT, onBehalfOf));
+						HttpHeaders.USER_AGENT, userAgent));
+				System.out.println("USERAGENT = " + userAgent);
 			}
 
 			stream = new FileInputStream(message.getFilepath());

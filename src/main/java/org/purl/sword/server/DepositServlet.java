@@ -305,6 +305,11 @@ public class DepositServlet extends HttpServlet {
 
 				// Get the DepositResponse
 				DepositResponse dr = myRepository.doDeposit(d);
+				
+				// Echo back the user agent
+				if (request.getHeader(HttpHeaders.USER_AGENT.toString()) != null) {
+					dr.getEntry().setUserAgent(request.getHeader(HttpHeaders.USER_AGENT.toString()));
+				}
 
 				// Print out the Deposit Response
 				response.setStatus(dr.getHttpResponse());
