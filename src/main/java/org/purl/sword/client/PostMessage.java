@@ -134,6 +134,11 @@ public class PostMessage
     * The Slug header value. 
     */
    private String slug; 
+   
+   /**
+    * The user agent name
+    */
+   private String userAgent;
 
    /**
     * Get the filepath. 
@@ -343,4 +348,20 @@ public class PostMessage
    {
       return this.slug; 
    }
+
+	/**
+	 * @return the userAgent
+	 */
+	public String getUserAgent() {
+		return userAgent;
+	}
+	
+	/**
+	 * Set the user agent
+	 * 
+	 * @param userAgent the userAgent to set
+	 */
+	public void setUserAgent(String userAgent) {
+		this.userAgent = userAgent;
+	}
 }

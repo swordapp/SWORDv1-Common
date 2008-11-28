@@ -43,6 +43,7 @@ import javax.servlet.http.HttpServletResponse;
  * the SWORD protocol. 
  * 
  * @author Neil Taylor
+ * @author Stuart Lewis
  *
  */
 public interface HttpHeaders
@@ -81,6 +82,11 @@ public interface HttpHeaders
      * The HTTP Header that specifies the error code information. 
      */
     public static final String X_ERROR_CODE = "X-Error-Code";
+    
+    /**
+     * The user agent.
+     */
+    public static final String USER_AGENT = "User-Agent";
   
     /**
      * The Slug header.
