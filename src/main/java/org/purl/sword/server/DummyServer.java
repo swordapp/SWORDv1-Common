@@ -221,7 +221,6 @@ public class DummyServer implements SWORDServer {
 		if (((deposit.getOnBehalfOf() != null) && (!deposit.getOnBehalfOf().equals(""))) && 
 	        (!deposit.getLocation().contains("deposit?user="))) {
 			throw new SWORDErrorException(ErrorCodes.MEDIATION_NOT_ALLOWED,
-					                      HttpServletResponse.SC_PRECONDITION_FAILED,
 					                      "Mediated deposit not allowed to this collection");
 		}
 		

@@ -61,12 +61,19 @@ public class SWORDErrorException extends Exception
      * @param source  The original exception that lead to this exception. This
      *                can be <code>null</code>.
      */
-    public SWORDErrorException(String errorURI, int status, String description)
+    public SWORDErrorException(String errorURI, String description)
     {  
        super(description); 
        this.errorURI = errorURI;
-       this.status = status;
        this.description = description;
+       
+       if (errorURI.equals(ErrorCodes.ERROR_BAD_REQUEST)) { status = 400; }
+       else if (errorURI.equals(ErrorCodes.ERROR_CHECKSUM_MISMATCH)) { status = 412; }
+       else if (errorURI.equals(ErrorCodes.ERROR_CONTENT)) { status = 415; }
+       else if (errorURI.equals(ErrorCodes.MAX_UPLOAD_SIZE_EXCEEDED)) { status = 413; }
+       else if (errorURI.equals(ErrorCodes.MEDIATION_NOT_ALLOWED)) { status = 412; }
+       else if (errorURI.equals(ErrorCodes.TARGET_OWNER_UKNOWN)) { status = 400; }
+       else { status = 400; }
     }
 
 
@@ -82,6 +89,15 @@ public class SWORDErrorException extends Exception
 	 */
 	public int getStatus() {
 		return status;
+	}
+	
+	/**
+	 * Set the status
+	 * 
+	 * @param status The HTTP status code
+	 */
+	public void setStatus(int status) {
+		this.status = status;
 	}
 
 	/**
