@@ -79,6 +79,11 @@ public class SWORDEntry extends Entry
     * Used to determine if the noOp value has been set.
     */
    protected boolean noOpSet; 
+   
+   /**
+    * The user agent
+    */
+   protected String userAgent;
 
    /**
     * The logger.
@@ -182,6 +187,26 @@ public class SWORDEntry extends Entry
    }
    
    /**
+    * Get the user agent
+    * 
+    * @return the user agent
+    */
+   public String getUserAgent() 
+   {
+	   return userAgent;
+   }
+   
+   /**
+    * Set the user agent
+    * 
+    * @param userAgent the user agent
+    */
+   public void setUserAgent(String userAgent)
+   {
+	   this.userAgent = userAgent;
+   }
+   
+   /**
     * Overrides the marshall method in the parent Entry. This will 
     * call the parent marshall method and then add the additional 
     * elements that have been added in this subclass.  
@@ -227,6 +252,14 @@ public class SWORDEntry extends Entry
 	         noOpElement.appendChild(Boolean.toString(noOp));
 	         entry.appendChild(noOpElement);
 	      }
+	      
+	      if (userAgent != null)
+	      {
+	         Element userAgentElement = new Element(
+	        		 Namespaces.PREFIX_SWORD + ":userAgent", Namespaces.NS_SWORD);
+	         userAgentElement.appendChild(userAgent);
+	         entry.appendChild(userAgentElement);
+	      }
    }
 
    /**
@@ -254,7 +287,7 @@ public class SWORDEntry extends Entry
       {
     	  element = elements.get(i);
 
-    	  if( isInstanceOf(element, "treatment", Namespaces.NS_SWORD ))
+    	  if (isInstanceOf(element, "treatment", Namespaces.NS_SWORD))
     	  {
     		  try
     		  {
@@ -265,7 +298,7 @@ public class SWORDEntry extends Entry
     			  log.error("Error accessing the content for the treatment element");
     		  }
     	  }
-    	  else if( isInstanceOf(element, "formatNamespace", Namespaces.NS_SWORD ))
+    	  else if (isInstanceOf(element, "formatNamespace", Namespaces.NS_SWORD))
     	  {
     		  try
     		  {
@@ -276,7 +309,7 @@ public class SWORDEntry extends Entry
     			  log.error("Error accessing the content for the formatNamespace element");
     		  }
     	  }
-    	  else if( isInstanceOf(element, "noOp", Namespaces.NS_SWORD ))
+    	  else if (isInstanceOf(element, "noOp", Namespaces.NS_SWORD))
     	  {
     		  try
     		  {
@@ -287,7 +320,7 @@ public class SWORDEntry extends Entry
     			  log.error("Error accessing the boolean value for noOp");
     		  }
     	  }
-    	  else if( isInstanceOf(element, "verboseDescription", Namespaces.NS_SWORD ))
+    	  else if (isInstanceOf(element, "verboseDescription", Namespaces.NS_SWORD))
     	  {
     		  try
     		  {
@@ -296,6 +329,17 @@ public class SWORDEntry extends Entry
     		  catch( UnmarshallException ume ) 
     		  {
     			  log.error("Error accessing the content for the verboseDescription element");
+    		  }
+    	  }
+    	  else if (isInstanceOf(element, "userAgent", Namespaces.NS_SWORD))
+    	  {
+    		  try
+    		  {
+    			  userAgent = unmarshallString(element);
+    		  }
+    		  catch( UnmarshallException ume ) 
+    		  {
+    			  log.error("Error accessing the content for the userAgent element");
     		  }
     	  }
       } // for
