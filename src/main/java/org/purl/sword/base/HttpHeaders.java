@@ -64,9 +64,9 @@ public interface HttpHeaders
 	public static final String X_ON_BEHALF_OF = "X-On-Behalf-Of";
   
     /**
-     * The HTTP Header label that specifies the Format Namespace information.
+     * The HTTP Header label that specifies the Packaging information.
      */
-    public static final String X_FORMAT_NAMESPACE = "X-Format-Namespace";
+    public static final String X_PACKAGING = "X-Packaging";
   
     /**
      * The HTTP Header label that specifies the desired Verbose status. 

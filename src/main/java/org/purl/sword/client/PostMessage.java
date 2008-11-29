@@ -119,9 +119,9 @@ public class PostMessage
    private boolean verbose; 
 
    /**
-    * The format namespace for the deposit. 
+    * The packaging format for the deposit. 
     */
-   private String formatNamespace;
+   private String packaging;
 
    /**
     * True if the deposit should simualte a checksum error. The client should check this 
@@ -290,23 +290,23 @@ public class PostMessage
    }
 
    /**
-    * Get the format namespace. 
+    * Get the packaging format. 
     * 
     * @return The value.
     */
-   public String getFormatNamespace() 
+   public String getPackaging() 
    {
-      return formatNamespace;
+      return packaging;
    }
 
    /**
-    * Set the format namespace. 
+    * Set the packaging format. 
     * 
-    * @param formatNamespace The format namespace. 
+    * @param formatNamespace The packaging format. 
     */
-   public void setFormatNamespace(String formatNamespace) 
+   public void setFormatNamespace(String packaging) 
    {
-      this.formatNamespace = formatNamespace;
+      this.packaging = packaging;
    }
 
    /**

@@ -84,6 +84,11 @@ public class SWORDEntry extends Entry
     * The user agent
     */
    protected String userAgent;
+   
+   /**
+    * The packaging format
+    */
+   protected String packaging;
 
    /**
     * The logger.
@@ -207,6 +212,26 @@ public class SWORDEntry extends Entry
    }
    
    /**
+    * Get the packaging format
+    * 
+    * @return the packaging format
+    */
+   public String getPackaging()
+   {
+	   return packaging;
+   }
+   
+   /**
+    * Set the packaging format
+    * 
+    * @param packaging the packaging format
+    */
+   public void setPackaging(String packaging)
+   {
+	   this.packaging = packaging;
+   }
+   
+   /**
     * Overrides the marshall method in the parent Entry. This will 
     * call the parent marshall method and then add the additional 
     * elements that have been added in this subclass.  
@@ -259,6 +284,14 @@ public class SWORDEntry extends Entry
 	        		 Namespaces.PREFIX_SWORD + ":userAgent", Namespaces.NS_SWORD);
 	         userAgentElement.appendChild(userAgent);
 	         entry.appendChild(userAgentElement);
+	      }
+	      
+	      if (packaging != null)
+	      {
+	         Element packagingElement = new Element(
+	        		 Namespaces.PREFIX_SWORD + ":packaging", Namespaces.NS_SWORD);
+	         packagingElement.appendChild(packaging);
+	         entry.appendChild(packagingElement);
 	      }
    }
 
@@ -336,6 +369,17 @@ public class SWORDEntry extends Entry
     		  try
     		  {
     			  userAgent = unmarshallString(element);
+    		  }
+    		  catch( UnmarshallException ume ) 
+    		  {
+    			  log.error("Error accessing the content for the userAgent element");
+    		  }
+    	  }
+    	  else if (isInstanceOf(element, "packaging", Namespaces.NS_SWORD))
+    	  {
+    		  try
+    		  {
+    			  packaging = unmarshallString(element);
     		  }
     		  catch( UnmarshallException ume ) 
     		  {

@@ -243,7 +243,7 @@ public class DepositServlet extends HttpServlet {
 			String md5 = request.getHeader("Content-MD5");
 			log.debug("Received file checksum header: " + md5);
 			if ((md5 != null) && (!md5.equals(receivedMD5))) {
-				//TODO put an error doc in here
+				// Return an error document
 				this.makeErrorDocument(ErrorCodes.ERROR_CHECKSUM_MISMATCH, 
 						               HttpServletResponse.SC_PRECONDITION_FAILED,
 						               "The received MD5 checksum for the deposited file did not match the checksum sent by the deposit client",
@@ -259,8 +259,8 @@ public class DepositServlet extends HttpServlet {
 				// Set the X-On-Behalf-Of header
 				d.setOnBehalfOf(request.getHeader(HttpHeaders.X_ON_BEHALF_OF.toString()));
 
-				// Set the X-Format-Namespace header
-				d.setFormatNamespace(request.getHeader(HttpHeaders.X_FORMAT_NAMESPACE));
+				// Set the X-Packaging header
+				d.setPackaging(request.getHeader(HttpHeaders.X_PACKAGING));
 
 				// Set the X-No-Op header
 				String noop = request.getHeader(HttpHeaders.X_NO_OP);
@@ -285,8 +285,7 @@ public class DepositServlet extends HttpServlet {
 				}
 
 				// Set the content disposition
-				d.setContentDisposition(request
-						.getHeader(HttpHeaders.CONTENT_DISPOSITION));
+				d.setContentDisposition(request.getHeader(HttpHeaders.CONTENT_DISPOSITION));
 
 				// Set the IP address
 				d.setIPAddress(request.getRemoteAddr());
@@ -310,7 +309,12 @@ public class DepositServlet extends HttpServlet {
 				if (request.getHeader(HttpHeaders.USER_AGENT.toString()) != null) {
 					dr.getEntry().setUserAgent(request.getHeader(HttpHeaders.USER_AGENT.toString()));
 				}
-
+				
+				// Echo back the packaging format
+				if (request.getHeader(HttpHeaders.X_PACKAGING.toString()) != null) {
+					dr.getEntry().setPackaging(request.getHeader(HttpHeaders.X_PACKAGING.toString()));
+				}
+				
 				// Print out the Deposit Response
 				response.setStatus(dr.getHttpResponse());
 				response.setContentType("application/atom+xml; charset=UTF-8");

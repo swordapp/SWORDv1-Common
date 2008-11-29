@@ -80,8 +80,8 @@ public class Deposit
    /** True if this is a no-operation command */
    private boolean noOp;
    
-   /** The format namespace */
-   private String formatNamespace;
+   /** The packaging format */
+   private String packaging;
    
    /** Deposit ID */
    private String depositID;
@@ -192,15 +192,15 @@ public class Deposit
    /**
     * @return the formatNamespace
     */
-   public String getFormatNamespace() {
-      return formatNamespace;
+   public String getPackaging() {
+      return packaging;
    }
 
    /**
     * @param formatNamespace the formatNamespace to set
     */
-   public void setFormatNamespace(String formatNamespace) {
-      this.formatNamespace = formatNamespace;
+   public void setPackaging(String packaging) {
+      this.packaging = packaging;
    }
 
    /**

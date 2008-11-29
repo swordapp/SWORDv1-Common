@@ -374,10 +374,10 @@ public class Client implements SWORDClient {
 			httppost.addRequestHeader(new Header(HttpHeaders.X_VERBOSE, Boolean
 					.toString(message.isVerbose())));
 
-			String formatNamespace = message.getFormatNamespace();
-			if (formatNamespace != null && formatNamespace.length() > 0) {
+			String packaging = message.getPackaging();
+			if (packaging != null && packaging.length() > 0) {
 				httppost.addRequestHeader(new Header(
-						HttpHeaders.X_FORMAT_NAMESPACE, formatNamespace));
+						HttpHeaders.X_PACKAGING, packaging));
 			}
 
 			String onBehalfOf = message.getOnBehalfOf();
