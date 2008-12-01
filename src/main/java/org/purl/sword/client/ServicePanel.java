@@ -692,7 +692,7 @@ implements TreeSelectionListener
          addTableRow(buffer, "NoOp", entry.isNoOp());
 
          // process formatNamespace 
-         addTableRow(buffer, "Format Namespace", entry.getFormatNamespace());
+         addTableRow(buffer, "Packaging", entry.getPackaging());
 
 
          buffer.append("</table>");

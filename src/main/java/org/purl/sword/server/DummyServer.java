@@ -319,8 +319,6 @@ public class DummyServer implements SWORDServer {
 		
 		se.setNoOp(deposit.isNoOp());
 		
-		se.setFormatNamespace("http://www.standards-body.com/standardXYZ/v1/");
-		
 		dr.setEntry(se);
 		
 		return dr;

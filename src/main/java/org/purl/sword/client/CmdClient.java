@@ -444,7 +444,7 @@ public class CmdClient implements ClientType
 			System.out.println("Published: " + entry.getPublished());
 			System.out.println("Verbose Description: " + entry.getVerboseDescription());
 			System.out.println("Treatment: " + entry.getTreatment());
-			System.out.println("Format Namespace: " + entry.getFormatNamespace());
+			System.out.println("Packaging: " + entry.getPackaging());
 
 			if( entry.isNoOpSet() )
 			{

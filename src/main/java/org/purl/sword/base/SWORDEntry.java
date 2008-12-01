@@ -71,11 +71,6 @@ public class SWORDEntry extends Entry
    protected String treatment;
    
    /**
-    * Used to record the format namespace. 
-    */
-   protected String formatNamespace; 
-
-   /**
     * Used to determine if the noOp value has been set.
     */
    protected boolean noOpSet; 
@@ -254,14 +249,6 @@ public class SWORDEntry extends Entry
 	         entry.appendChild(treatmentElement); 
 	      }
 	      
-	      if (formatNamespace != null)
-	      {
-	         Element formatNamespaceElement = new Element(
-	        		 Namespaces.PREFIX_SWORD + ":formatNamespace", Namespaces.NS_SWORD);
-	         formatNamespaceElement.appendChild(formatNamespace);
-	         entry.appendChild(formatNamespaceElement);
-	      }
-	      
 	      if (verboseDescription != null)
 	      {
 	         Element verboseDescriptionElement = new Element(
@@ -331,17 +318,6 @@ public class SWORDEntry extends Entry
     			  log.error("Error accessing the content for the treatment element");
     		  }
     	  }
-    	  else if (isInstanceOf(element, "formatNamespace", Namespaces.NS_SWORD))
-    	  {
-    		  try
-    		  {
-    			  formatNamespace = unmarshallString(element);
-    		  }
-    		  catch( UnmarshallException ume )
-    		  {
-    			  log.error("Error accessing the content for the formatNamespace element");
-    		  }
-    	  }
     	  else if (isInstanceOf(element, "noOp", Namespaces.NS_SWORD))
     	  {
     		  try
@@ -387,26 +363,5 @@ public class SWORDEntry extends Entry
     		  }
     	  }
       } // for
-   }
-
-   /**
-    * Get the format namespace. 
-    * 
-    * @return The format namespace. 
-    */
-   public String getFormatNamespace()
-   {
-      return formatNamespace;
-   }
-
-   /**
-    * Set the format namespace. 
-    * 
-    * @param formatNamespace The format namespace. 
-    */
-   public void setFormatNamespace(String formatNamespace)
-   {
-      this.formatNamespace = formatNamespace;
-   }
-   
+   }   
 }
