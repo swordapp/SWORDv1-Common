@@ -44,15 +44,12 @@ import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.purl.sword.atom.Author;
 import org.purl.sword.atom.Content;
 import org.purl.sword.atom.Contributor;
 import org.purl.sword.atom.Generator;
 import org.purl.sword.atom.InvalidMediaTypeException;
 import org.purl.sword.atom.Link;
-import org.purl.sword.atom.Source;
 import org.purl.sword.atom.Summary;
 import org.purl.sword.atom.Title;
 import org.purl.sword.base.Collection;
