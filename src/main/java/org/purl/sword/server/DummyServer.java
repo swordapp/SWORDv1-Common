@@ -245,7 +245,7 @@ public class DummyServer implements SWORDServer {
 		if (!deposit.isNoOp()) {
 			counter++;
 		}
-		DepositResponse dr = new DepositResponse(Deposit.ACCEPTED);
+		DepositResponse dr = new DepositResponse(Deposit.CREATED);
 		SWORDEntry se = new SWORDEntry();
 		
 		Title t = new Title();
@@ -319,8 +319,6 @@ public class DummyServer implements SWORDServer {
 		se.setNoOp(deposit.isNoOp());
 		
 		dr.setEntry(se);
-		
-		dr.setHttpResponse(200);
 		
 		return dr;
 	}
