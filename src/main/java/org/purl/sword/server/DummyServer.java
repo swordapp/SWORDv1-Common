@@ -320,6 +320,8 @@ public class DummyServer implements SWORDServer {
 		
 		dr.setEntry(se);
 		
+		dr.setHttpResponse(200);
+		
 		return dr;
 	}
 }
