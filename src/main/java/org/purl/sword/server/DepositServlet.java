@@ -232,6 +232,7 @@ public class DepositServlet extends HttpServlet {
 		    			               "The uploaded file exceeded the maximum file size this server will accept (the file is " + 
 		    			               fLength + "kB but the server will only accept files as large as " + 
 		    			               maxUploadSize + "kB)",
+		    			               request,
 		    			               response);
 		    	return;
 		    }
@@ -247,6 +248,7 @@ public class DepositServlet extends HttpServlet {
 				this.makeErrorDocument(ErrorCodes.ERROR_CHECKSUM_MISMATCH, 
 						               HttpServletResponse.SC_PRECONDITION_FAILED,
 						               "The received MD5 checksum for the deposited file did not match the checksum sent by the deposit client",
+						               request,
 						               response);
 				log.debug("Bad MD5 for file. Aborting with appropriate error message");
 				return;
@@ -335,6 +337,7 @@ public class DepositServlet extends HttpServlet {
 			this.makeErrorDocument(see.getErrorURI(), 
 		               			   see.getStatus(),
 		               			   see.getDescription(),
+		                           request,
 		                           response);
 			return;
 		} catch (SWORDException se) {
@@ -365,11 +368,12 @@ public class DepositServlet extends HttpServlet {
 	 * @param errorURI The error URI to pass
 	 * @param status The HTTP status to return
 	 * @param summary The textual description to give the user
+	 * @param request The HttpServletRequest object
 	 * @param response The HttpServletResponse to send the error document to
 	 * @throws IOException 
 	 */
-	private void makeErrorDocument(String errorURI, int status,
-			                       String summary, HttpServletResponse response) throws IOException
+	private void makeErrorDocument(String errorURI, int status, String summary, 
+			                       HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		SWORDErrorDocument sed = new SWORDErrorDocument(errorURI);
 		Title title = new Title();
@@ -383,6 +387,9 @@ public class DepositServlet extends HttpServlet {
 		Summary sum = new Summary();
 		sum.setContent(summary);
 		sed.setSummary(sum);
+		if (request.getHeader(HttpHeaders.USER_AGENT.toString()) != null) {
+			sed.setUserAgent(request.getHeader(HttpHeaders.USER_AGENT.toString()));
+		}
 		response.setStatus(status);
     	response.setContentType("application/atom+xml; charset=UTF-8");
 		PrintWriter out = response.getWriter();
