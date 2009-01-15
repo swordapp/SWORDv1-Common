@@ -74,10 +74,16 @@ public interface HttpHeaders
     public static final String X_VERBOSE = "X-Verbose";
   
     /**
-     * The HTTP Header label that specifies the desired NoOp status.  
+     * The HTTP Header label that specifies the desired NoOp status.
      */
     public static final String X_NO_OP = "X-No-Op";
-  
+
+    /**
+     * An HTTP Header label that the server should not epect, and thus
+     * created a corrupt header.
+     */
+    public static final String X_CORRUPT = "X-wibble";
+
     /**
      * The HTTP Header that specifies the error code information. 
      */

@@ -47,7 +47,17 @@ public class ClientConstants
     * Current software version. 
     */
    public static final String CLIENT_VERSION = "1.0";
-   
+
+   /**
+    * the name of this application
+    */
+   public static final String SERVICE_NAME = "CASIS Test Client";
+
+   /**
+    * the name of this application
+    */
+   public static final String NOT_DEFINED_TEXT = "Not defined";
+
    /**
     * The logging property file. 
     */

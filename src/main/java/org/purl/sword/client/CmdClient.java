@@ -42,6 +42,8 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.Hashtable;
+import java.util.Enumeration;
 
 import org.apache.log4j.Logger;
 import org.purl.sword.atom.Author;
@@ -58,6 +60,7 @@ import org.purl.sword.base.DepositResponse;
 import org.purl.sword.base.SWORDEntry;
 import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.Workspace;
+import org.purl.sword.base.QualityValue;
 
 /**
  * Example implementation of a command line client. This can send out service 
@@ -164,6 +167,8 @@ public class CmdClient implements ClientType
 			System.out.println("Supports NoOp? " + document.getService().isNoOp());
 			System.out.println("Supports Verbose? "
 					+ document.getService().isVerbose());
+			System.out.println("Max Upload File Size "
+					+ document.getService().getMaxUploadSize() +" kB");
 
 			Iterator<Workspace> workspaces = document.getService().getWorkspaces();
 			for (; workspaces.hasNext();)
@@ -206,6 +211,16 @@ public class CmdClient implements ClientType
 							System.out.println("Accepts: " + s);
 						}
 					}
+                     Hashtable acceptsPackaging = collection.getAcceptPackaging();
+                     String acceptPackagingList = "";
+                     for(Enumeration e = acceptsPackaging.keys();e.hasMoreElements();)
+                     {
+                        String key = (String) e.nextElement();
+                        QualityValue packagingValue = (QualityValue)acceptsPackaging.get(key);
+                        acceptPackagingList +=  key + " ("+packagingValue+"), ";
+                     }
+                     System.out.println("Accepts Packaging: "+ acceptPackagingList);
+
 				}
 				System.out.println("+ End of Collections ---");
 			}
@@ -251,7 +266,7 @@ public class CmdClient implements ClientType
 		message.setFormatNamespace(options.getFormatNamespace());
 		message.setOnBehalfOf(options.getOnBehalfOf());
 		message.setChecksumError(options.getChecksumError());
-		message.setSlug(options.getSlug());
+        message.setUserAgent(ClientConstants.SERVICE_NAME);
 		
 		processPost(message);
 
@@ -313,7 +328,7 @@ public class CmdClient implements ClientType
 		   message.setFormatNamespace(options.getFormatNamespace());
 		   message.setOnBehalfOf(destination.getOnBehalfOf());
 		   message.setChecksumError(options.getChecksumError());
-		   message.setSlug(options.getSlug());
+           message.setUserAgent(ClientConstants.SERVICE_NAME);
 			
 		   processPost(message);
 		}

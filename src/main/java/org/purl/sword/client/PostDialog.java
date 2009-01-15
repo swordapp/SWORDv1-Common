@@ -160,10 +160,15 @@ implements ActionListener, ChangeListener
    private JCheckBox useMD5;
    
    /**
-    * The corruptMD5 checkbox. 
+    * The corruptMD5 checkbox.
     */
    private JCheckBox corruptMD5;
-   
+
+   /**
+    * The corruptRequest checkbox.
+    */
+   private JCheckBox corruptRequest;
+
    /**
     * The useNoOp checkbox. 
     */
@@ -183,11 +188,6 @@ implements ActionListener, ChangeListener
     * The list of post destinations. 
     */
    private JList list;
-   
-   /**
-    * The Slug Header that is to be sent to the server. 
-    */
-   private SWORDComboBox slugHeader; 
    
    /**
     * The parent frame for the dialog that is displayed.
@@ -263,7 +263,6 @@ implements ActionListener, ChangeListener
       String type = "application/zip";
       fileType.addItem(type);
       fileType.setSelectedItem(type);
-      slugHeader = new SWORDComboBox(); 
       
       // controls that will be used in the second dialog
       postLocation = new SWORDComboBox();
@@ -275,6 +274,7 @@ implements ActionListener, ChangeListener
       useMD5 = new JCheckBox();
       useMD5.addChangeListener(this);
       corruptMD5 = new JCheckBox();
+      corruptRequest = new JCheckBox();
       useNoOp = new JCheckBox();
       useVerbose = new JCheckBox();
       formatNamespace = new SWORDComboBox();
@@ -283,10 +283,13 @@ implements ActionListener, ChangeListener
       JLabel fileTypeLabel = new JLabel("File Type:", JLabel.TRAILING);
       JLabel useMD5Label = new JLabel("Use MD5:", JLabel.TRAILING);
       JLabel corruptMD5Label = new JLabel("Corrupt MD5:", JLabel.TRAILING);
+      JLabel corruptRequestLabel = new JLabel("Corrupt Request:", JLabel.TRAILING);
+      //JLabel corruptMD5Label = new JLabel("Corrupt MD5:", JLabel.TRAILING);
       JLabel useNoOpLabel = new JLabel("Use noOp:", JLabel.TRAILING);
       JLabel useVerboseLabel = new JLabel("Use verbose:", JLabel.TRAILING);
-      JLabel formatNamespaceLabel = new JLabel("Format Namespace:", JLabel.TRAILING);
-      JLabel slugHeaderLabel = new JLabel("Slug Header:", JLabel.TRAILING);
+      JLabel formatNamespaceLabel = new JLabel("X-Packaging:", JLabel.TRAILING);
+      JLabel userAgentLabel = new JLabel("User Agent:", JLabel.TRAILING);
+      JLabel userAgentNameLabel = new JLabel(ClientConstants.SERVICE_NAME, JLabel.LEADING);
       
       SWORDFormPanel panel = new SWORDFormPanel(); 
       panel.addFirstRow(new JLabel("Please enter the details for the post operation"));
@@ -298,10 +301,11 @@ implements ActionListener, ChangeListener
       panel.addRow(fileTypeLabel, fileType);
       panel.addRow(useMD5Label, useMD5);
       panel.addRow(corruptMD5Label, corruptMD5);
+      panel.addRow(corruptRequestLabel, corruptRequest);
       panel.addRow(useNoOpLabel, useNoOp);
       panel.addRow(useVerboseLabel, useVerbose);
       panel.addRow(formatNamespaceLabel, formatNamespace);
-      panel.addRow(slugHeaderLabel, slugHeader);
+      panel.addRow(userAgentLabel, userAgentNameLabel);
       
       return panel; 
    }
@@ -575,22 +579,22 @@ implements ActionListener, ChangeListener
    }
    
    /**
-    * Get the slug name. 
-    * @return The name. 
-    */
-   public String getSlug()
-   {
-	   return slugHeader.getText();
-   }
-   
-   /**
-    * Determine if the MD5 hash should be corrupted. 
+    * Determine if the MD5 hash should be corrupted.
     * @return True if the corrupt MD5 checkbox is selected. The MD5 checkbox
-    * must also be selected. 
+    * must also be selected.
     */
    public boolean corruptMD5()
    {
 	   return (corruptMD5.isEnabled() && corruptMD5.isSelected());
+   }
+
+   /**
+    * Determine if the POST request should be corrupted.
+    * @return True if the corrupt request checkbox is selected.
+    */
+   public boolean corruptRequest()
+   {
+	   return (corruptRequest.isSelected());
    }
 
    /**

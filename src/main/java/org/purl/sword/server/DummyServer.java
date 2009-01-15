@@ -65,6 +65,8 @@ import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.ServiceDocumentRequest;
 import org.purl.sword.base.Workspace;
 
+import org.apache.log4j.Logger;
+
 /**
  * A 'dummy server' which acts as dumb repository which implements the
  * SWORD ServerInterface. It accepts any type of deposit, and tries to
@@ -81,6 +83,8 @@ public class DummyServer implements SWORDServer {
 	/** A counter to count submissions, so the response to a deposit can increment */
 	private static int counter = 0;
 
+    /** Logger */
+	private static Logger log = Logger.getLogger(ServiceDocumentServlet.class);
 
 	/**
 	 * Provides a dumb but plausible service document - it contains
@@ -107,8 +111,10 @@ public class DummyServer implements SWORDServer {
 		ServiceDocument document = new ServiceDocument();
 		Service service = new Service("1.3", true, true);
 		document.setService(service);
+        log.debug("sdr.getLocation() is: " + sdr.getLocation());
 		String location = sdr.getLocation().substring(0, sdr.getLocation().length() - 16);
-		
+		log.debug("location is: " + location);
+        
 	    if (sdr.getLocation().contains("?nested=")) {
 	    	Workspace workspace = new Workspace();
 		    workspace.setTitle("Nested service document workspace");
@@ -304,7 +310,7 @@ public class DummyServer implements SWORDServer {
 		try {
 			content.setType("application/zip");
 		} catch (InvalidMediaTypeException e1) {
-			// TODO Auto-generated catch block
+		// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		content.setSource("http://www.myrepository.ac.uk/sdl/uploads/upload-" + counter + ".zip");

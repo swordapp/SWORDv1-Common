@@ -64,12 +64,17 @@ public class SWORDEntry extends Entry
    protected String verboseDescription; 
    
    /**
-    * Used for a human readable statement about what treatment 
+    * Used for a human readable statement about what treatment
     * the deposited resource has received. Include either a
-    * text description or a URI. 
+    * text description or a URI.
     */
    protected String treatment;
-   
+
+   /**
+    * Used for a human readable summary of an error.
+    */
+   protected String summary;
+
    /**
     * Used to determine if the noOp value has been set.
     */
@@ -316,6 +321,17 @@ public class SWORDEntry extends Entry
     		  catch( UnmarshallException ume )
     		  {
     			  log.error("Error accessing the content for the treatment element");
+    		  }
+    	  }
+    	  else if (isInstanceOf(element, "summary", Namespaces.NS_ATOM))
+    	  {
+    		  try
+    		  {
+    			  summary = unmarshallString(element);
+    		  }
+    		  catch( UnmarshallException ume )
+    		  {
+    			  log.error("Error accessing the content for the summary element");
     		  }
     	  }
     	  else if (isInstanceOf(element, "noOp", Namespaces.NS_SWORD))

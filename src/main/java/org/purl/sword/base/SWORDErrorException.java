@@ -72,7 +72,7 @@ public class SWORDErrorException extends Exception
        else if (errorURI.equals(ErrorCodes.ERROR_CONTENT)) { status = 415; }
        else if (errorURI.equals(ErrorCodes.MAX_UPLOAD_SIZE_EXCEEDED)) { status = 413; }
        else if (errorURI.equals(ErrorCodes.MEDIATION_NOT_ALLOWED)) { status = 412; }
-       else if (errorURI.equals(ErrorCodes.TARGET_OWNER_UKNOWN)) { status = 400; }
+       else if (errorURI.equals(ErrorCodes.TARGET_OWNER_UKNOWN)) { status = 401; }
        else { status = 400; }
     }
 

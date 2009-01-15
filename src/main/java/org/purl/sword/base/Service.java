@@ -85,6 +85,11 @@ public class Service extends XmlElement implements SwordElementInterface
    private int maxUploadSize = -1;
    
    /**
+    * The details of the server
+    */
+   private String serverIdentity;
+
+   /**
     * List of Workspaces. 
     */
    private List<Workspace> workspaces; 
@@ -101,7 +106,7 @@ public class Service extends XmlElement implements SwordElementInterface
     * Local name part of verbose element.
     */
    public static final String ELEMENT_SWORD_VERBOSE = "verbose";
-   
+
    /**
     * Local name part of noOp element.
     */
@@ -111,7 +116,12 @@ public class Service extends XmlElement implements SwordElementInterface
     * MaxUploadSize
     */
    public static final String ELEMENT_SWORD_MAX_UPLOAD_SIZE = "maxUploadSize";
-   
+
+   /**
+    * MaxUploadSize
+    */
+   public static final String ELEMENT_GENERATOR = "generator";
+
    /**
     * Name for this element. 
     */
@@ -255,14 +265,32 @@ public class Service extends XmlElement implements SwordElementInterface
    
    /**
     * Get the maximum upload file size (in kB)
-    * 
+    *
     * @return the maximum file upload size
     */
    public int getMaxUploadSize()
    {
 	   return maxUploadSize;
    }
-   
+
+   /**
+    * Get the identity of the server
+    *
+    * @return the data returned by the server
+    */
+   public String getServerIdentity()
+   {
+	   return serverIdentity;
+   }
+
+   /**
+    * Set the identity of the server
+    */
+   public void setServerIdentity(String identity)
+   {
+	   serverIdentity = identity;
+   }
+
    /**
     * Get an Iterator over the workspaces. 
     * 
@@ -396,6 +424,10 @@ public class Service extends XmlElement implements SwordElementInterface
             else if (isInstanceOf(element, ELEMENT_SWORD_MAX_UPLOAD_SIZE, Namespaces.NS_SWORD))
             {
                setMaxUploadSize(unmarshallInteger(element));
+            }
+            else if (isInstanceOf(element, ELEMENT_GENERATOR, Namespaces.NS_ATOM))
+            {
+               setServerIdentity(unmarshallString(element));
             }
             else if (isInstanceOf(element, Workspace.ELEMENT_NAME, Namespaces.NS_APP ))
             {

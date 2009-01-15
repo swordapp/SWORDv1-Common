@@ -99,7 +99,7 @@ public class ServiceDocumentServlet extends HttpServlet {
 
 		// Set the authentication method
 		authN = getServletContext().getInitParameter("authentication-method");
-		if ((authN == null) || (authN == "")) {
+		if ((authN == null) || ("".equals(authN))) {
 			authN = "None";
 		}
 		log.info("Authentication type set to: " + authN);
@@ -129,7 +129,7 @@ public class ServiceDocumentServlet extends HttpServlet {
 		// Create the ServiceDocumentRequest
 		ServiceDocumentRequest sdr = new ServiceDocumentRequest();
 
-		// Are there any authentication details?
+        // Are there any authentication details?
 		String usernamePassword = getUsernamePassword(request);
 		if ((usernamePassword != null) && (!usernamePassword.equals(""))) {
 			int p = usernamePassword.indexOf(":");
@@ -239,9 +239,11 @@ public class ServiceDocumentServlet extends HttpServlet {
 	private static String getUrl(HttpServletRequest req) {
 		String reqUrl = req.getRequestURL().toString();
 		String queryString = req.getQueryString();
+        log.debug("Requested url is: " + reqUrl);
 		if (queryString != null) {
 			reqUrl += "?" + queryString;
 		}
+        log.debug("Requested url with Query String is: " + reqUrl);
 		return reqUrl;
 	}
 }

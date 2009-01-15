@@ -88,12 +88,31 @@ public class DepositResponse
 
    /**
     * Get the SWORD Entry
-    * 
-    * @return The entry 
+    *
+    * @return The entry
     */
    public SWORDEntry getEntry( )
    {
       return entry;
+   }
+
+   /**
+    * Get the SWORD Entry as an error document
+    *
+    * @return The error document
+    * @throws SWORDException If this DespositResponse does not contain a
+    *                        SWORDErrorDocument. If this is thrown, then
+    *                        the document stores an Entry. 
+    */
+   public SWORDErrorDocument getErrorDocument( )
+   throws SWORDException
+   {
+       if( entry instanceof SWORDErrorDocument)
+       {
+          return (SWORDErrorDocument)entry;
+       }
+
+       throw new SWORDException("Requested document is not an Error Document.");
    }
 
    /**
@@ -126,7 +145,7 @@ public class DepositResponse
          ByteArrayOutputStream stream = new ByteArrayOutputStream();
          Serializer serializer = new Serializer(stream, "UTF-8");
          serializer.setIndent(3);
-         serializer.setMaxLength(64);
+         //serializer.setMaxLength(64);
 
          if( entry != null ) 
          {

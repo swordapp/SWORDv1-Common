@@ -259,26 +259,41 @@ public class DepositServlet extends HttpServlet {
 				d.setFile(fis);
 
 				// Set the X-On-Behalf-Of header
-				d.setOnBehalfOf(request.getHeader(HttpHeaders.X_ON_BEHALF_OF.toString()));
+                String onBehalfOf = request.getHeader(HttpHeaders.X_ON_BEHALF_OF.toString());
+				if ((onBehalfOf != null) && (onBehalfOf.equals("reject"))) {
+                    // user name is "reject", so throw a not know error to allow the client to be tested
+                    throw new SWORDErrorException(ErrorCodes.TARGET_OWNER_UKNOWN,"unknown user \"reject\"");
+                } else {
+                    d.setOnBehalfOf(onBehalfOf);
+                }
 
 				// Set the X-Packaging header
 				d.setPackaging(request.getHeader(HttpHeaders.X_PACKAGING));
 
 				// Set the X-No-Op header
 				String noop = request.getHeader(HttpHeaders.X_NO_OP);
+                log.error("X_NO_OP value is " + noop);
 				if ((noop != null) && (noop.equals("true"))) {
 					d.setNoOp(true);
-				} else {
+				} else if ((noop != null) && (noop.equals("false"))) {
 					d.setNoOp(false);
-				}
+                }else if (noop == null) {
+                    d.setNoOp(false);
+				} else {
+                    throw new SWORDErrorException(ErrorCodes.ERROR_BAD_REQUEST,"Bad no-op");
+                }
 
 				// Set the X-Verbose header
 				String verbose = request.getHeader(HttpHeaders.X_VERBOSE);
 				if ((verbose != null) && (verbose.equals("true"))) {
 					d.setVerbose(true);
-				} else {
+				} else if ((verbose != null) && (verbose.equals("false"))) {
 					d.setVerbose(false);
-				}
+                }else if (verbose == null) {
+                    d.setVerbose(false);
+				} else {
+                    throw new SWORDErrorException(ErrorCodes.ERROR_BAD_REQUEST,"Bad verbose");
+                }
 
 				// Set the slug
 				String slug = request.getHeader(HttpHeaders.SLUG);

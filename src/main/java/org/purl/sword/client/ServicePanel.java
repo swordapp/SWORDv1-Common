@@ -77,6 +77,7 @@ import java.awt.Component;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.Hashtable;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -107,6 +108,7 @@ import org.purl.sword.base.SWORDEntry;
 import org.purl.sword.base.Service;
 import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.Workspace;
+import org.purl.sword.base.QualityValue;
 
 /**
  * The main panel for the GUI client. This contains the top-two sub-panels: the 
@@ -473,7 +475,7 @@ implements TreeSelectionListener
       buffer.append("<tr bgcolor=\"#ffffff;\"><td>");
       buffer.append(label);
       buffer.append("</td><td>");
-      buffer.append(value);
+      buffer.append(DisplayableValue(value));
       buffer.append("</td></tr>");
    }
    /**
@@ -492,6 +494,8 @@ implements TreeSelectionListener
       addTableRow(buffer, "SWORD Version", service.getVersion());
       addTableRow(buffer, "NoOp Support ", service.isNoOp());
       addTableRow(buffer, "Verbose Support ", service.isVerbose());
+      addTableRow(buffer, "Max File Upload Size ", service.getMaxUploadSize()+" kB");
+      //addTableRow(buffer, "Server Identity ", service.getServerIdentity());  // FIXME delete?
 
       buffer.append("</table>");
 
@@ -521,6 +525,20 @@ implements TreeSelectionListener
       details.setText(buffer.toString());
    }
 
+   /**
+    * Return the parameter unmodified if set, or the not defined text if null
+    * @param s
+    * @return s or ClientConstants.NOT_DEFINED_TEXT
+    */
+   private Object DisplayableValue(Object s)
+   {
+       if (null == s)
+       {
+           return ClientConstants.NOT_DEFINED_TEXT;
+       }else{
+           return s;
+       }
+   }
 
    /** 
     * Add a string within paragraph tags. 
@@ -559,11 +577,12 @@ implements TreeSelectionListener
          addTableRow(buffer, "Namespace", collection.getFormatNamespace());
          addTableRow(buffer, "Treatment", collection.getTreatment());
          addTableRow(buffer, "Mediation", collection.getMediation());
+         addTableRow(buffer, "Nested Service Document", collection.getService());
 
 
          String[] accepts = collection.getAccepts();
          String acceptList = "";
-         if( accepts != null && accepts.length == 0 ) 
+         if( accepts != null && accepts.length == 0 )
          {
             acceptList = "None specified";
          }
@@ -575,6 +594,16 @@ implements TreeSelectionListener
             }
          }
          addTableRow(buffer, "Accepts", acceptList);
+
+         Hashtable acceptsPackaging = collection.getAcceptPackaging();
+         String acceptPackagingList = "";
+         for(Enumeration e = acceptsPackaging.keys();e.hasMoreElements();)
+         {
+            String key = (String) e.nextElement();
+            QualityValue packagingValue = (QualityValue)acceptsPackaging.get(key);
+            acceptPackagingList +=  key + " ("+packagingValue+")" + "<br>";
+         }
+         addTableRow(buffer, "Accepts Packaging", acceptPackagingList);
 
          buffer.append("</table>");
       }
@@ -660,27 +689,20 @@ implements TreeSelectionListener
          addTableRow(buffer, "Contributors", contributorString.toString());
 
          // process source
-         Source source = entry.getSource();
-         String sourceString = "";
-         if( source != null ) 
-         {	
-            Generator generator = source.getGenerator();
-            if( generator != null ) 
-            {
-               sourceString += "Content: '" + generator.getContent() + "' <br>'";
-               sourceString += "Version: '" + generator.getVersion() + "' <br>'";
-               sourceString += "Uri: '" + generator.getUri() + "' <br>'";
-            }
-            else
-            {
-               sourceString += "No generator defined.";
-            }
+         String sourceString="";
+         Generator generator = entry.getGenerator();
+         if( generator != null ) 
+         {
+            sourceString += "Content: '" + generator.getContent() + "' <br>'";
+            sourceString += "Version: '" + generator.getVersion() + "' <br>'";
+            sourceString += "Uri: '" + generator.getUri() + "'";
          }
          else
          {
-            sourceString = "Not defined";
+            sourceString += "No generator defined.";
          }
-         addTableRow(buffer, "Source", sourceString);
+
+         addTableRow(buffer, "Generator", sourceString);
 
          // process treatment 
          addTableRow(buffer, "Treatment", entry.getTreatment());
@@ -691,8 +713,11 @@ implements TreeSelectionListener
          // process noOp
          addTableRow(buffer, "NoOp", entry.isNoOp());
 
-         // process formatNamespace 
+         // process formatNamespace
          addTableRow(buffer, "Packaging", entry.getPackaging());
+
+         // process userAgent
+         addTableRow(buffer, "User Agent", entry.getUserAgent());
 
 
          buffer.append("</table>");

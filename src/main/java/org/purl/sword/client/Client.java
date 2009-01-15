@@ -102,6 +102,11 @@ public class Client implements SWORDClient {
 	private String password;
 
 	/**
+	 * The userAgent to identify this application.
+	 */
+	private String userAgent;
+
+	/**
 	 * The client that is used to send data to the specified server.
 	 */
 	private HttpClient client;
@@ -126,7 +131,7 @@ public class Client implements SWORDClient {
 				new Integer(DEFAULT_TIMEOUT));
 		log.debug("proxy host: " + client.getHostConfiguration().getProxyHost());
 		log.debug("proxy port: " + client.getHostConfiguration().getProxyPort());
-		doAuthentication = false;
+        doAuthentication = false;
 	}
 
 	/**
@@ -210,6 +215,9 @@ public class Client implements SWORDClient {
 		doAuthentication = false;
 	}
 
+    public void setUserAgent(String userAgent){
+        this.userAgent = userAgent;
+    }
 	/**
 	 * Set the connection timeout for the socket.
 	 * 
@@ -285,6 +293,12 @@ public class Client implements SWORDClient {
 					onBehalfOf));
 		}
 
+		if (containsValue(userAgent)) {
+			log.debug("Setting userAgent: " + userAgent);
+			httpget.addRequestHeader(new Header(HttpHeaders.USER_AGENT,
+					userAgent));
+		}
+
 		ServiceDocument doc = null;
 
 		try {
@@ -358,7 +372,7 @@ public class Client implements SWORDClient {
 			}
 
 			String filename = message.getFilename();
-			if (filename != "") {
+			if (! "".equals(filename)) {
 				httppost.addRequestHeader(new Header(
 						HttpHeaders.CONTENT_DISPOSITION, " filename="
 								+ filename));
@@ -369,8 +383,14 @@ public class Client implements SWORDClient {
 						.getSlug()));
 			}
 
-			httppost.addRequestHeader(new Header(HttpHeaders.X_NO_OP, Boolean
+            if(message.getCorruptRequest())
+            {
+                // insert a header with an invalid boolean value
+                httppost.addRequestHeader(new Header(HttpHeaders.X_NO_OP, "Wibble"));
+            }else{
+                httppost.addRequestHeader(new Header(HttpHeaders.X_NO_OP, Boolean
 					.toString(message.isNoOp())));
+            }
 			httppost.addRequestHeader(new Header(HttpHeaders.X_VERBOSE, Boolean
 					.toString(message.isVerbose())));
 
@@ -390,7 +410,6 @@ public class Client implements SWORDClient {
 			if (containsValue(userAgent)) {
 				httppost.addRequestHeader(new Header(
 						HttpHeaders.USER_AGENT, userAgent));
-				System.out.println("USERAGENT = " + userAgent);
 			}
 
 			stream = new FileInputStream(message.getFilepath());

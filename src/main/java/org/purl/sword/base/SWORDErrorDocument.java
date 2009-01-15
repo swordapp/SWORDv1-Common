@@ -64,7 +64,7 @@ public class SWORDErrorDocument extends SWORDEntry
     * The Error URI
     */
    private String errorURI;
-   
+
    /**
     * Create the error document (intended to be used when unmarshalling an error document
     * as this will set the errorURI)
@@ -117,11 +117,31 @@ public class SWORDErrorDocument extends SWORDEntry
    }  
    
    /**
+    * Get the error URI
+    * 
+    * @return the error URI
+    */
+   public String getErrorURI()
+   {
+       return errorURI;
+   }
+
+   /**
+    * set the error URI
+    * 
+    * @param error the error URI
+    */
+   public void setErrorURI(String error)
+   {
+       errorURI = error;
+   }
+
+   /**
     * Main method to perform a brief test of the class
     * 
     * @param args
     */
-   public static void main(String[] args)
+   /*public static void main(String[] args)
    {
 	   SWORDErrorDocument sed = new SWORDErrorDocument(ErrorCodes.MEDIATION_NOT_ALLOWED);
 	   sed.setNoOp(true);
@@ -137,4 +157,5 @@ public class SWORDErrorDocument extends SWORDEntry
 	   
 	   System.out.println(sed.marshall().toXML());
    }
+    */
 }

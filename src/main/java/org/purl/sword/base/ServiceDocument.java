@@ -126,7 +126,7 @@ public class ServiceDocument {
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			Serializer serializer = new Serializer(stream, "UTF-8");
 			serializer.setIndent(3);
-			serializer.setMaxLength(64);
+			//serializer.setMaxLength(64);
 
 			Document doc = new Document(service.marshall());
 			serializer.write(doc);

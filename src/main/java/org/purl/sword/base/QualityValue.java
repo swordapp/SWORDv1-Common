@@ -118,7 +118,7 @@ public class QualityValue {
 	/**
 	 * A main method with rudimentary tests to check the class
 	 */
-	public static void main(String[] args)
+	/*public static void main(String[] args)
 	{
 		// Test the class
 		
@@ -204,4 +204,5 @@ public class QualityValue {
 			System.out.println("7) Fail: no value failed unexpectedly");
 		}
 	}
+     */
 }

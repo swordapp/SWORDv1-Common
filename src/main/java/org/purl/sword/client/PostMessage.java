@@ -119,16 +119,23 @@ public class PostMessage
    private boolean verbose; 
 
    /**
-    * The packaging format for the deposit. 
+    * The packaging format for the deposit.
     */
    private String packaging;
 
    /**
-    * True if the deposit should simualte a checksum error. The client should check this 
+    * True if the deposit should simualte a checksum error. The client should check this
     * field to determine if a correct MD5 checksum should be sent or whether the checksum should
-    * be modified so that it generates an error at the server. 
+    * be modified so that it generates an error at the server.
     */
    private boolean checksumError;
+
+   /**
+    * True if the deposit should corrupt the POST header. The client should check this
+    * field to determine if a correct header should be sent or whether the header should
+    * be modified so that it generates an error at the server.
+    */
+   private boolean corruptRequest;
 
    /** 
     * The Slug header value. 
@@ -327,6 +334,26 @@ public class PostMessage
    public void setChecksumError(boolean checksumError) 
    {
       this.checksumError = checksumError;
+   }
+
+   /**
+    * Get the status of the corrupt request flag.
+    * 
+    * @return True if the client should corrupt the POST header.
+    */
+   public boolean getCorruptRequest()
+   {
+      return corruptRequest;
+   }
+
+   /**
+    * Set the state of the corrupt request flag.
+    * 
+    * @param checksumError True if the item should corrupt the POST header.
+    */
+   public void setCorruptRequest(boolean corruptRequest)
+   {
+      this.corruptRequest = corruptRequest;
    }
 
    /**

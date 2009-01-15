@@ -82,6 +82,8 @@ import org.apache.log4j.PropertyConfigurator;
 import org.jdesktop.swingworker.SwingWorker;
 import org.purl.sword.base.DepositResponse;
 import org.purl.sword.base.ServiceDocument;
+import org.purl.sword.base.SWORDException;
+import org.purl.sword.base.SWORDErrorDocument;
 
 /**
  * Main class that creates the GUI interface for the demonstration SWORD client.
@@ -363,6 +365,7 @@ public class GuiClient extends JFrame implements ClientType,
 		} else {
 			swordclient.clearCredentials();
 		}
+        swordclient.setUserAgent(ClientConstants.SERVICE_NAME);
 	}
 
 	/***************************************************************************
@@ -686,7 +689,9 @@ public class GuiClient extends JFrame implements ClientType,
 								message.setNoOp(postDialog.useNoOp());
 								message.setChecksumError(postDialog
 										.corruptMD5());
-								message.setSlug(postDialog.getSlug());
+								message.setCorruptRequest(postDialog
+										.corruptRequest());
+                                message.setUserAgent(ClientConstants.SERVICE_NAME);
 
 								publish("Posting file to: " + location);
 
@@ -705,12 +710,29 @@ public class GuiClient extends JFrame implements ClientType,
 								} else {
 									publish("Unable to post file to: "
 											+ location);
+									mainPanel.addMessage(document.marshall());
+
+                                    // build up the error message, taking into
+                                    // account the exception condition.
+                                    String outputMessage;
+                                    try{
+                                        SWORDErrorDocument errorDoc = document.getErrorDocument();
+                                        outputMessage = "Unable to post file to "
+													+ location
+													+ ".\r\nStatus is: "
+													+ status.toString()
+													+ ".\r\nThe Error URI is: "
+													+ errorDoc.getErrorURI()
+                                                    + "\r\nSummary is: "
+                                                    + errorDoc.getSummary();
+                                    }catch (SWORDException se){
+                                        outputMessage = se.getMessage();
+                                    }
+
+                                    // display the error - using the string created above
 									JOptionPane.showMessageDialog(
 											GuiClient.this,
-											"Unable to post file to "
-													+ location
-													+ ". Status is: "
-													+ status.toString(),
+											outputMessage,
 											"Post File",
 											JOptionPane.WARNING_MESSAGE);
 								}
