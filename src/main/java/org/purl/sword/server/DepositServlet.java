@@ -334,6 +334,10 @@ public class DepositServlet extends HttpServlet {
 				
 				// Print out the Deposit Response
 				response.setStatus(dr.getHttpResponse());
+				if( (dr.getLocation()!= null) && (!dr.getLocation().equals("")))
+				{
+					response.setHeader("Location", dr.getLocation());
+				}
 				response.setContentType("application/atom+xml; charset=UTF-8");
 				PrintWriter out = response.getWriter();
 				out.write(dr.marshall());

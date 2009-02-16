@@ -61,6 +61,9 @@ public class DepositResponse
 
    /** The HTTP Response code */
    private int httpResponse;
+   
+   /** The value to set in the Location header (typically the atom edit link) */
+   private String location;
 
    /** Logger */
    private static Logger log = Logger.getLogger(DepositResponse.class);
@@ -74,6 +77,7 @@ public class DepositResponse
    {
       entry = new SWORDEntry();  
       this.httpResponse = httpResponse;
+      location = null;
    }
 
    /**
@@ -131,6 +135,24 @@ public class DepositResponse
     */
    public void setHttpResponse(int httpResponse) {
       this.httpResponse = httpResponse;
+   }
+
+   /**
+    * Retrieve the Location header.
+    * 
+    * @return The Location header
+    */
+   public String getLocation() {
+      return location;
+   }
+
+   /**
+    * Set the HTTP Location header. 
+    * 
+    * @param location The Location header. 
+    */
+   public void setLocation(String location) {
+      this.location = location;
    }
 
    /**
