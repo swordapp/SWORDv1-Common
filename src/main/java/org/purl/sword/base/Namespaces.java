@@ -50,7 +50,7 @@ public interface Namespaces {
 	/**
 	 * Atom Publishing Protocol (APP) Namespace. 
 	 */
-	public static final String NS_APP = "http://purl.org/atom/app#";
+	public static final String NS_APP = "http://www.w3.org/2007/app";
 	
 	/**
     * APP Prefix. 
