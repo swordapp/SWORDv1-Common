@@ -78,7 +78,7 @@ import org.purl.sword.base.SWORDErrorException;
 public class DepositServlet extends HttpServlet {
 
 	/** Sword repository */
-	private SWORDServer myRepository;
+	protected SWORDServer myRepository;
 
 	/** Authentication type */
 	private String authN;
@@ -387,7 +387,7 @@ public class DepositServlet extends HttpServlet {
 	 * @param response The HttpServletResponse to send the error document to
 	 * @throws IOException 
 	 */
-	private void makeErrorDocument(String errorURI, int status, String summary, 
+	protected void makeErrorDocument(String errorURI, int status, String summary, 
 			                       HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		SWORDErrorDocument sed = new SWORDErrorDocument(errorURI);
@@ -419,7 +419,7 @@ public class DepositServlet extends HttpServlet {
 	 * @param request
 	 * @return The username and password combination
 	 */
-	private String getUsernamePassword(HttpServletRequest request) {
+	protected String getUsernamePassword(HttpServletRequest request) {
 		try {
 			String authHeader = request.getHeader("Authorization");
 			if (authHeader != null) {
@@ -459,7 +459,7 @@ public class DepositServlet extends HttpServlet {
 	 * @param req The request object
 	 * @return The URL
 	 */
-	private static String getUrl(HttpServletRequest req) {
+	protected static String getUrl(HttpServletRequest req) {
 		String reqUrl = req.getRequestURL().toString();
 		String queryString = req.getQueryString();
 		if (queryString != null) {
