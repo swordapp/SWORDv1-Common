@@ -50,6 +50,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.purl.sword.base.HttpHeaders;
 import org.purl.sword.base.SWORDAuthenticationException;
+import org.purl.sword.base.SWORDErrorException;
 import org.purl.sword.base.SWORDException;
 import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.ServiceDocumentRequest;
@@ -172,11 +173,13 @@ public class ServiceDocumentServlet extends HttpServlet {
 				response.setHeader("WWW-Authenticate", s);
 				response.setStatus(401);
 			}
+		} catch (SWORDErrorException see) {
+			// Return the relevant HTTP status code
+			response.sendError(see.getStatus(), see.getDescription());
 		} catch (SWORDException se) {
 			se.printStackTrace();
 			// Throw a HTTP 500
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, se
-					.getMessage());
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, se.getMessage());
 		}
 	}
 
@@ -218,7 +221,7 @@ public class ServiceDocumentServlet extends HttpServlet {
 	}
 
 	/**
-	 * Utility method to deicde if we are using HTTP Basic authentication
+	 * Utility method to decide if we are using HTTP Basic authentication
 	 * 
 	 * @return if HTTP Basic authentication is in use or not
 	 */

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -96,7 +96,7 @@ public class DummyServer implements SWORDServer {
 	 * @throws SWORDErrorException If something goes wrong, such as 
 	 */
 	public ServiceDocument doServiceDocument(ServiceDocumentRequest sdr) 
-	                           throws SWORDAuthenticationException, SWORDException {
+	                           throws SWORDAuthenticationException, SWORDErrorException, SWORDException {
 		// Authenticate the user
 		String username = sdr.getUsername();
 		String password = sdr.getPassword();
@@ -105,6 +105,13 @@ public class DummyServer implements SWORDServer {
 		     (!username.equalsIgnoreCase(password))) ) {
 				// User not authenticated
 				throw new SWORDAuthenticationException("Bad credentials");
+		}
+		
+		// Allow users to force the throwing of a SWORD error exception by setting
+		// the OBO user to 'error'
+		if ((sdr.getOnBehalfOf() != null) && (sdr.getOnBehalfOf().equals("error"))) {
+			// Throw the error exception
+			throw new SWORDErrorException(ErrorCodes.MEDIATION_NOT_ALLOWED, "Mediated deposits not allowed");
 		}
 		
 		// Create and return a dummy ServiceDocument
@@ -325,6 +332,8 @@ public class DummyServer implements SWORDServer {
 		se.setNoOp(deposit.isNoOp());
 		
 		dr.setEntry(se);
+		
+		dr.setLocation("http://www.myrepository.ac.uk/atom/" + counter);
 		
 		return dr;
 	}

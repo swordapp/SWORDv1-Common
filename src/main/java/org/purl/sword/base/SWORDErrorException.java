@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -57,9 +57,8 @@ public class SWORDErrorException extends Exception
 	/**
      * Create a new instance and store the specified data. 
      * 
-     * @param message The message for the exception. 
-     * @param source  The original exception that lead to this exception. This
-     *                can be <code>null</code>.
+     * @param errorURI The errorURI of the exception being thrown 
+     * @param description  A description of the error thrown.
      */
     public SWORDErrorException(String errorURI, String description)
     {  

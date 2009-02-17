@@ -334,7 +334,7 @@ public class DepositServlet extends HttpServlet {
 				
 				// Print out the Deposit Response
 				response.setStatus(dr.getHttpResponse());
-				if( (dr.getLocation()!= null) && (!dr.getLocation().equals("")))
+				if ((dr.getLocation() != null) && (!dr.getLocation().equals("")))
 				{
 					response.setHeader("Location", dr.getLocation());
 				}

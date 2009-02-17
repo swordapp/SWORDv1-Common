@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -61,13 +61,15 @@ public interface SWORDServer {
 	 * @param sdr The Service Document Request object
 	 * 
 	 * @exception SWORDAuthenticationException Thrown if the authentication fails
+	 * @exception SWORDErrorException Thrown if there was an error with the input not matching
+	 *            the capabilities of the server
 	 * @exception SWORDException Thrown in an un-handalable Exception occurs. 
 	 *            This will be dealt with by sending a HTTP 500 Server Exception
 	 *
 	 * @return The ServiceDocument representing the service document
 	 */
 	public ServiceDocument doServiceDocument(ServiceDocumentRequest sdr)
-		throws SWORDAuthenticationException, SWORDException;
+		throws SWORDAuthenticationException, SWORDErrorException, SWORDException;
 	
 	/**
 	 * Answer a SWORD deposit
@@ -75,6 +77,8 @@ public interface SWORDServer {
 	 * @param deposit The Deposit object
 	 * 
 	 * @exception SWORDAuthenticationException Thrown if the authentication fails
+	 * @exception SWORDErrorException Thrown if there was an error with the input not matching
+	 *            the capabilities of the server
 	 * @exception SWORDException Thrown if an un-handalable Exception occurs. 
 	 *            This will be dealt with by sending a HTTP 500 Server Exception
 	 * 
