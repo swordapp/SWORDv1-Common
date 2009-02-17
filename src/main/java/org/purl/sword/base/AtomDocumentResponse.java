@@ -36,55 +36,24 @@
  */
 package org.purl.sword.base;
 
-/**
- * List of the namespaces that are used by SWORD. 
- * 
- * Last updated on: $Date: 2007/10/19 08:51:41 $
- * 
- * @author Neil Taylor
- * @version $Revision: 1.4 $
- *
- */
-public interface Namespaces {
+import org.apache.log4j.Logger;
 
-	/**
-	 * Atom Publishing Protocol (APP) Namespace. 
-	 */
-	public static final String NS_APP = "http://www.w3.org/2007/app";
-	
-	/**
-    * APP Prefix. 
+/**
+ * Represents a deposit response. This holds the SWORD Entry element. 
+ * 
+ * @author Stuart Lewis
+ */
+public class AtomDocumentResponse extends DepositResponse
+{
+
+  /**
+    * Create a new response with the specified http code. 
+    * 
+    * @param httpResponse Response code. 
     */
-   public static final String PREFIX_APP = "app";
-	
-	/**
-	 * ATOM Namespace.
-	 */
-	public static final String NS_ATOM = "http://www.w3.org/2005/Atom";
-	
-	/**
-	 * ATOM Prefix. 
-	 */
-	public static final String PREFIX_ATOM = "atom";
-	
-	/**
-	 * Sword Namespace. 
-	 */
-	public static final String NS_SWORD = "http://purl.org/net/sword/";
-	
-	/**
-    * SWORD Prefix. 
-    */
-   public static final String PREFIX_SWORD = "sword";
-   
-   /**
-    * DC Terms Namespace.
-    */
-	public static final String NS_DC_TERMS = "http://purl.org/dc/terms/";
-	
-	/**
-    * DC Terms Prefix. 
-    */
-   public static final String PREFIX_DC_TERMS = "dcterms";
-   
+   public AtomDocumentResponse(int httpResponse) 
+   {
+      super(httpResponse);
+   }
+
 }

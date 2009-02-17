@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -48,7 +48,7 @@ import nu.xom.ParsingException;
 import nu.xom.Serializer;
 
 /**
- * Represents a desposit response. This holds the SWORD Entry element. 
+ * Represents a deposit response. This holds the SWORD Entry element. 
  * 
  * @author Stuart Lewis
  * @author Neil Taylor

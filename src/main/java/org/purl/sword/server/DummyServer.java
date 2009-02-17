@@ -44,6 +44,8 @@ import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.purl.sword.atom.Author;
 import org.purl.sword.atom.Content;
 import org.purl.sword.atom.Contributor;
@@ -52,6 +54,8 @@ import org.purl.sword.atom.InvalidMediaTypeException;
 import org.purl.sword.atom.Link;
 import org.purl.sword.atom.Summary;
 import org.purl.sword.atom.Title;
+import org.purl.sword.base.AtomDocumentRequest;
+import org.purl.sword.base.AtomDocumentResponse;
 import org.purl.sword.base.Collection;
 import org.purl.sword.base.Deposit;
 import org.purl.sword.base.DepositResponse;
@@ -316,9 +320,8 @@ public class DummyServer implements SWORDServer {
 		Content content = new Content();
 		try {
 			content.setType("application/zip");
-		} catch (InvalidMediaTypeException e1) {
-		// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (InvalidMediaTypeException ex) {
+			ex.printStackTrace();
 		}
 		content.setSource("http://www.myrepository.ac.uk/sdl/uploads/upload-" + counter + ".zip");
 		se.setContent(content);
@@ -337,4 +340,20 @@ public class DummyServer implements SWORDServer {
 		
 		return dr;
 	}
+	
+	public AtomDocumentResponse doAtomDocument(AtomDocumentRequest adr) 
+                  throws SWORDAuthenticationException, SWORDErrorException, SWORDException {
+		// Authenticate the user
+		String username = adr.getUsername();
+		String password = adr.getPassword();
+		if ((username != null) && (password != null) && 
+		    (((username.equals("")) && (password.equals(""))) || 
+		    (!username.equalsIgnoreCase(password))) ) {
+			// User not authenticated
+			throw new SWORDAuthenticationException("Bad credentials");
+		}
+		
+		return new AtomDocumentResponse(HttpServletResponse.SC_OK);
+	}
+
 }
