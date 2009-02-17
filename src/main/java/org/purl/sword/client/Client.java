@@ -429,6 +429,7 @@ public class Client implements SWORDClient {
 				messageBody = readResponse(httppost
 						.getResponseBodyAsStream());
 				response = new DepositResponse(status.getCode()); 
+				response.setLocation(httppost.getResponseHeader("Location").getValue());
 				// added call for the status code.
 				response.unmarshall(messageBody);
 			}
