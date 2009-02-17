@@ -449,7 +449,7 @@ public class DepositServlet extends HttpServlet {
 	 * 
 	 * @return if HTTP Basic authentication is in use or not
 	 */
-	private boolean authenticateWithBasic() {
+	protected boolean authenticateWithBasic() {
 		if (authN.equalsIgnoreCase("Basic")) {
 			return true;
 		} else {
