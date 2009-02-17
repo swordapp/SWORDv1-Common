@@ -58,7 +58,6 @@ import org.purl.sword.base.HttpHeaders;
 import org.purl.sword.base.SWORDEntry;
 import org.purl.sword.base.Service;
 import org.purl.sword.base.ServiceDocument;
-import org.purl.sword.base.ServiceLevel;
 import org.purl.sword.base.Workspace;
 
 /**
@@ -91,7 +90,7 @@ public class SwordTest
    public void serviceDocumentTest()
    {
       // create a new service document 
-      Service service = new Service(ServiceLevel.ZERO);
+      Service service = new Service();
       service.setVerbose(true);
       service.setNoOp(false);
       
@@ -231,8 +230,6 @@ public class SwordTest
          entry.setUpdated("2007-08-02T10:22:17Z");
          
          
-         entry.setFormatNamespace("Test format namespace");
-         entry.setTreatment("Treatment description");
          entry.setNoOp(true);
          entry.setVerboseDescription("A Verbose Description.");
           
