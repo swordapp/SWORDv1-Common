@@ -192,8 +192,6 @@ public class CmdClient implements ClientType
 					.println("Abstract: " + collection.getAbstract());
 					System.out.println("Collection Policy: "
 							+ collection.getCollectionPolicy());
-					System.out.println("Namespace: "
-							+ collection.getFormatNamespace());
 					System.out.println("Treatment: "
 							+ collection.getTreatment());
 					System.out.println("Mediation: "

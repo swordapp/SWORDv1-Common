@@ -574,7 +574,6 @@ implements TreeSelectionListener
          addTableRow(buffer, "Collection title", collection.getTitle());
          addTableRow(buffer, "Abstract", collection.getAbstract());
          addTableRow(buffer, "Collection Policy", collection.getCollectionPolicy());
-         addTableRow(buffer, "Namespace", collection.getFormatNamespace());
          addTableRow(buffer, "Treatment", collection.getTreatment());
          addTableRow(buffer, "Mediation", collection.getMediation());
          addTableRow(buffer, "Nested Service Document", collection.getService());

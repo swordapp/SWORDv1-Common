@@ -93,11 +93,6 @@ public class Collection extends XmlElement implements SwordElementInterface
     */
    private String treatment;
 
-   /** 
-    * The SWORD namespace. 
-    */
-   private String namespace;
-
    /**
     * The DC Terms Abstract details. 
     */
@@ -320,26 +315,6 @@ public class Collection extends XmlElement implements SwordElementInterface
    public void setMediation(boolean mediation) {
       this.mediation = mediation;
       mediationSet = true;
-   }
-
-   /**
-    * Get the format namespace. 
-    * 
-    * @return The format namespace. 
-    */
-   public String getFormatNamespace()
-   {
-      return namespace;
-   }
-
-   /**
-    * Set the format namespace. 
-    * 
-    * @param namespace The namespace. 
-    */
-   public void setFormatNamespace(String namespace)
-   {
-      this.namespace = namespace; 
    }
 
    /**
