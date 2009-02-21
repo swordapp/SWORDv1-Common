@@ -149,11 +149,6 @@ public class Collection extends XmlElement implements SwordElementInterface
    public static final String ELEMENT_SWORD_TREATMENT = "treatment";
 
    /**
-    * Local name for the sword formatNamespace element. 
-    */
-   public static final String ELEMENT_SWORD_FORMAT_NAMESPACE = "formatNamespace";
-
-   /**
     * Local name for the sword acceptPackaging element. 
     */
    public static final String ELEMENT_SWORD_ACCEPT_PACKAGING = "acceptPackaging";
@@ -522,15 +517,6 @@ public class Collection extends XmlElement implements SwordElementInterface
          collection.appendChild(treatmentElement);
       }
 
-      // namespace 
-      if (namespace != null)
-      {
-         Element namespaceElement = new Element(Namespaces.PREFIX_SWORD + ":" + 
-        		 ELEMENT_SWORD_FORMAT_NAMESPACE, Namespaces.NS_SWORD);
-         namespaceElement.appendChild(namespace);
-         collection.appendChild(namespaceElement);
-      }
-
       return collection; 
    }
 
@@ -670,17 +656,6 @@ public class Collection extends XmlElement implements SwordElementInterface
                catch(UnmarshallException ume)
                {
                   log.error("Error accessing the content for the treatment element");
-               }
-            }
-            else if (isInstanceOf(element, ELEMENT_SWORD_FORMAT_NAMESPACE, Namespaces.NS_SWORD))
-            {
-               try
-               {
-                  namespace = unmarshallString(element);
-               }
-               catch( UnmarshallException ume )
-               {
-                  log.error("Error accessing the content for the namespace element");
                }
             }
          }

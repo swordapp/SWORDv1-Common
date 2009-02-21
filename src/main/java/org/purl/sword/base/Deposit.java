@@ -190,14 +190,14 @@ public class Deposit
    }
 
    /**
-    * @return the formatNamespace
+    * @return the packaging
     */
    public String getPackaging() {
       return packaging;
    }
 
    /**
-    * @param formatNamespace the formatNamespace to set
+    * @param packaging the packaging to set
     */
    public void setPackaging(String packaging) {
       this.packaging = packaging;
