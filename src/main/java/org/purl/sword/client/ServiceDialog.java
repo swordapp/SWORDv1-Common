@@ -72,6 +72,7 @@
  */
 package org.purl.sword.client;
 
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -114,8 +115,8 @@ public class ServiceDialog
    /**
     * The panel that holds the controls. 
     */
-   private JPanel controls = null; 
-   
+   private JPanel controls = null;
+
    /**
     * List of buttons. 
     */

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import java.util.Properties;
 import nu.xom.Element;
 import nu.xom.Elements;
 
@@ -72,15 +73,25 @@ public class Workspace extends XmlElement implements SwordElementInterface
    /**
     * Local name part of this element.
     */
+   @Deprecated
    public static final String ELEMENT_NAME = "workspace";
+   
+   private static final XmlName XML_NAME = 
+           new XmlName(Namespaces.PREFIX_APP, "workspace", Namespaces.NS_APP);
    
    /**
     * Create a new instance of the workspace, with no title. 
     */
    public Workspace( ) 
    {
-      this(null); 
+      super(XML_NAME);
+      initialise();
    }
+
+   public static XmlName elementName()
+    {
+        return XML_NAME;
+    }
 
    /**
     * Create a new instance of the workspace with the specified title. 
@@ -89,9 +100,18 @@ public class Workspace extends XmlElement implements SwordElementInterface
     */
    public Workspace( String title )
    {
-      super(ELEMENT_NAME);
+      this();
+
       setTitle(title);
-      collections = new ArrayList<Collection>();
+   }
+
+   /**
+    * Initialise the object, ready for use.
+    */
+   protected void initialise()
+   {
+       collections = new ArrayList<Collection>();
+       title = null; 
    }
 
    /**
@@ -165,10 +185,13 @@ public class Workspace extends XmlElement implements SwordElementInterface
    {
       // convert data into XOM elements and return the 'root', i.e. the one 
       // that represents the collection. 
-      Element workspace = new Element(getQualifiedName(), Namespaces.NS_APP);
+      Element workspace = new Element(xmlName.getQualifiedName(), xmlName.getNamespace());
 
-      workspace.appendChild(title.marshall());
-
+      if( title != null )
+      {
+         workspace.appendChild(title.marshall());
+      }
+      
       for( Collection item : collections )
       {
          workspace.appendChild(item.marshall());
@@ -187,33 +210,68 @@ public class Workspace extends XmlElement implements SwordElementInterface
    public void unmarshall( Element workspace )
    throws UnmarshallException 
    {
-      if( ! isInstanceOf(workspace, localName, Namespaces.NS_APP))
+      unmarshall(workspace, null);
+   }
+
+   /**
+    *
+    * @param workspace
+    * @param validate
+    * @return
+    * @throws org.purl.sword.base.UnmarshallException
+    */
+   public SwordValidationInfo unmarshall( Element workspace, Properties validationProperties )
+   throws UnmarshallException
+   {
+      if( ! isInstanceOf(workspace, xmlName))
       {
-         throw new UnmarshallException( "Not a" + getQualifiedName() + " element" );
+         return handleIncorrectElement(workspace, validationProperties);
       }
+
+      ArrayList<SwordValidationInfo> validationItems = new ArrayList<SwordValidationInfo>();
 
       try
       {
-         collections.clear(); 
+         initialise();
+
+         // FIXME - process the attributes 
 
          // retrieve all of the sub-elements
          Elements elements = workspace.getChildElements();
-         Element element = null; 
+         Element element = null;
          int length = elements.size();
 
          for(int i = 0; i < length; i++ )
          {
             element = elements.get(i);
-            if( isInstanceOf(element, Title.ELEMENT_NAME, Namespaces.NS_ATOM ) )
+            if( isInstanceOf(element, Title.elementName() ) )
             {
-               title = new Title();
-               title.unmarshall(element);   
+               if( title == null )
+               {
+                  title = new Title();
+                  validationItems.add(title.unmarshall(element, validationProperties));
+               }
+               else
+               {
+                  SwordValidationInfo info =
+                          new SwordValidationInfo(Title.elementName(),
+                             SwordValidationInfo.DUPLICATE_ELEMENT,
+                             SwordValidationInfoType.WARNING);
+                  info.setContentDescription(element.getValue());
+                  validationItems.add(info);
+               }
             }
-            else if( isInstanceOf(element, Collection.ELEMENT_NAME, Namespaces.NS_APP ))
+            else if( isInstanceOf(element, Collection.elementName() ))
             {
                Collection collection = new Collection( );
-               collection.unmarshall(element);
-               collections.add(collection);
+               validationItems.add(collection.unmarshall(element, validationProperties));
+               collections.add(collection); 
+            }
+            else if( validationProperties != null )
+            {
+                validationItems.add(new SwordValidationInfo(new XmlName(element),
+                        SwordValidationInfo.UNKNOWN_ELEMENT,
+                        SwordValidationInfoType.INFO));
             }
          }
       }
@@ -222,6 +280,64 @@ public class Workspace extends XmlElement implements SwordElementInterface
          log.error("Unable to parse an element in workspace: " + ex.getMessage());
          throw new UnmarshallException("Unable to parse element in workspace.", ex);
       }
+
+      SwordValidationInfo result = null;
+      if( validationProperties != null )
+      {
+          result = validate(validationItems, validationProperties);
+      }
+      return result; 
    }
+
+   /**
+    * 
+    * @return A validation object that specifies the status of this object.
+    */
+   @Override
+   public SwordValidationInfo validate(Properties validationContext)
+   {
+       return validate(null, validationContext);
+   }
+
+   /**
+    * 
+    * @param existing
+    * @return
+    */
+   protected SwordValidationInfo validate(ArrayList<SwordValidationInfo> existing,
+           Properties validationContext)
+   {
+      boolean validateAll = (existing == null );
+
+      SwordValidationInfo result = new SwordValidationInfo(xmlName);
+
+      if( collections == null || collections.size() == 0 )
+      {
+          result.addValidationInfo(new SwordValidationInfo(Collection.elementName(),
+                    SwordValidationInfo.MISSING_ELEMENT_WARNING,
+                    SwordValidationInfoType.WARNING ));
+      }
+
+      if( validateAll )
+      {
+          if( title != null )
+          {
+              result.addValidationInfo(title.validate(validationContext));
+          }
+
+          if( collections.size() > 0 )
+          {
+             Iterator<Collection> iterator = collections.iterator();
+             while( iterator.hasNext() )
+             {
+                 result.addValidationInfo(iterator.next().validate(validationContext));
+             }
+          }
+      }
+
+      result.addUnmarshallValidationInfo(existing, null);
+      return result; 
+   }
+
 
 }

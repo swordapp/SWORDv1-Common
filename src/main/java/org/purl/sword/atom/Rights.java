@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -37,6 +37,7 @@
 package org.purl.sword.atom;
 
 import org.purl.sword.base.Namespaces;
+import org.purl.sword.base.XmlName;
 
 /**
  * Represents an ATOM Rights element. This is a simple subclass of the 
@@ -49,15 +50,23 @@ public class Rights extends TextConstruct
    /**
 	* Local name for the element. 
 	*/
-   public static final String ELEMENT_NAME = "rights";
-   
+   private static final XmlName XML_NAME = new XmlName(
+           Namespaces.PREFIX_ATOM, "rights", Namespaces.NS_ATOM);
+
+
+
    /** 
     * Create a new instance and set the prefix to 
     * 'atom' and the local name to 'rights'. 
     */
    public Rights()
    {
-      super(Namespaces.PREFIX_ATOM, ELEMENT_NAME);
+      super(XML_NAME);
+   }
+
+   public static XmlName elementName()
+   {
+       return XML_NAME;
    }
 
 }

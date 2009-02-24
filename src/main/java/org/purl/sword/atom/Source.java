@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -36,6 +36,8 @@
  */
 package org.purl.sword.atom;
 
+import java.util.ArrayList;
+import java.util.Properties;
 import nu.xom.Element;
 import nu.xom.Elements;
 
@@ -43,7 +45,10 @@ import org.purl.sword.base.Namespaces;
 import org.purl.sword.base.SwordElementInterface;
 import org.purl.sword.base.UnmarshallException;
 import org.purl.sword.base.XmlElement;
+import org.purl.sword.base.XmlName;
 import org.apache.log4j.Logger;
+import org.purl.sword.base.SwordValidationInfo;
+import org.purl.sword.base.SwordValidationInfoType;
 
 /**
  * Represents an ATOM Generator element. 
@@ -55,7 +60,8 @@ public class Source extends XmlElement implements SwordElementInterface
 	/**
 	 * Local name for the element. 
 	 */
-   public static final String ELEMENT_NAME = "source";
+   private static final XmlName XML_NAME = new XmlName(
+           Namespaces.PREFIX_ATOM, "source", Namespaces.NS_ATOM);
    
    /**
     * The generator data for this object. 
@@ -73,9 +79,14 @@ public class Source extends XmlElement implements SwordElementInterface
     */
    public Source()
    {
-      super(Namespaces.PREFIX_ATOM, ELEMENT_NAME);   
+      super(XML_NAME);
    }
-   
+
+   public static XmlName elementName()
+   {
+       return XML_NAME;
+   }
+
    /**
     * Marshall the data stored in this object into Element objects. 
     * 
@@ -83,7 +94,7 @@ public class Source extends XmlElement implements SwordElementInterface
     */
    public Element marshall()
    {
-      Element source = new Element(getQualifiedName(), Namespaces.NS_ATOM);
+      Element source = new Element(getQualifiedName(), xmlName.getNamespace());
       
       if( generator != null )
       {
@@ -106,13 +117,32 @@ public class Source extends XmlElement implements SwordElementInterface
    public void unmarshall(Element source) 
    throws UnmarshallException 
    {
-      if( ! isInstanceOf(source, localName, Namespaces.NS_ATOM))
+      unmarshall(source, null);
+   }
+
+   /**
+    * 
+    * @param source
+    * @param validate
+    * @return
+    * @throws org.purl.sword.base.UnmarshallException
+    */
+   public SwordValidationInfo unmarshall(Element source, Properties validationProperties)
+   throws UnmarshallException
+   {
+      if( ! isInstanceOf(source, xmlName.getLocalName(), Namespaces.NS_ATOM))
       {
-         throw new UnmarshallException( "Not an atom:source element" );
+         //throw new UnmarshallException( "Not an atom:source element" );
+          return handleIncorrectElement(source, validationProperties);
       }
-      
+
+      ArrayList<SwordValidationInfo> validationItems = new ArrayList<SwordValidationInfo>();
+      ArrayList<SwordValidationInfo> attributeItems = new ArrayList<SwordValidationInfo>();
+
       try
       {
+         processUnexpectedAttributes(source, attributeItems);
+
          // retrieve all of the sub-elements
          Elements elements = source.getChildElements();
          Element element = null; 
@@ -121,10 +151,18 @@ public class Source extends XmlElement implements SwordElementInterface
          for(int i = 0; i < length; i++ )
          {
             element = elements.get(i);
-            if( isInstanceOf(element, Generator.ELEMENT_NAME, Namespaces.NS_ATOM ) )
+            if( isInstanceOf(element, Generator.elementName()) )
             {
                generator = new Generator(); 
                generator.unmarshall(element);
+            }
+            else
+            {
+               SwordValidationInfo info = new SwordValidationInfo(new XmlName(element),
+                       SwordValidationInfo.UNKNOWN_ELEMENT,
+                       SwordValidationInfoType.INFO);
+               info.setContentDescription(element.getValue());
+               validationItems.add(info);
             }
          }
       }
@@ -133,7 +171,32 @@ public class Source extends XmlElement implements SwordElementInterface
          log.error("Unable to parse an element in Source: " + ex.getMessage());
          throw new UnmarshallException("Unable to parse an element in Source", ex);
       }
+
+      SwordValidationInfo result = null;
+      if( validationProperties != null )
+      {
+          result = validate(validationItems, attributeItems, validationProperties);
+      }
+      return result;
+
    }
+
+   public SwordValidationInfo validate(Properties validationContext)
+   {
+       return validate(null, null, validationContext);
+   }
+
+   public SwordValidationInfo validate(ArrayList<SwordValidationInfo> elements,
+           ArrayList<SwordValidationInfo> attributes,
+           Properties validationContext)
+   {
+       SwordValidationInfo result = new SwordValidationInfo(xmlName);
+       
+       
+       result.addUnmarshallValidationInfo(elements, attributes);
+       return result;
+   }
+
 
    /**
     * Get the generator. 

@@ -46,7 +46,7 @@ public class ClientConstants
    /** 
     * Current software version. 
     */
-   public static final String CLIENT_VERSION = "1.0";
+   public static final String CLIENT_VERSION = "1.1";
 
    /**
     * the name of this application

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -39,6 +39,7 @@ package org.purl.sword.base;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import java.util.Properties;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
@@ -151,28 +152,83 @@ public class ServiceDocument {
 	 *             as a result of an error in parsing the XML string, extracting
 	 *             information.
 	 */
-	public void unmarshall(String xml) throws UnmarshallException {
-		//
+	public void unmarshall(String xml) throws UnmarshallException
+    {
+       unmarshall(xml, null);
+    }
+
+    /**
+     * 
+     * @param xml
+     * @param validationProperties
+     * @return
+     * @throws org.purl.sword.base.UnmarshallException
+     */
+    public SwordValidationInfo unmarshall(String xml, Properties validationProperties)
+    throws UnmarshallException
+    {
 		try {
 			Builder builder = new Builder();
-			Document doc = builder.build(xml, "http://something.com/here");
-			Element root = doc.getRootElement();
-			unmarshall(root);
+			Document doc = builder.build(xml, Namespaces.PREFIX_APP);
+            Element root = doc.getRootElement();
+			return unmarshall(root, validationProperties);
 		} catch (ParsingException ex) {
 			throw new UnmarshallException("Unable to parse the XML", ex);
 		} catch (IOException ex) {
 			throw new UnmarshallException("Error acessing the file?", ex);
-
 		}
 	}
 
-	public void unmarshall(Element element) throws UnmarshallException {
+
+    /**
+     * Unmarshall the specified element. This version does not generate any
+     * valiation information.
+     *
+     * @param element
+     * @throws org.purl.sword.base.UnmarshallException
+     */
+	public void unmarshall(Element element)
+    throws UnmarshallException
+    {
+       unmarshall(element, null);
+    }
+
+    /**
+     * Unmarshall the specified element, and return the generated validation
+     * information.
+     * 
+     * @param element
+     * @param validationProperties
+     * @return
+     * @throws org.purl.sword.base.UnmarshallException
+     */
+    public SwordValidationInfo unmarshall(Element element, Properties validationProperties)
+    throws UnmarshallException
+    {
 		service = new Service();
 		try {
-			service.unmarshall(element);
+			return service.unmarshall(element, validationProperties);
 		} catch (UnmarshallException e) {
 			throw new UnmarshallException("Unable to parse the XML", e);
 		}
 	}
 
+
+    public SwordValidationInfo validate()
+    {
+        if( service == null )
+        {
+            return null;
+        }
+        return service.validate(new Properties());
+    }
+
+    public SwordValidationInfo validate(Properties validationContext)
+    {
+        if( service == null)
+        {
+            return null;
+        }
+        return service.validate(validationContext);
+    }
 }

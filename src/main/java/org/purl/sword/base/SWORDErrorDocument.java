@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -36,6 +36,8 @@
  */
 package org.purl.sword.base;
 
+import java.util.ArrayList;
+import java.util.Properties;
 import nu.xom.Attribute;
 import nu.xom.Element;
 
@@ -46,20 +48,28 @@ import org.purl.sword.atom.Title;
 /**
  * Extension of the SWORD Entry class, specialized for Error Documents. 
  * 
- * @author Stuart Lewis
- */
-public class SWORDErrorDocument extends SWORDEntry 
+ * @author Stuart Lewis (sdl@aber.ac.uk)
+ * @author Neil Taylor (nst@aber.ac.uk)
+ */ 
+public class SWORDErrorDocument extends SWORDEntry
 {
 	/**
 	* Local name for the element. 
 	*/
+   @Deprecated
    public static final String ELEMENT_NAME = "error";
    
    /**
     * The logger.
     */
    private static Logger log = Logger.getLogger(SWORDErrorDocument.class);
-   
+
+   private static final XmlName XML_NAME =
+           new XmlName(Namespaces.PREFIX_SWORD, "error", Namespaces.NS_SWORD);
+
+   private static final XmlName ATTRIBUTE_HREF_NAME =
+           new XmlName(Namespaces.PREFIX_SWORD, "href", Namespaces.NS_SWORD);
+
    /**
     * The Error URI
     */
@@ -70,17 +80,37 @@ public class SWORDErrorDocument extends SWORDEntry
     * as this will set the errorURI)
     */
    public SWORDErrorDocument() {
-	   super(Namespaces.PREFIX_SWORD, ELEMENT_NAME);
-	}
-   
+	   super(XML_NAME.getPrefix(),
+             XML_NAME.getLocalName(),
+             XML_NAME.getNamespace());
+   }
+
    /**
     * Create the error document
     * 
     * @param errorURI The URI of the error
     */
    public SWORDErrorDocument(String errorURI) {
-	   super(Namespaces.PREFIX_SWORD, ELEMENT_NAME);
+	   this();
 	   this.errorURI = errorURI;
+   }
+
+   /**
+    * Get the element name.
+    * 
+    * @return
+    */
+   public static XmlName elementName()
+   {
+      return XML_NAME; 
+   }
+
+   /**
+    * 
+    */
+   protected void initialise()
+   {
+       super.initialise();
    }
    
    /**
@@ -112,9 +142,129 @@ public class SWORDErrorDocument extends SWORDEntry
     */
    public void unmarshall(Element entry) throws UnmarshallException
    {
-      super.unmarshall(entry);
-      errorURI = entry.getAttributeValue("href");
-   }  
+       unmarshall(entry, null);
+   }
+
+   /**
+    * 
+    * @param entry
+    * @param validationProperties
+    * @return
+    * @throws org.purl.sword.base.UnmarshallException
+    */
+   public SwordValidationInfo unmarshall(Element entry, Properties validationProperties)
+   throws UnmarshallException
+   {
+      SwordValidationInfo result = super.unmarshall(entry, validationProperties);
+      result.clearValidationItems();
+
+      errorURI = entry.getAttributeValue(ATTRIBUTE_HREF_NAME.getLocalName());
+      
+      if( validationProperties != null )
+      {
+         result = validate(result, validationProperties);
+      }
+      
+      return result;
+   }
+
+   /**
+    * This method overrides the XmlElement definition so that it can allow
+    * the definition of the href attribute. All other attributes are
+    * shown as 'Unknown Attribute' info elements.
+    *
+    * @param element The element that contains the attributes
+    * @param info    The info object that will hold the validation info. 
+    */
+   @Override
+   protected void processUnexpectedAttributes(Element element, SwordValidationInfo info)
+   {
+       int attributeCount = element.getAttributeCount();
+       Attribute attribute = null;
+
+       for( int i = 0; i < attributeCount; i++ )
+       {
+            attribute = element.getAttribute(i);
+            if( ! ATTRIBUTE_HREF_NAME.getLocalName().equals(attribute.getQualifiedName()) )
+            {
+
+               XmlName attributeName = new XmlName(attribute.getNamespacePrefix(),
+                       attribute.getLocalName(),
+                       attribute.getNamespaceURI());
+
+               SwordValidationInfo item = new SwordValidationInfo(xmlName, attributeName,
+                       SwordValidationInfo.UNKNOWN_ATTRIBUTE,
+                       SwordValidationInfoType.INFO);
+               item.setContentDescription(attribute.getValue());
+               info.addUnmarshallAttributeInfo(item);
+            }
+       }
+   }
+
+   /**
+    *
+    * @param elementName
+    * @return
+    */
+   protected boolean isElementChecked(XmlName elementName)
+   {
+       return super.isElementChecked(elementName);
+   }
+
+   /**
+    *
+    * @return
+    */
+   public SwordValidationInfo validate(Properties validationContext)
+   {
+       return validate(null, validationContext);
+   }
+
+   /**
+    * 
+    * @param elements
+    * @param attributes
+    * @return
+    */
+   protected SwordValidationInfo validate(SwordValidationInfo info, Properties validationContext)
+   {
+      
+      if( errorURI == null )
+      {
+         info.addValidationInfo(new SwordValidationInfo(xmlName, ATTRIBUTE_HREF_NAME,
+                 SwordValidationInfo.MISSING_ATTRIBUTE_WARNING,
+                 SwordValidationInfoType.WARNING));
+      }
+      else
+      {
+         boolean validUri = true;
+         if(errorURI.startsWith("http://purl.org/net/sword/error/"))
+         {
+             // check that the list of codes
+             if( ! (errorURI.equals(ErrorCodes.ERROR_CONTENT) |
+                    errorURI.equals(ErrorCodes.ERROR_CHECKSUM_MISMATCH) |
+                    errorURI.equals(ErrorCodes.ERROR_BAD_REQUEST) |
+                    errorURI.equals(ErrorCodes.TARGET_OWNER_UKNOWN) |
+                    errorURI.equals(ErrorCodes.MEDIATION_NOT_ALLOWED)) )
+             {
+                 info.addValidationInfo(new SwordValidationInfo(xmlName,
+                         ATTRIBUTE_HREF_NAME,
+                         "Errors in the SWORD namespace are reserved and legal values are enumerated in the SWORD 1.3 specification. Implementations MAY define their own errors, but MUST use a different namespace to do so.",
+                         SwordValidationInfoType.ERROR));
+                 validUri = false; 
+             }
+         }
+
+         if( validUri )
+         {
+             SwordValidationInfo item = new SwordValidationInfo(xmlName, ATTRIBUTE_HREF_NAME);
+             item.setContentDescription(errorURI);
+             info.addAttributeValidationInfo(item);
+         }
+      }
+      return info; 
+   }
+
    
    /**
     * Get the error URI
@@ -143,7 +293,7 @@ public class SWORDErrorDocument extends SWORDEntry
     */
    /*public static void main(String[] args)
    {
-	   SWORDErrorDocument sed = new SWORDErrorDocument(ErrorCodes.MEDIATION_NOT_ALLOWED);
+	   SWORDErrorDocumentTest sed = new SWORDErrorDocumentTest(ErrorCodes.MEDIATION_NOT_ALLOWED);
 	   sed.setNoOp(true);
 	   sed.setTreatment("Short back and shine");
 	   sed.setId("123456789");

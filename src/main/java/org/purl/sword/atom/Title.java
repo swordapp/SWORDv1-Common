@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -37,6 +37,7 @@
 package org.purl.sword.atom;
 
 import org.purl.sword.base.Namespaces;
+import org.purl.sword.base.XmlName;
 
 /**
  * Represents an ATOM Title element. This is a simple subclass of the 
@@ -46,10 +47,18 @@ import org.purl.sword.base.Namespaces;
  */
 public class Title extends TextConstruct
 {
+
 	/**
 	 * Local name part of the element. 
 	 */
-	public static final String ELEMENT_NAME = "title"; 
+    @Deprecated
+	public static final String ELEMENT_NAME = "title";
+
+    /**
+     * XML Name representation. 
+     */
+    private static final XmlName XML_NAME = new XmlName(Namespaces.PREFIX_ATOM,
+            "title", Namespaces.NS_ATOM);
 
 	/** 
 	 * Create a new instance and set the prefix to 
@@ -57,6 +66,11 @@ public class Title extends TextConstruct
 	 */
 	public Title()
 	{
-		super(Namespaces.PREFIX_ATOM, ELEMENT_NAME);
+		super(XML_NAME);
 	}
+
+    public static XmlName elementName()
+    {
+        return XML_NAME;
+    }
 }

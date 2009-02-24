@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -36,8 +36,12 @@
  */
 package org.purl.sword.base;
 
+import java.util.ArrayList;
+import java.util.Properties;
+import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
+import org.apache.log4j.Logger;
 
 /**
  * Parent class for all classes that represent an XML element. This provides
@@ -46,17 +50,34 @@ import nu.xom.Node;
  * 
  * @author Neil Taylor
  */
-public class XmlElement 
+public abstract class XmlElement
 {
+
+    /** Logger */
+   private static Logger log = Logger.getLogger(XmlElement.class);
+
+
+   /**
+    *
+    */
+   protected XmlName xmlName;
+
+
+   public XmlName getXmlName()
+   {
+       // FIXME - should this be a clone?
+       return xmlName; 
+   }
+
    /**
     * The name to use for the prefix. E.g. atom:title, atom is the prefix. 
     */
-   protected String prefix; 
+   //protected String prefix;
    
    /**
     * The local name of the element. E.g. atom:title, title is the local name. 
     */
-   protected String localName; 
+   //protected String localName;
       
    /**
     * Create a new instance. Set the local name that will be used. 
@@ -76,8 +97,28 @@ public class XmlElement
     */
    public XmlElement(String prefix, String localName)
    {
-      this.prefix = prefix;
-      this.localName = localName;
+      this.xmlName = new XmlName(prefix, localName, "");
+   }
+
+   /**
+    * Create a new insatnce. Set the prefix, local name and the namespace URI.
+    *
+    * @param prefix       The prefix.
+    * @param localName    The element's local name. 
+    * @param namespaceUri The namespace URI.
+    */
+   public XmlElement(String prefix, String localName, String namespaceUri)
+   {
+       this.xmlName = new XmlName(prefix, localName, namespaceUri);
+   }
+
+   /**
+    * 
+    * @param name
+    */
+   public XmlElement(XmlName name)
+   {
+       xmlName = name; 
    }
    
    /**
@@ -86,7 +127,9 @@ public class XmlElement
     */
    protected static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
    
-   
+   /**
+    * Array of possible date formats that are permitted for date elements. 
+    */
    protected static final String[] DATE_FORMATS = 
    {
       "yyyy-MM-dd'T'HH:mm:ss'Z'",
@@ -208,7 +251,7 @@ public class XmlElement
 	   } 
 	   catch( NumberFormatException nfex )
 	   {
-	      throw new UnmarshallException("Error fomratting the number", nfex);	   
+	      throw new UnmarshallException("Error formatting the number", nfex);
 	   }
    }
       
@@ -227,6 +270,18 @@ public class XmlElement
       return (localName.equals(element.getLocalName()) && 
               namespaceURI.equals(element.getNamespaceURI()) );
    }
+
+   /**
+    * 
+    * @param element
+    * @param xmlName
+    * @return
+    */
+   protected boolean isInstanceOf(Element element, XmlName xmlName)
+   {
+       return (xmlName.getLocalName().equals(element.getLocalName()) &&
+               xmlName.getNamespace().equals(element.getNamespaceURI()));
+   }
    
    /**
     * Retrieve the qualified name for this object. This uses the
@@ -236,7 +291,7 @@ public class XmlElement
     */
    public String getQualifiedName()
    {
-      return getQualifiedName(localName);
+      return getQualifiedName(xmlName.getLocalName());
    }
 
    /**
@@ -248,13 +303,8 @@ public class XmlElement
     */
    public String getQualifiedName(String name)
    {
-      String qName = "";
-      if( prefix != null && prefix.trim().length() > 0 ) 
-      {
-         qName = prefix + ":";
-      }
-      qName += name;
-      return qName;
+      return xmlName.getQualifiedName();
+ 
    }
    
    /**
@@ -268,4 +318,89 @@ public class XmlElement
    {
 	   return prefix + ":" + name;
    }
+
+
+   public abstract SwordValidationInfo validate(Properties validationContext);
+
+   protected void processUnexpectedAttributes(Element element, ArrayList<SwordValidationInfo> attributeItems)
+   {
+       int attributeCount = element.getAttributeCount();
+       Attribute attribute = null;
+
+       for( int i = 0; i < attributeCount; i++ )
+       {
+            attribute = element.getAttribute(i);
+            XmlName attributeName = new XmlName(attribute.getNamespacePrefix(),
+                       attribute.getLocalName(),
+                       attribute.getNamespaceURI());
+
+            SwordValidationInfo info = new SwordValidationInfo(xmlName, attributeName,
+                       SwordValidationInfo.UNKNOWN_ATTRIBUTE,
+                       SwordValidationInfoType.INFO);
+            info.setContentDescription(attribute.getValue());
+            attributeItems.add(info);
+       }
+   }
+
+   /**
+    * Add the information to the unmarshall attribute section of the specified
+    * info object.
+    * 
+    * @param element
+    * @param info
+    */
+   protected void processUnexpectedAttributes(Element element, SwordValidationInfo info)
+   {
+       int attributeCount = element.getAttributeCount();
+       Attribute attribute = null;
+
+       for( int i = 0; i < attributeCount; i++ )
+       {
+            attribute = element.getAttribute(i);
+            XmlName attributeName = new XmlName(attribute.getNamespacePrefix(),
+                       attribute.getLocalName(),
+                       attribute.getNamespaceURI());
+
+            SwordValidationInfo item = new SwordValidationInfo(xmlName, attributeName,
+                       SwordValidationInfo.UNKNOWN_ATTRIBUTE,
+                       SwordValidationInfoType.INFO);
+            item.setContentDescription(attribute.getValue());
+            info.addUnmarshallAttributeInfo(item);
+       }
+   }
+
+   protected SwordValidationInfo handleIncorrectElement(Element element, Properties validationProperties)
+   throws UnmarshallException
+   {
+       log.error("Unexpected element. Expected: " + getQualifiedName() + ". Got: " +
+				   ((element != null) ? element.getQualifiedName() : "null" ));
+
+       if( validationProperties != null )
+       {
+          SwordValidationInfo info = new SwordValidationInfo(
+                    new XmlName(element.getNamespacePrefix(), element.getLocalName(), element.getNamespaceURI()),
+                    "This is not the expected element. Received: " + element.getQualifiedName() + " for namespaceUri: " + element.getNamespaceURI(),
+                    SwordValidationInfoType.ERROR
+                    );
+          return info;
+       }
+       else
+       {
+           throw new UnmarshallException( "Not a " + getQualifiedName() + " element" );
+       }
+   }
+
+   protected SwordValidationInfo createValidAttributeInfo(String name, String content)
+   {
+      XmlName attributeName = new XmlName(xmlName.getPrefix(),
+                       name,
+                       xmlName.getNamespace());
+
+      SwordValidationInfo item = new SwordValidationInfo(xmlName, attributeName);
+      item.setContentDescription(content);
+      //attributeItems.add(item);
+      return item; 
+   }
+
+   
 }

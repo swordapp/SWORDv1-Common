@@ -45,6 +45,7 @@ import java.util.Iterator;
 import java.util.Hashtable;
 import java.util.Enumeration;
 
+import java.util.List;
 import org.apache.log4j.Logger;
 import org.purl.sword.atom.Author;
 import org.purl.sword.atom.Content;
@@ -61,6 +62,7 @@ import org.purl.sword.base.SWORDEntry;
 import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.Workspace;
 import org.purl.sword.base.QualityValue;
+import org.purl.sword.base.SwordAcceptPackaging;
 
 /**
  * Example implementation of a command line client. This can send out service 
@@ -209,13 +211,13 @@ public class CmdClient implements ClientType
 							System.out.println("Accepts: " + s);
 						}
 					}
-                     Hashtable acceptsPackaging = collection.getAcceptPackaging();
+                     List<SwordAcceptPackaging> acceptsPackaging = collection.getAcceptPackaging();
+
                      String acceptPackagingList = "";
-                     for(Enumeration e = acceptsPackaging.keys();e.hasMoreElements();)
+                     for(Iterator i = acceptsPackaging.iterator();i.hasNext();)
                      {
-                        String key = (String) e.nextElement();
-                        QualityValue packagingValue = (QualityValue)acceptsPackaging.get(key);
-                        acceptPackagingList +=  key + " ("+packagingValue+"), ";
+                        SwordAcceptPackaging accept = (SwordAcceptPackaging) i.next();
+                        acceptPackagingList +=  accept.getContent() + " ("+ accept.getQualityValue() +"), ";
                      }
                      System.out.println("Accepts Packaging: "+ acceptPackagingList);
 
@@ -401,7 +403,17 @@ public class CmdClient implements ClientType
 			   System.out.println(link.toString());
 			}
 
-			System.out.println( "Published: " + entry.getPublished());
+            Generator generator = entry.getGenerator();
+            if( generator != null )
+            {
+                System.out.println("Generator - " + generator.toString());
+            }
+            else
+            {
+                System.out.println("There is no generator");
+            }
+
+            System.out.println( "Published: " + entry.getPublished());
 			
 			Content content = entry.getContent();
 			if( content != null ) 
@@ -424,26 +436,8 @@ public class CmdClient implements ClientType
             System.out.println("There is no right element.");
          }
 			
-			Source source = entry.getSource();
-			if( source != null ) 
-         {
-            Generator generator = source.getGenerator();
-            if( generator != null ) 
-            {
-               System.out.println(generator.toString());
-            }
-            else
-            {
-               System.out.println("The generator is not specified");
-            }
-         }
-         else
-         {
-            System.out.println("There is no source element.");
-         }
-			
-			Summary summary = entry.getSummary();
-			if( summary != null ) 
+	     Summary summary = entry.getSummary();
+		 if( summary != null )
          {
             
             System.out.println(summary.toString());

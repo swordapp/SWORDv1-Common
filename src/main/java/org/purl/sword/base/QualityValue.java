@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -88,9 +88,10 @@ public class QualityValue {
 		
 		// Check there are no more than three digits after the decimal point
 		String qStr = "" + q;
-		if (qStr.length() > 5)
+        int pos = qStr.indexOf(".");
+        if (qStr.substring(pos + 1).length() > 3)
 		{
-			throw new NumberFormatException("Invalid value - no more than three digits after the decimal point");
+			throw new NumberFormatException("Invalid value - no more than three digits after the decimal point: " + qStr);
 		}
 		quality = q;
 	}

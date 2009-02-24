@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -36,15 +36,21 @@
  */
 package org.purl.sword.atom;
 
+import java.util.ArrayList;
+import java.util.Properties;
 import nu.xom.Attribute;
 import nu.xom.Element;
 
+import nu.xom.Node;
 import org.purl.sword.base.Namespaces;
 import org.purl.sword.base.SwordElementInterface;
 import org.purl.sword.base.UnmarshallException;
 import org.purl.sword.base.XmlElement;
 
 import org.apache.log4j.Logger;
+import org.purl.sword.base.SwordValidationInfo;
+import org.purl.sword.base.SwordValidationInfoType;
+import org.purl.sword.base.XmlName;
 
 /**
  * Represents an ATOM Content element. 
@@ -53,11 +59,6 @@ import org.apache.log4j.Logger;
  */
 public class Content extends XmlElement implements SwordElementInterface
 {
-	/**
-	* Local name for the element. 
-	*/
-   public static final String ELEMENT_NAME = "content";
-   
    /**
     * The identifier for the src attribute. 
     */
@@ -82,14 +83,25 @@ public class Content extends XmlElement implements SwordElementInterface
     * The log.
     */
    private static Logger log = Logger.getLogger(Content.class);
-   
+
+   /**
+    * 
+    */
+   private static final XmlName XML_NAME =
+           new XmlName(Namespaces.PREFIX_ATOM, "content", Namespaces.NS_ATOM);
+
    /**
     * Create a new instance and set the prefix to 
     * 'atom' and the local name to 'content'.  
     */
    public Content()
    {
-      super(Namespaces.PREFIX_ATOM, ELEMENT_NAME);
+      super(XML_NAME);
+   }
+
+   public static XmlName elementName()
+   {
+       return XML_NAME;
    }
    
    /**
@@ -168,6 +180,12 @@ public class Content extends XmlElement implements SwordElementInterface
       return content;
    }
 
+   public void unmarshall(Element content)
+   throws UnmarshallException
+   {
+      unmarshall(content, null);
+   }
+
    /**
     * Unmarshall the content element into the data in this object. 
     * 
@@ -175,13 +193,17 @@ public class Content extends XmlElement implements SwordElementInterface
     *                             content element or if there are problems
     *                             accessing the data. 
     */
-   public void unmarshall(Element content)
+   public SwordValidationInfo unmarshall(Element content, Properties validationProperties)
    throws UnmarshallException 
    {
-      if( ! isInstanceOf( content, localName, Namespaces.NS_ATOM))
+
+      if( ! isInstanceOf( content, xmlName.getLocalName(), Namespaces.NS_ATOM))
       {
-         throw new UnmarshallException("Element is not of the correct type");
+         return handleIncorrectElement(content, validationProperties);
       }
+
+      ArrayList<SwordValidationInfo> elements = new ArrayList<SwordValidationInfo>();
+      ArrayList<SwordValidationInfo> attributes = new ArrayList<SwordValidationInfo>();
       
       try
       {
@@ -195,26 +217,93 @@ public class Content extends XmlElement implements SwordElementInterface
             if( ATTRIBUTE_TYPE.equals(name))
             {
                 type = attribute.getValue();
+                if( validationProperties != null )
+                {
+                   attributes.add(createValidAttributeInfo(ATTRIBUTE_TYPE, type));
+                }
             }
-            
-            if( ATTRIBUTE_SRC.equals(name) )
+            else if( ATTRIBUTE_SRC.equals(name) )
             {
                source = attribute.getValue();
+               if( validationProperties != null )
+               {
+                  attributes.add(createValidAttributeInfo(ATTRIBUTE_SRC, source));
+               }
+            }
+            else
+            {
+               SwordValidationInfo info = new SwordValidationInfo(xmlName,
+                       new XmlName(attribute),
+                       SwordValidationInfo.UNKNOWN_ATTRIBUTE,
+                       SwordValidationInfoType.INFO );
+                info.setContentDescription(attribute.getValue());
+                attributes.add(info);
             }
          }
+
+         // check if there is any content. If there is, add a simple message to
+         // say that there are sub elements that are not used in this profile
+         if( content.getChildCount() > 0 )
+         {
+            elements.add(new SwordValidationInfo(xmlName,
+                    "This element has child elements. These are not expected as part of the SWORD profile",
+                    SwordValidationInfoType.INFO));
+         }
+
       }
       catch( Exception ex )
       {
          log.error("Unable to parse an element in Content: " + ex.getMessage());
          throw new UnmarshallException("Error parsing Content", ex);
       }
+
+      SwordValidationInfo result = null;
+      if( validationProperties != null )
+      {
+          result = validate(elements, attributes, validationProperties);
+      }
+      return result;
    }
 
+   public SwordValidationInfo validate(Properties validationContext)
+   {
+       return validate(null, null, validationContext);
+   }
+
+   /**
+    * 
+    * @param elements
+    * @param attributes
+    * @return
+    */
+   protected SwordValidationInfo validate(ArrayList<SwordValidationInfo> elements,
+           ArrayList<SwordValidationInfo> attributes,
+           Properties validationContext)
+   {
+       SwordValidationInfo info = new SwordValidationInfo(xmlName);
+
+       if( source == null )
+       {
+           XmlName attributeName = new XmlName(xmlName.getPrefix(),
+                       ATTRIBUTE_SRC,
+                       xmlName.getNamespace());
+
+          SwordValidationInfo item = new SwordValidationInfo(xmlName, attributeName,
+                  SwordValidationInfo.MISSING_ATTRIBUTE_WARNING,
+                  SwordValidationInfoType.ERROR);
+          info.addValidationInfo(item);
+       }
+
+       info.addUnmarshallValidationInfo(elements, attributes);
+       return info; 
+   }
+   
    /**
     * Get a string representation. 
     * 
     * @return String
     */
+   @Override
    public String toString()
    {
       return "Content - source: " + getSource() + " type: " + getType();

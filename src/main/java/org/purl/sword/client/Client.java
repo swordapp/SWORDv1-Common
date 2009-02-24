@@ -46,6 +46,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 
+import java.util.Properties;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -61,6 +62,7 @@ import org.purl.sword.base.DepositResponse;
 import org.purl.sword.base.HttpHeaders;
 import org.purl.sword.base.SWORDErrorDocument;
 import org.purl.sword.base.ServiceDocument;
+import org.purl.sword.base.SwordValidationInfo;
 import org.purl.sword.base.UnmarshallException;
 
 /**
@@ -286,17 +288,20 @@ public class Client implements SWORDClient {
 			httpget.setDoAuthentication(true);
 		}
 
-		// if (( onBehalfOf != null ) && ( ! onBehalfOf.trim().equals("") ))
+        Properties properties = new Properties();
+
 		if (containsValue(onBehalfOf)) {
 			log.debug("Setting on-behalf-of: " + onBehalfOf);
 			httpget.addRequestHeader(new Header(HttpHeaders.X_ON_BEHALF_OF,
 					onBehalfOf));
+            properties.put(HttpHeaders.X_ON_BEHALF_OF, onBehalfOf);
 		}
 
 		if (containsValue(userAgent)) {
 			log.debug("Setting userAgent: " + userAgent);
 			httpget.addRequestHeader(new Header(HttpHeaders.USER_AGENT,
 					userAgent));
+            properties.put(HttpHeaders.USER_AGENT, userAgent);
 		}
 
 		ServiceDocument doc = null;
@@ -311,7 +316,7 @@ public class Client implements SWORDClient {
 				String message = readResponse(httpget.getResponseBodyAsStream());
 				log.debug("returned message is: " + message);
 				doc = new ServiceDocument();
-				doc.unmarshall(message);
+				lastUnmarshallInfo = doc.unmarshall(message, properties);
 			} else {
 				throw new SWORDClientException(
 						"Received error from service document request: "
@@ -329,6 +334,17 @@ public class Client implements SWORDClient {
 
 		return doc;
 	}
+
+    private SwordValidationInfo lastUnmarshallInfo;
+
+    /**
+     * 
+     * @return
+     */
+    public SwordValidationInfo getLastUnmarshallInfo()
+    {
+        return lastUnmarshallInfo;
+    }
 
 	/**
 	 * Post a file to the server. The different elements of the post are encoded
@@ -431,8 +447,8 @@ public class Client implements SWORDClient {
 				response = new DepositResponse(status.getCode()); 
 				response.setLocation(httppost.getResponseHeader("Location").getValue());
 				// added call for the status code.
-				response.unmarshall(messageBody);
-			}
+				lastUnmarshallInfo = response.unmarshall(messageBody, new Properties());
+            }
 			else {
 				messageBody = readResponse(httppost
 						.getResponseBodyAsStream());

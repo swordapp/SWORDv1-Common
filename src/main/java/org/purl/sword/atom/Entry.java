@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -37,18 +37,22 @@
 package org.purl.sword.atom;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import java.util.Properties;
 import nu.xom.Element;
 import nu.xom.Elements;
 
 import org.apache.log4j.Logger;
+import org.purl.sword.base.HttpHeaders;
 import org.purl.sword.base.Namespaces;
 import org.purl.sword.base.SwordElementInterface;
+import org.purl.sword.base.SwordValidationInfo;
+import org.purl.sword.base.SwordValidationInfoType;
 import org.purl.sword.base.UnmarshallException;
 import org.purl.sword.base.XmlElement;
+import org.purl.sword.base.XmlName;
 
 /**
  * Represents an ATOM entry. 
@@ -58,34 +62,40 @@ import org.purl.sword.base.XmlElement;
  */
 public class Entry extends XmlElement implements SwordElementInterface
 {
-	/**
+   /**
 	* Local name for the element. 
 	*/
+   @Deprecated
    public static final String ELEMENT_NAME = "entry";
    
    /**
     * Local name for the atom id element. 
     */
+   @Deprecated
    public static final String ELEMENT_ID = "id";
    
    /**
     * Local name for the atom published element. 
     */
+   @Deprecated
    public static final String ELEMENT_PUBLISHED = "published";
    
    /**
     * Local name for the atom updated element. 
     */
+   @Deprecated
    public static final String ELEMENT_UPDATED = "updated";
 
    /**
     * Local name for the atom category element. 
     */
+   @Deprecated
    public static final String ELEMENT_CATEGORY = "category";
 
    /**
     * Local name for the atom generator element. 
     */
+   @Deprecated
    public static final String ELEMENT_GENERATOR = "generator";
    
    /**
@@ -97,7 +107,7 @@ public class Entry extends XmlElement implements SwordElementInterface
    /**
     * The atom:category data. There can be 0 or more of these elements.
     */
-   private List<String> categories; 
+   private List<Category> categories;
 
    /**
     * A single content element for the Entry. 
@@ -120,7 +130,7 @@ public class Entry extends XmlElement implements SwordElementInterface
     * but these have not been modelled in this version. The content of 
     * ID is an unconstrained string, which is intended to represent a URI. 
     */
-   private String id; 
+   private Id id;
 
    /**
     * A list of link elements. This can contain 0 or more entries. 
@@ -134,7 +144,7 @@ public class Entry extends XmlElement implements SwordElementInterface
     * 
     * This item is optional. 
     */
-   private String published; 
+   private Published published;
 
    /**
     * A single, optional, content element for the Entry. 
@@ -144,6 +154,7 @@ public class Entry extends XmlElement implements SwordElementInterface
    /**
     * A single, optional, content element for the Entry. 
     */
+   @Deprecated
    private Source source; 
 
    /**
@@ -159,7 +170,7 @@ public class Entry extends XmlElement implements SwordElementInterface
    /**
     * The date on which the entry was last updated.  
     */
-   private String updated; 
+   private Updated updated;
 
    /**
     * The log. 
@@ -167,12 +178,20 @@ public class Entry extends XmlElement implements SwordElementInterface
    private static Logger log = Logger.getLogger(Entry.class);
 
    /**
+    * The prefix, local name and namespace used for this element.
+    */
+   private static final XmlName XML_NAME =
+           new XmlName(Namespaces.PREFIX_ATOM, "entry", Namespaces.NS_ATOM);
+
+   /**
     * Create a new instance of the class and initialise it. 
     * Also, set the prefix to 'atom' and the local name to 'entry'. 
     */
    public Entry() 
    {
-      this(Namespaces.PREFIX_ATOM, ELEMENT_NAME);
+      this(XML_NAME.getPrefix(),
+           XML_NAME.getLocalName(),
+           XML_NAME.getNamespace());
    }
    
    /**
@@ -182,12 +201,64 @@ public class Entry extends XmlElement implements SwordElementInterface
      * @param namespace The namespace of the element
     * @param element The element name
     */
-   public Entry(String namespace, String element)
+   public Entry(String prefix, String element)
    {
-	   super(namespace, element);
-	   
+	   this(prefix, element, XML_NAME.getNamespace());
+   }
+
+   /**
+    * 
+    * @param prefix
+    * @param element
+    * @param namespaceUri
+    */
+   public Entry(String prefix, String element, String namespaceUri)
+   {
+       super(prefix, element, namespaceUri);
+       initialise();
+   }
+
+   public Entry(XmlName name)
+   {
+       this(name.getPrefix(), name.getLocalName(), name.getNamespace());
+   }
+
+
+
+   public static XmlName elementName()
+   {
+       return XML_NAME;
+   }
+
+   protected boolean isElementChecked(XmlName elementName)
+   {
+       if( elementName == null )
+       {
+           return false;
+       }
+
+       return elementName.equals(Author.elementName()) |
+              elementName.equals(Category.elementName()) |
+              elementName.equals(Content.elementName()) |
+              elementName.equals(Generator.elementName()) |
+              elementName.equals(Contributor.elementName()) |
+              elementName.equals(Id.elementName()) |
+              elementName.equals(Link.elementName()) |
+              elementName.equals(Published.elementName()) |
+              elementName.equals(Rights.elementName()) |
+              elementName.equals(Source.elementName()) |
+              elementName.equals(Summary.elementName()) |
+              elementName.equals(Title.elementName()) |
+              elementName.equals(Updated.elementName());
+   }
+
+   /**
+    * 
+    */
+   protected void initialise()
+   {
 	   authors = new ArrayList<Author>();
-	   categories = new ArrayList<String>();
+	   categories = new ArrayList<Category>();
 	   contributors = new ArrayList<Contributor>();
 	   links = new ArrayList<Link>();
    }
@@ -210,9 +281,7 @@ public class Entry extends XmlElement implements SwordElementInterface
    {
 	      if (id != null)
 	      {
-	         Element idElement = new Element(getQualifiedNameWithPrefix(Namespaces.PREFIX_ATOM, ELEMENT_ID), Namespaces.NS_ATOM);
-	         idElement.appendChild(id);
-	         entry.appendChild(idElement);
+             entry.appendChild(id.marshall());
 	      }
 
 	      for (Author author : authors)
@@ -242,9 +311,7 @@ public class Entry extends XmlElement implements SwordElementInterface
 
 	      if (published != null)
 	      {
-	         Element publishedElement = new Element(getQualifiedNameWithPrefix(Namespaces.PREFIX_ATOM, ELEMENT_PUBLISHED), Namespaces.NS_ATOM);
-	         publishedElement.appendChild(published);
-	         entry.appendChild(publishedElement);
+             entry.appendChild(published.marshall());
 	      }
 
 	      if (rights != null)
@@ -269,17 +336,12 @@ public class Entry extends XmlElement implements SwordElementInterface
 
 	      if (updated != null)
 	      {
-	         Element updatedElement = new Element(getQualifiedNameWithPrefix(Namespaces.PREFIX_ATOM, ELEMENT_UPDATED), Namespaces.NS_ATOM);
-	         updatedElement.appendChild(updated);
-	         entry.appendChild(updatedElement);
+             entry.appendChild(updated.marshall());
 	      }
 
-	      Element categoryElement = null; 
-	      for (String category : categories)
+	      for (Category category : categories)
 	      {
-	         categoryElement = new Element(getQualifiedNameWithPrefix(Namespaces.PREFIX_ATOM, ELEMENT_CATEGORY), Namespaces.NS_ATOM );
-	         categoryElement.appendChild(category);
-	         entry.appendChild(categoryElement);
+             entry.appendChild(category.marshall());
 	      }
    }
 
@@ -296,20 +358,25 @@ public class Entry extends XmlElement implements SwordElementInterface
    public void unmarshall(Element entry)
    throws UnmarshallException
    {
-	  if (!((isInstanceOf(entry, localName, Namespaces.NS_ATOM)) || 
-		    (isInstanceOf(entry, "error", Namespaces.NS_SWORD))))
+       unmarshall(entry, null);
+   }
+
+   public SwordValidationInfo unmarshallWithoutValidate(Element entry, Properties validationProperties)
+   throws UnmarshallException
+   {
+	  if (! isInstanceOf(entry, xmlName) )
       {
-         log.error("Unexpected element. Expected atom:entry. Got " + 
-               ((entry != null ) ? entry.getQualifiedName() : "null"));
-         throw new UnmarshallException( "Not a " + getQualifiedName() + " element" );
+         return handleIncorrectElement(entry, validationProperties);
       }
+
+      // used to hold the element and attribute unmarshall info results
+      SwordValidationInfo result = new SwordValidationInfo(xmlName);
 
       try
       {
-         authors.clear();
-         categories.clear();
-         contributors.clear();
-         links.clear(); 
+         initialise();
+
+         // FIXME - attributes? 
 
          // retrieve all of the sub-elements
          Elements elements = entry.getChildElements();
@@ -320,97 +387,187 @@ public class Entry extends XmlElement implements SwordElementInterface
          {
             element = elements.get(i);
 
-            if (isInstanceOf(element, Author.ELEMENT_NAME, Namespaces.NS_ATOM))
+            if (isInstanceOf(element, Author.elementName()))
             {
                Author author = new Author(); 
-               author.unmarshall(element);
+               result.addUnmarshallElementInfo(author.unmarshall(element, validationProperties));
                authors.add(author);
             }
-            else if (isInstanceOf(element, ELEMENT_CATEGORY, Namespaces.NS_ATOM))
+            else if (isInstanceOf(element, Category.elementName()))
             {
-               try
+               Category category = new Category();
+               result.addUnmarshallElementInfo(category.unmarshall(element, validationProperties));
+               categories.add(category); 
+            }
+            else if (isInstanceOf(element, Content.elementName()))
+            {
+               if( content == null )
                {
-                  categories.add(unmarshallString(element));
+                  content = new Content();
+                  result.addUnmarshallElementInfo(content.unmarshall(element, validationProperties));
                }
-               catch( UnmarshallException ume ) 
+               else if( validationProperties != null )
                {
-                  log.error("Error accessing the content for the categories element");
+                   SwordValidationInfo info = new SwordValidationInfo(Content.elementName(),
+                          SwordValidationInfo.DUPLICATE_ELEMENT,
+                          SwordValidationInfoType.WARNING);
+                  info.setContentDescription(element.getValue());
+                  result.addUnmarshallElementInfo(info);
+               }
+
+            }
+            else if (isInstanceOf(element, Generator.elementName()))
+            {
+               if( generator == null )
+               {
+                  generator = new Generator();
+                  result.addUnmarshallElementInfo(generator.unmarshall(element, validationProperties));
+               }
+               else if( validationProperties != null )
+               {
+                  SwordValidationInfo info = new SwordValidationInfo(Generator.elementName(),
+                          SwordValidationInfo.DUPLICATE_ELEMENT,
+                          SwordValidationInfoType.WARNING);
+                  info.setContentDescription(element.getValue());
+                  result.addUnmarshallElementInfo(info);
                }
             }
-            else if (isInstanceOf(element, Content.ELEMENT_NAME, Namespaces.NS_ATOM))
-            {
-               content = new Content();
-               content.unmarshall(element); 
-            }
-            else if (isInstanceOf(element, Generator.ELEMENT_NAME, Namespaces.NS_ATOM))
-            {
-               generator = new Generator();
-               generator.unmarshall(element); 
-            }
-            else if (isInstanceOf(element, Contributor.ELEMENT_NAME, Namespaces.NS_ATOM))
+            else if (isInstanceOf(element, Contributor.elementName()))
             {
                Contributor contributor = new Contributor(); 
-               contributor.unmarshall(element);
+               result.addUnmarshallElementInfo(contributor.unmarshall(element, validationProperties));
                contributors.add(contributor);
             }
-            else if (isInstanceOf(element, ELEMENT_ID, Namespaces.NS_ATOM))
+            else if (isInstanceOf(element, Id.elementName()))
             {
-               try
+               if( id == null )
                {
-                  id = unmarshallString(element);
+                 id = new Id();
+                 result.addUnmarshallElementInfo(id.unmarshall(element, validationProperties));
                }
-               catch( UnmarshallException ume )
+               else if( validationProperties != null )
                {
-                  log.error("Error accessing the content for the id element.");
+                  SwordValidationInfo info = new SwordValidationInfo(Id.elementName(),
+                          SwordValidationInfo.DUPLICATE_ELEMENT,
+                          SwordValidationInfoType.WARNING);
+                  info.setContentDescription(element.getValue());
+                  result.addUnmarshallElementInfo(info);
                }
+
             }
-            else if (isInstanceOf(element, Link.ELEMENT_NAME, Namespaces.NS_ATOM))
+            else if (isInstanceOf(element, Link.elementName()))
             {
                Link link = new Link(); 
-               link.unmarshall(element);
+               result.addUnmarshallElementInfo(link.unmarshall(element, validationProperties));
                links.add(link);
             }
-            else if (isInstanceOf(element, ELEMENT_PUBLISHED, Namespaces.NS_ATOM))
+            else if (isInstanceOf(element, Published.elementName()))
             {
-               try
+               if( published == null )
                {
-                  published = unmarshallString(element);
+                  published = new Published();
+                  result.addUnmarshallElementInfo(published.unmarshall(element, validationProperties));
                }
-               catch( UnmarshallException ume ) 
+               else if( validationProperties != null )
                {
-                  log.error("Error accessing the published date");
-               }
-            }
-            else if (isInstanceOf(element, Rights.ELEMENT_NAME, Namespaces.NS_ATOM))
-            {
-               rights = new Rights(); 
-               rights.unmarshall(element);
-            }
-            else if (isInstanceOf(element, Summary.ELEMENT_NAME, Namespaces.NS_ATOM))
-            {
-               summary = new Summary(); 
-               summary.unmarshall(element);
-            }
-            else if (isInstanceOf(element, Title.ELEMENT_NAME, Namespaces.NS_ATOM))
-            {
-               title = new Title(); 
-               title.unmarshall(element);
-            }
-            else if (isInstanceOf(element, ELEMENT_UPDATED, Namespaces.NS_ATOM))
-            {
-               try
-               {
-                  updated = unmarshallString(element);
-               }
-               catch( UnmarshallException ume) 
-               {
-                  log.error("Unable to access the updated date.");
+                  SwordValidationInfo info = new SwordValidationInfo(Published.elementName(),
+                          SwordValidationInfo.DUPLICATE_ELEMENT,
+                          SwordValidationInfoType.WARNING);
+                  info.setContentDescription(element.getValue());
+                  result.addUnmarshallElementInfo(info);
                }
             }
-            else if (isInstanceOf(element, Source.ELEMENT_NAME, Namespaces.NS_ATOM))
+            else if (isInstanceOf(element, Rights.elementName()))
             {
-               source = new Source(); 
-               source.unmarshall(element);
+               if( rights == null )
+               {
+                  rights = new Rights();
+                  result.addUnmarshallElementInfo(rights.unmarshall(element, validationProperties));
+               }
+               else if( validationProperties != null )
+               {
+                  SwordValidationInfo info = new SwordValidationInfo(Rights.elementName(),
+                          SwordValidationInfo.DUPLICATE_ELEMENT,
+                          SwordValidationInfoType.WARNING);
+                  info.setContentDescription(element.getValue());
+                  result.addUnmarshallElementInfo(info);
+               }
+            }
+            else if (isInstanceOf(element, Summary.elementName()))
+            {
+               if( summary == null )
+               {
+                  summary = new Summary();
+                  result.addUnmarshallElementInfo(summary.unmarshall(element, validationProperties));
+               }
+               else if( validationProperties != null )
+               {
+                  SwordValidationInfo info = new SwordValidationInfo(Summary.elementName(),
+                          SwordValidationInfo.DUPLICATE_ELEMENT,
+                          SwordValidationInfoType.WARNING);
+                  info.setContentDescription(element.getValue());
+                  result.addUnmarshallElementInfo(info);
+               }
+            }
+            else if (isInstanceOf(element, Title.elementName()))
+            {
+               if( title == null )
+               {
+                  title = new Title();
+                  result.addUnmarshallElementInfo(title.unmarshall(element, validationProperties));
+               }
+               else if( validationProperties != null )
+               {
+                  SwordValidationInfo info = new SwordValidationInfo(Title.elementName(),
+                          SwordValidationInfo.DUPLICATE_ELEMENT,
+                          SwordValidationInfoType.WARNING);
+                  info.setContentDescription(element.getValue());
+                  result.addUnmarshallElementInfo(info);
+               }
+            }
+            else if (isInstanceOf(element, Updated.elementName()))
+            {
+               if( updated == null )
+               {
+                  updated = new Updated();
+                  result.addUnmarshallElementInfo(updated.unmarshall(element, validationProperties));
+               }
+               else if( validationProperties != null )
+               {
+                  SwordValidationInfo info = new SwordValidationInfo(Updated.elementName(),
+                          SwordValidationInfo.DUPLICATE_ELEMENT,
+                          SwordValidationInfoType.WARNING);
+                  info.setContentDescription(element.getValue());
+                  result.addUnmarshallElementInfo(info);
+               }
+            }
+            else if (isInstanceOf(element, Source.elementName()))
+            {
+               if( source == null )
+               {
+                  source = new Source();
+                  result.addUnmarshallElementInfo(source.unmarshall(element, validationProperties));
+               }
+               else if( validationProperties != null )
+               {
+                  SwordValidationInfo info = new SwordValidationInfo(Source.elementName(),
+                          SwordValidationInfo.DUPLICATE_ELEMENT,
+                          SwordValidationInfoType.WARNING);
+                  info.setContentDescription(element.getValue());
+                  result.addUnmarshallElementInfo(info);
+               }
+            }
+            else if( validationProperties != null )
+            {
+                XmlName name = new XmlName(element);
+                if( ! isElementChecked(name) )
+                {
+                   SwordValidationInfo info = new SwordValidationInfo(name,
+                          SwordValidationInfo.UNKNOWN_ELEMENT,
+                          SwordValidationInfoType.INFO);
+                   info.setContentDescription(element.getValue());
+                   result.addUnmarshallElementInfo(info);
+                }
             }
 
          } // for 
@@ -418,8 +575,166 @@ public class Entry extends XmlElement implements SwordElementInterface
       catch (Exception ex)
       {
          log.error("Unable to parse an element in Entry: " + ex.getMessage());
+         ex.printStackTrace();
          throw new UnmarshallException("Unable to parse an element in " + getQualifiedName(), ex);
       }
+
+      return result; 
+   }
+
+   public SwordValidationInfo unmarshall(Element entry, Properties validationProperties)
+   throws UnmarshallException
+   {
+
+      SwordValidationInfo result = unmarshallWithoutValidate(entry, validationProperties);
+      if( validationProperties != null )
+      {
+          result = validate(result, validationProperties);
+      }
+      return result; 
+   }
+
+   /**
+    *
+    * @return
+    */
+   public SwordValidationInfo validate(Properties validationContext)
+   {
+       return validate(null, validationContext);
+   }
+
+   /**
+    *
+    * @param elementsInfo
+    * @param attributeInfo
+    * @return
+    */
+   protected SwordValidationInfo validate(SwordValidationInfo info, Properties validationContext)
+   {
+       // determine if a full validation is required 
+       boolean validateAll = (info == null);
+
+       SwordValidationInfo result = info;
+       if( result == null )
+       {
+          result = new SwordValidationInfo(xmlName);
+       }
+       
+       // id, title an updated are required
+       if( id == null )
+       {
+          result.addValidationInfo(new SwordValidationInfo(Id.elementName(),
+                  SwordValidationInfo.MISSING_ELEMENT_ERROR,
+                  SwordValidationInfoType.ERROR));
+       }
+       else if( id != null && validateAll )
+       {
+           result.addValidationInfo(id.validate(validationContext));
+       }
+
+       if( title == null )
+       {
+          result.addValidationInfo(new SwordValidationInfo(Title.elementName(),
+                  SwordValidationInfo.MISSING_ELEMENT_ERROR,
+                  SwordValidationInfoType.ERROR));
+       }
+       else if( title != null && validateAll )
+       {
+           result.addValidationInfo(title.validate(validationContext));
+       }
+
+       if( updated == null )
+       {
+          result.addValidationInfo(new SwordValidationInfo(Updated.elementName(),
+                  SwordValidationInfo.MISSING_ELEMENT_ERROR,
+                  SwordValidationInfoType.ERROR));
+       }
+       else if( updated != null && validateAll )
+       {
+           result.addValidationInfo(updated.validate(validationContext));
+       }
+
+       // additional sword requirements on the element
+       if( contributors.isEmpty() )
+       {
+          String contributor = validationContext.getProperty(HttpHeaders.X_ON_BEHALF_OF);
+          if( contributor != null )
+          {
+             result.addValidationInfo(new SwordValidationInfo(Contributor.elementName(),
+                  SwordValidationInfo.MISSING_ELEMENT_ERROR +
+                    " This item SHOULD contain the value of the X-On-Behalf-Of header, if one was present in the POST request.",
+                  SwordValidationInfoType.ERROR));
+          }
+       }
+       else if( (! contributors.isEmpty()) && validateAll )
+       {
+           Iterator<Contributor> iterator = contributors.iterator();
+           while( iterator.hasNext() )
+           {
+              Contributor contributor = iterator.next();
+              result.addValidationInfo(contributor.validate(validationContext));
+           }
+       }
+
+       if( generator == null )
+       {
+           result.addValidationInfo(new SwordValidationInfo(Generator.elementName(),
+                   SwordValidationInfo.MISSING_ELEMENT_ERROR +
+                    " SHOULD contain the URI and version of the server software.",
+                   SwordValidationInfoType.ERROR));
+       }
+       else if( generator != null && validateAll )
+       {
+           result.addValidationInfo(generator.validate(validationContext));
+       }
+
+       if( validateAll )
+       {
+           // process the remaining items
+           Iterator<Link> linksIterator = links.iterator();
+           while( linksIterator.hasNext() )
+           {
+              Link link = linksIterator.next();
+              result.addValidationInfo(link.validate(validationContext));
+           }
+
+           Iterator<Author> authorIterator = authors.iterator();
+           while( authorIterator.hasNext() )
+           {
+              Author author = authorIterator.next();
+              result.addValidationInfo(author.validate(validationContext));
+           }
+
+           if( content != null )
+           {
+               result.addValidationInfo(content.validate(validationContext));
+           }
+
+           if( published != null )
+           {
+               result.addValidationInfo(published.validate(validationContext));
+           }
+
+           if( rights != null )
+           {
+               result.addValidationInfo(rights.validate(validationContext));
+           }
+
+           if( summary != null )
+           {
+               result.addValidationInfo(summary.validate(validationContext));
+           }
+
+           Iterator<Category> categoryIterator = categories.iterator();
+           while( categoryIterator.hasNext() )
+           {
+              Category category = categoryIterator.next();
+              result.addValidationInfo(category.validate(validationContext));
+           }
+           
+       }
+
+       return result;
    }
 
    /**
@@ -456,7 +771,13 @@ public class Entry extends XmlElement implements SwordElementInterface
     * @return An iterator. 
     */
    public Iterator<String> getCategories() {
-      return categories.iterator();
+      ArrayList<String> items = new ArrayList<String>();
+      for( int i = 0; i < categories.size(); i++ )
+      {
+         items.add(categories.get(i).getContent());
+      }
+
+      return items.iterator();
    }
 
    /**
@@ -465,7 +786,7 @@ public class Entry extends XmlElement implements SwordElementInterface
     * @param category the category to add. 
     */
    public void addCategory(String category) {
-      this.categories.add(category);
+      this.categories.add(new Category(category));
    }
 
    /**
@@ -548,7 +869,11 @@ public class Entry extends XmlElement implements SwordElementInterface
     */
    public String getId() 
    {
-      return id;
+      if( id == null )
+      {
+          return null;
+      }
+      return id.getContent();
    }
 
    /**
@@ -558,7 +883,7 @@ public class Entry extends XmlElement implements SwordElementInterface
     */
    public void setId(String id) 
    {
-      this.id = id;
+      this.id = new Id(id);
    }
 
    /**
@@ -596,7 +921,11 @@ public class Entry extends XmlElement implements SwordElementInterface
     */
    public String getPublished() 
    {
-      return published;
+      if( published == null )
+      {
+          return null;
+      }
+      return published.getContent();
    }
    
    /**
@@ -610,7 +939,7 @@ public class Entry extends XmlElement implements SwordElementInterface
     */
    public void setPublished(String published) 
    {
-      this.published = published;
+      this.published = new Published(published);
    }
 
    /**
@@ -632,8 +961,10 @@ public class Entry extends XmlElement implements SwordElementInterface
 
    /**
     * Get the source for this Entry. 
-    * @return The source. 
+    * @return The source.
+    * @Deprecated
     */
+   @Deprecated
    public Source getSource() {
       return source;
    }
@@ -641,8 +972,10 @@ public class Entry extends XmlElement implements SwordElementInterface
    /**
     * Set the source for this entry. 
     * 
-    * @param source The source. 
+    * @param source The source.
+    * @Deprecated
     */
+   @Deprecated
    public void setSource(Source source) 
    {
       this.source = source;
@@ -698,7 +1031,11 @@ public class Entry extends XmlElement implements SwordElementInterface
     */
    public String getUpdated() 
    {
-      return updated;
+      if( updated == null )
+      {
+          return null;
+      }
+      return updated.getContent();
    }
 
    /**
@@ -712,6 +1049,6 @@ public class Entry extends XmlElement implements SwordElementInterface
     */ 
    public void setUpdated(String updated) 
    {
-      this.updated = updated;
+      this.updated = new Updated(updated);
    }     
 }

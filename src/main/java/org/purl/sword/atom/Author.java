@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -36,6 +36,8 @@
  */
 package org.purl.sword.atom;
 
+import java.util.ArrayList;
+import java.util.Properties;
 import nu.xom.Element;
 import nu.xom.Elements;
 
@@ -44,6 +46,9 @@ import org.purl.sword.base.SwordElementInterface;
 import org.purl.sword.base.UnmarshallException;
 import org.purl.sword.base.XmlElement;
 import org.apache.log4j.Logger;
+import org.purl.sword.base.SwordValidationInfo;
+import org.purl.sword.base.SwordValidationInfoType;
+import org.purl.sword.base.XmlName;
 
 /**
  * Represents an Author type, as used in ATOM. This class is used as the 
@@ -58,37 +63,41 @@ public class Author extends XmlElement implements SwordElementInterface
 	/**
 	* Local name for the element. 
 	*/
+   @Deprecated
    public static final String ELEMENT_NAME = "author";
    
    /**
     * Label for the 'name' attribute. 
     */
+   @Deprecated
    public static final String ELEMENT_AUTHOR_NAME = "name";
    
    /**
     * Label for the 'uri' attribute. 
     */
+   @Deprecated
    public static final String ELEMENT_URI = "uri";
    
    /**
     * Label for the 'email' attribute. 
     */
+   @Deprecated
    public static final String ELEMENT_EMAIL = "email";
    
    /**
     * The author's name. 
     */
-   private String name; 
+   private Name name;
 
    /**
     * The author's URI.  
     */
-   private String uri;
+   private Uri uri;
 
    /**
     * The author's email. 
     */
-   private String email; 
+   private Email email;
 
    /**
     * The logger. 
@@ -96,12 +105,23 @@ public class Author extends XmlElement implements SwordElementInterface
    private static Logger log = Logger.getLogger(Author.class);
 
    /**
+    *
+    */
+   private static final XmlName XML_NAME =
+           new XmlName(Namespaces.PREFIX_ATOM, "author", Namespaces.NS_ATOM);
+
+   /**
     * Create a new instance and set the prefix to 
     * 'atom' and the local name to 'author'.  
     */
    public Author()
    {
-      this(Namespaces.PREFIX_ATOM, ELEMENT_NAME);   
+      this(XML_NAME);
+   }
+
+   public Author(XmlName name)
+   {
+      super(name); 
    }
 
    /**
@@ -112,8 +132,29 @@ public class Author extends XmlElement implements SwordElementInterface
     */
    public Author(String prefix, String localName )
    {
-      super(prefix, localName);
+      this(prefix, localName, XML_NAME.getNamespace());
    }
+
+   /**
+    *
+    * @param prefix
+    * @param localName
+    * @param namespaceUri
+    */
+   public Author(String prefix, String localName, String namespaceUri)
+   {
+      super(prefix, localName, XML_NAME.getNamespace());
+   }
+
+   /**
+     * Get the XmlName for this class.
+     *
+     * @return The prefix, localname and namespace for this element.
+     */
+    public static XmlName elementName()
+    {
+        return XML_NAME;
+    }
 
    /**
     * Marshall the data in this object to a XOM Element. The element
@@ -123,32 +164,126 @@ public class Author extends XmlElement implements SwordElementInterface
     */
    public Element marshall()
    {
-      Element element = new Element(getQualifiedName(), Namespaces.NS_ATOM);
+      Element element = new Element(getQualifiedName(), xmlName.getNamespace());
 
       if( name != null )
       {
-         Element nameElement = new Element(getQualifiedName(ELEMENT_AUTHOR_NAME), Namespaces.NS_ATOM);
-         nameElement.appendChild(name);
-         element.appendChild(nameElement);
+         element.appendChild(name.marshall());
       }
 
       if( uri != null )
       {
-         Element uriElement = new Element(getQualifiedName(ELEMENT_URI), Namespaces.NS_ATOM);
-         uriElement.appendChild(uri);
-         element.appendChild(uriElement);
+         element.appendChild(uri.marshall());
       }
 
       if( email != null )
       {
-         Element emailElement = new Element(getQualifiedName(ELEMENT_EMAIL), Namespaces.NS_ATOM);
-         emailElement.appendChild(email);
-         element.appendChild(emailElement);
+         element.appendChild(email.marshall());
       }
 
       return element;
    }
 
+
+   /**
+    * Unmarshall the author details from the specified element. The element
+    * is a XOM element.
+    *
+    * @param author The element to unmarshall.
+    */
+   public SwordValidationInfo unmarshall(Element author, Properties validationProperties)
+   throws UnmarshallException
+   {
+      if( ! isInstanceOf( author, xmlName) )
+      {
+         handleIncorrectElement(author, validationProperties);
+      }
+
+      ArrayList<SwordValidationInfo> validationItems = new ArrayList<SwordValidationInfo>();
+      ArrayList<SwordValidationInfo> attributeItems = new ArrayList<SwordValidationInfo>();
+
+      processUnexpectedAttributes(author, attributeItems);
+      
+      // retrieve all of the sub-elements
+      Elements elements = author.getChildElements();
+      Element element = null;
+      int length = elements.size();
+
+      for(int i = 0; i < length; i++ )
+      {
+         element = elements.get(i);
+
+         if( isInstanceOf(element, Name.elementName() ))
+         {
+            name = new Name();
+            validationItems.add(name.unmarshall(element, validationProperties));
+         }
+         else if( isInstanceOf(element, Uri.elementName()))
+         {
+            uri = new Uri();
+            validationItems.add(uri.unmarshall(element, validationProperties));
+            
+         }
+         else if( isInstanceOf(element, Email.elementName() ))
+         {
+            email = new Email();
+            validationItems.add(email.unmarshall(element, validationProperties));
+         }
+         else if( validationProperties != null )
+         {
+            SwordValidationInfo info = new SwordValidationInfo(new XmlName(element),
+                    SwordValidationInfo.UNKNOWN_ELEMENT,
+                    SwordValidationInfoType.INFO);
+            info.setContentDescription(element.getValue());
+            validationItems.add(info);
+         }
+
+      } // for
+
+      SwordValidationInfo result = null;
+      if( validationProperties != null )
+      {
+          result = validate(validationItems, attributeItems, validationProperties);
+      }
+      return result;
+   }
+
+   public SwordValidationInfo validate(Properties validationContext)
+   {
+       return validate(null, null, validationContext);
+   }
+
+   public SwordValidationInfo validate(ArrayList<SwordValidationInfo> elements,
+           ArrayList<SwordValidationInfo> attributes,
+           Properties validationContext)
+   {
+       SwordValidationInfo result = new SwordValidationInfo(xmlName);
+
+       if( name == null )
+       {
+           SwordValidationInfo info = new SwordValidationInfo(Name.elementName(),
+                   SwordValidationInfo.MISSING_ELEMENT_ERROR,
+                   SwordValidationInfoType.ERROR);
+           result.addValidationInfo(info);
+       }
+       else if( elements == null && name != null)
+       {
+          result.addValidationInfo(name.validate(validationContext));
+       }
+
+       if( elements == null && uri != null )
+       {
+           result.addValidationInfo(uri.validate(validationContext));
+       }
+
+       if( elements == null && email != null )
+       {
+           result.addValidationInfo(email.validate(validationContext));
+       }
+
+       result.addUnmarshallValidationInfo(elements, attributes);
+       return result;
+   }
 
    /**
     * Unmarshall the author details from the specified element. The element 
@@ -159,58 +294,7 @@ public class Author extends XmlElement implements SwordElementInterface
    public void unmarshall(Element author)
    throws UnmarshallException
    {
-
-      if( ! isInstanceOf( author, localName, Namespaces.NS_ATOM))
-      {
-         log.error("Unexpected element. Expected atom:author. Got: " + 
-               ((author != null) ? author.getQualifiedName() : "null"));
-         throw new UnmarshallException("Element is not of the correct type");
-      }
-
-      // retrieve all of the sub-elements
-      Elements elements = author.getChildElements();
-      Element element = null; 
-      int length = elements.size();
-
-      for(int i = 0; i < length; i++ )
-      {
-         element = elements.get(i);
-
-         if( isInstanceOf(element, ELEMENT_AUTHOR_NAME, Namespaces.NS_ATOM ))
-         {
-            try
-            {
-               name = unmarshallString(element);
-            }
-            catch( UnmarshallException ume ) 
-            {
-               log.error("Error acessing the content for the atom:name element.");
-            }
-         }
-         if( isInstanceOf(element, ELEMENT_URI, Namespaces.NS_ATOM ))
-         {
-            try
-            {
-               uri = unmarshallString(element);
-            }
-            catch( UnmarshallException ume ) 
-            {
-               log.error("Error accessing the content for the atom::uri element.");
-            }
-         }
-         if( isInstanceOf(element, ELEMENT_EMAIL, Namespaces.NS_ATOM ))
-         {
-            try
-            {
-               email = unmarshallString(element);
-            }
-            catch( UnmarshallException ume ) 
-            {
-               log.error("Error accessing the contnet of the atom:email element.");
-            }
-         }
-
-      } // for       
+      unmarshall(author, null);
    }
 
    /**
@@ -220,7 +304,11 @@ public class Author extends XmlElement implements SwordElementInterface
     */
    public String getName() 
    {
-      return name;
+      if( name == null )
+      {
+          return null;
+      }
+      return name.getContent();
    }
 
    /**
@@ -230,7 +318,7 @@ public class Author extends XmlElement implements SwordElementInterface
     */
    public void setName(String name) 
    {
-      this.name = name;
+      this.name = new Name(name);
    }
 
    /**
@@ -240,7 +328,11 @@ public class Author extends XmlElement implements SwordElementInterface
     */
    public String getUri() 
    {
-      return uri;
+      if( uri == null )
+      {
+          return null;
+      }
+      return uri.getContent();
    }
 
    /**
@@ -250,7 +342,7 @@ public class Author extends XmlElement implements SwordElementInterface
     */
    public void setUri(String uri) 
    {
-      this.uri = uri;
+      this.uri = new Uri(uri);
    }
 
    /**
@@ -260,7 +352,11 @@ public class Author extends XmlElement implements SwordElementInterface
     */
    public String getEmail() 
    {
-      return email;
+      if( email == null )
+      {
+          return null;
+      }
+      return email.getContent();
    }
 
    /**
@@ -270,13 +366,14 @@ public class Author extends XmlElement implements SwordElementInterface
     */
    public void setEmail(String email) 
    {
-      this.email = email;
+      this.email = new Email(email);
    } 
    
    /**
     * Return the string. 
     * @return String.
     */
+   @Override
    public String toString()
    {
       return "name: " + getName() +

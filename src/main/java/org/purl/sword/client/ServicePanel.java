@@ -77,8 +77,8 @@ import java.awt.Component;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Vector;
-import java.util.Hashtable;
 
+import java.util.List;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -100,7 +100,6 @@ import org.purl.sword.atom.Content;
 import org.purl.sword.atom.Contributor;
 import org.purl.sword.atom.Generator;
 import org.purl.sword.atom.Link;
-import org.purl.sword.atom.Source;
 import org.purl.sword.atom.TextConstruct;
 import org.purl.sword.base.Collection;
 import org.purl.sword.base.DepositResponse;
@@ -109,6 +108,7 @@ import org.purl.sword.base.Service;
 import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.Workspace;
 import org.purl.sword.base.QualityValue;
+import org.purl.sword.base.SwordAcceptPackaging;
 
 /**
  * The main panel for the GUI client. This contains the top-two sub-panels: the 
@@ -287,7 +287,8 @@ implements TreeSelectionListener
     * @param url The url used to access the service document. 
     * @param doc The service document. 
     */
-   public void processServiceDocument(String url, ServiceDocument doc)
+   public void processServiceDocument(String url, 
+                                      ServiceDocument doc)
    {
       TreeNodeWrapper wrapper = null; 
 
@@ -578,7 +579,6 @@ implements TreeSelectionListener
          addTableRow(buffer, "Mediation", collection.getMediation());
          addTableRow(buffer, "Nested Service Document", collection.getService());
 
-
          String[] accepts = collection.getAccepts();
          String acceptList = "";
          if( accepts != null && accepts.length == 0 )
@@ -594,15 +594,16 @@ implements TreeSelectionListener
          }
          addTableRow(buffer, "Accepts", acceptList);
 
-         Hashtable acceptsPackaging = collection.getAcceptPackaging();
+         List<SwordAcceptPackaging> acceptsPackaging = collection.getAcceptPackaging();
+
          String acceptPackagingList = "";
-         for(Enumeration e = acceptsPackaging.keys();e.hasMoreElements();)
-         {
-            String key = (String) e.nextElement();
-            QualityValue packagingValue = (QualityValue)acceptsPackaging.get(key);
-            acceptPackagingList +=  key + " ("+packagingValue+")" + "<br>";
+         for (Iterator i = acceptsPackaging.iterator(); i.hasNext();) {
+             SwordAcceptPackaging accept = (SwordAcceptPackaging) i.next();
+             acceptPackagingList += accept.getContent() + " (" + accept.getQualityValue() + "), ";
          }
-         addTableRow(buffer, "Accepts Packaging", acceptPackagingList);
+
+         addTableRow(buffer, "Accepts Packaging",
+                 acceptPackagingList.substring(0, acceptPackagingList.length() - 2));
 
          buffer.append("</table>");
       }
@@ -838,7 +839,8 @@ implements TreeSelectionListener
     *  
     * @param response The details of the deposit. 
     */
-   public void processDepositResponse(String url, DepositResponse response)
+   public void processDepositResponse(String url, 
+                                      DepositResponse response)
    {
       SWORDEntry entry = response.getEntry();
       Object title = entry.getTitle(); 

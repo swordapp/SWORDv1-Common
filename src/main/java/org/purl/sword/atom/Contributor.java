@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -37,6 +37,7 @@
 package org.purl.sword.atom;
 
 import org.purl.sword.base.Namespaces;
+import org.purl.sword.base.XmlName;
 
 /**
  * Represents an ATOM Contributor. 
@@ -45,10 +46,8 @@ import org.purl.sword.base.Namespaces;
  */
 public class Contributor extends Author
 {
-	/**
-	* Local name for the element. 
-	*/
-   public static final String ELEMENT_NAME = "contributor";
+   private static final XmlName XML_NAME =
+           new XmlName(Namespaces.PREFIX_ATOM, "contributor", Namespaces.NS_ATOM);
    
    /**
     * Create a new instance and set the prefix to 
@@ -56,6 +55,16 @@ public class Contributor extends Author
     */
    public Contributor()
    {
-      super(Namespaces.PREFIX_ATOM, ELEMENT_NAME);
+      super(XML_NAME);
+   }
+
+   /**
+    * Get the element name for this Xml Element.
+    *
+    * @return The details of prefix, localname and namespace. 
+    */
+   public static XmlName elementName()
+   {
+       return XML_NAME;
    }
 }

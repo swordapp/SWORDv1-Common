@@ -382,7 +382,7 @@ public class DepositServlet extends HttpServlet {
 	}
 	
 	/**
-	 * Utility method to construct a SWORDErrorDocument
+	 * Utility method to construct a SWORDErrorDocumentTest
 	 * 
 	 * @param errorURI The error URI to pass
 	 * @param status The HTTP status to return

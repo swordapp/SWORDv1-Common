@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<assembly>
+    <id>distribution</id>
+    <formats>
+        <format>dir</format>
+    </formats>
+    <files>
+        <file>
+            <source>target/sword-java-common-1.1-SNAPSHOT.jar</source>
+            <destName>swordclient1.1.jar</destName>
+        </file>
+    </files>
+    <fileSets>
+        <fileSet>
+            <directory>src/main/resources/Licenses</directory>
+            <outputDirectory>/Licenses</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/resources/help</directory>
+            <outputDirectory>/help</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/resources/</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>*.properties</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>libs</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+</assembly>

@@ -90,7 +90,7 @@ public class SwordTest
    public void serviceDocumentTest()
    {
       // create a new service document 
-      Service service = new Service();
+      Service service = new Service(); 
       service.setVerbose(true);
       service.setNoOp(false);
       
@@ -117,7 +117,6 @@ public class SwordTest
       collection.setAbstract("An abstract goes in here");
       collection.setCollectionPolicy("A collection policy");
       collection.setMediation(true);
-      collection.setFormatNamespace("a namespace in here");
       collection.setTreatment("treatment in here too");
       
       workspace.addCollection(collection);
@@ -221,15 +220,14 @@ public class SwordTest
          generator.setContent("Test Generator ID");
          generator.setUri("http://www.somewhere.com/");
          generator.setVersion("1.1");
-         
-         Source source = new Source();
-         source.setGenerator(generator);
-         entry.setSource(source);
-         
+
+         entry.setGenerator(generator);
+
          entry.setPublished("2007-08-02T10:13:14Z");
          entry.setUpdated("2007-08-02T10:22:17Z");
          
          
+         entry.setTreatment("Treatment description");
          entry.setNoOp(true);
          entry.setVerboseDescription("A Verbose Description.");
           

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -36,6 +36,8 @@
  */
 package org.purl.sword.atom;
 
+import java.util.ArrayList;
+import java.util.Properties;
 import nu.xom.Attribute;
 import nu.xom.Element;
 
@@ -45,6 +47,9 @@ import org.purl.sword.base.UnmarshallException;
 import org.purl.sword.base.XmlElement;
 
 import org.apache.log4j.Logger;
+import org.purl.sword.base.SwordValidationInfo;
+import org.purl.sword.base.SwordValidationInfoType;
+import org.purl.sword.base.XmlName;
 
 /**
  * Represents a text construct in the ATOM elements. This is a superclass of 
@@ -83,7 +88,7 @@ implements SwordElementInterface
 	 */
 	public TextConstruct(String prefix, String name)
 	{
-	   super(prefix, name);   
+	   this(prefix, name, Namespaces.NS_ATOM);
 	}
 	
 	/**
@@ -93,9 +98,39 @@ implements SwordElementInterface
 	 */
 	public TextConstruct(String name)
 	{
-       super(name);
-       this.type = ContentType.TEXT;
+       this(Namespaces.PREFIX_ATOM, name);
 	}
+
+    /**
+     * Create a new instance. Set the XML name for the element.
+     *
+     * @param name The name to set. 
+     */
+    public TextConstruct(XmlName name)
+    {
+        super(name); 
+    }
+
+    /**
+     * 
+     * @param prefix
+     * @param name
+     * @param namespaceUri
+     */
+    public TextConstruct(String prefix, String name, String namespaceUri)
+    {
+        super(prefix, name, namespaceUri);
+        initialise();
+    }
+
+    /**
+     * 
+     */
+    protected void initialise()
+    {
+        this.type = ContentType.TEXT;
+        this.content = null; 
+    }
 
 	/**
 	 * Marshall the data in this object to an Element object. 
@@ -135,22 +170,40 @@ implements SwordElementInterface
    public void unmarshall(Element text)
    throws UnmarshallException
    {
-	   if( ! isInstanceOf(text, localName, Namespaces.NS_ATOM))
+       unmarshall(text, null);
+   }
+
+   /**
+    * 
+    * @param text
+    * @param validate
+    * @return
+    * @throws org.purl.sword.base.UnmarshallException
+    */
+   public SwordValidationInfo unmarshall(Element text, Properties validationProperties)
+   throws UnmarshallException
+   {
+	   if( ! isInstanceOf(text, xmlName))
 	   {
-		   log.error("Unexpected element. Expected: " + getQualifiedName() + ". Got: " + 
-				   ((text != null) ? text.getQualifiedName() : "null" ));
-		   throw new UnmarshallException( "Not a " + getQualifiedName() + " element" );
+		   return handleIncorrectElement(text, validationProperties);
 	   }
+
+       ArrayList<SwordValidationInfo> validationItems = new ArrayList<SwordValidationInfo>();
+       ArrayList<SwordValidationInfo> attributeItems = new ArrayList<SwordValidationInfo>();
+
 	   try
 	   {
+           initialise();
+           
 		   // get the attributes
 		   int attributeCount = text.getAttributeCount();
-		   Attribute attribute = null; 
+		   Attribute attribute = null;
 		   for( int i = 0; i < attributeCount; i++ )
 		   {
 			   attribute = text.getAttribute(i);
 			   if( ATTRIBUTE_TYPE.equals(attribute.getQualifiedName()))
 			   {
+                   boolean success = true;
 				   String value = attribute.getValue();
 				   if( ContentType.TEXT.toString().equals(value) )
 				   {
@@ -167,8 +220,31 @@ implements SwordElementInterface
 				   else
 				   {
 					   log.error("Unable to parse extract type in " + getQualifiedName() );
+                       SwordValidationInfo info = new SwordValidationInfo(xmlName,
+                                  new XmlName(attribute),
+                                  "Invalid content type has been specified",
+                                  SwordValidationInfoType.ERROR);
+                       info.setContentDescription(value);
+                       attributeItems.add(info);
+                       success = false;
 				   }
+
+                   if( success )
+                   {
+                       SwordValidationInfo info = new SwordValidationInfo(xmlName, new XmlName(attribute));
+                       info.setContentDescription(type.toString());
+                       attributeItems.add(info);
+                   }
 			   }
+               else
+               {
+                   SwordValidationInfo info = new SwordValidationInfo(xmlName,
+                              new XmlName(attribute),
+                              SwordValidationInfo.UNKNOWN_ATTRIBUTE,
+                              SwordValidationInfoType.INFO);
+                   info.setContentDescription(attribute.getValue());
+                   attributeItems.add(info);
+               }
 		   }
 
 		   // retrieve all of the sub-elements
@@ -176,7 +252,7 @@ implements SwordElementInterface
 		   if( length > 0 )
 		   {
 			   content = unmarshallString(text);
-		   }
+           }
 
 	   }
 	   catch( Exception ex )
@@ -184,7 +260,56 @@ implements SwordElementInterface
 		   log.error("Unable to parse an element in " + getQualifiedName() + ": " + ex.getMessage());
 		   throw new UnmarshallException("Unable to parse an element in " + getQualifiedName(), ex);
 	   }
+
+       SwordValidationInfo result = null;
+       if( validationProperties != null )
+       {
+           result = validate(validationItems, attributeItems, validationProperties);
+       }
+       return result; 
    }
+
+   public SwordValidationInfo validate(Properties validationContext)
+   {
+       return validate(null, null, validationContext);
+   }
+
+   /**
+    *
+    * @param existing
+    * @param attributeItems
+    * @return
+    */
+   protected SwordValidationInfo validate(ArrayList<SwordValidationInfo> existing,
+           ArrayList<SwordValidationInfo> attributeItems,
+           Properties validationContext)
+   {
+      boolean validateAll = (existing == null);
+
+      SwordValidationInfo result = new SwordValidationInfo(xmlName); 
+      result.setContentDescription(content);
+      
+      // item specific rules
+      if( content == null )
+      {
+          result.addValidationInfo(
+                  new SwordValidationInfo(xmlName, "Missing content for element",
+                                          SwordValidationInfoType.WARNING));
+      }
+
+      if( validateAll )
+      {
+          SwordValidationInfo info = new SwordValidationInfo(xmlName,
+                  new XmlName(xmlName.getPrefix(), ATTRIBUTE_TYPE, xmlName.getNamespace()));
+          info.setContentDescription(type.toString());
+          result.addAttributeValidationInfo(info);
+
+      }
+
+      result.addUnmarshallValidationInfo(existing, attributeItems);
+      return result; 
+   }
+
 
    /**
     * Get the content in this TextConstruct. 

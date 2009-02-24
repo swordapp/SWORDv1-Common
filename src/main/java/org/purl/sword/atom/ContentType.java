@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -68,5 +68,6 @@ public enum ContentType
     * 
     *  @return A string. 
     */
+   @Override
    public String toString() { return this.type; }
 }

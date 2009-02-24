@@ -37,8 +37,10 @@
 package org.purl.sword.client;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -70,8 +72,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 
@@ -84,6 +89,8 @@ import org.purl.sword.base.DepositResponse;
 import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.SWORDException;
 import org.purl.sword.base.SWORDErrorDocument;
+import org.purl.sword.base.SwordValidationInfo;
+import org.purl.sword.base.SwordValidationInfoType;
 
 /**
  * Main class that creates the GUI interface for the demonstration SWORD client.
@@ -240,9 +247,8 @@ public class GuiClient extends JFrame implements ClientType,
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				saveProperties();
-				log.debug("Exiting, bye!");
+				log.debug("Exiting.");
 				System.exit(0);
-				log.debug("Erm, I shouldn't be here...");
 			}
 		});
 
@@ -264,6 +270,8 @@ public class GuiClient extends JFrame implements ClientType,
 		debug = new JCheckBoxMenuItem(new DebugAction());
 		optionsMenu.add(debug);
 		optionsMenu.add(new EditPropertiesAction());
+        optionsMenu.add(new ValidationInfoAction());
+        
 		menubar.add(optionsMenu);
 
 		JMenu actionMenu = new JMenu("Help");
@@ -494,6 +502,19 @@ public class GuiClient extends JFrame implements ClientType,
 						Status status = swordclient.getStatus();
 						publish("The status is: " + status);
 
+                        SwordValidationInfo info = swordclient.getLastUnmarshallInfo();
+                        if( info != null && info.getType() == SwordValidationInfoType.VALID)
+                        {
+                            publish("The document was valid");
+                        }
+                        else if( info != null )
+                        {
+                            publish("This document did not validate.");
+                            StringBuffer buffer = new StringBuffer();
+                            info.createString(info, buffer, " ");
+                            publish(buffer.toString());
+                        }
+
 						if (status.getCode() == 200) {
 							mainPanel
 									.processServiceDocument(location, document);
@@ -580,6 +601,78 @@ public class GuiClient extends JFrame implements ClientType,
 			}
 		}
 	}
+
+    /**
+	 * Action to process the toggle to show and hide the debug panel.
+	 *
+	 * @author Neil Taylor
+	 */
+	protected class ValidationInfoAction extends AbstractAction {
+		/**
+		 * Create a new instance.
+		 */
+		public ValidationInfoAction() {
+			super("Show Last Validation Info");
+		}
+
+		/**
+		 * Handle the action. Update the debug status, based on the value in the
+		 * debug menu item.
+		 *
+		 * @param event
+		 *            The event.
+		 */
+		public void actionPerformed(ActionEvent event) {
+			JOptionPane.showOptionDialog(GuiClient.this,
+	           createPanel(),
+	           "View Validation Info",
+	           JOptionPane.OK_OPTION,
+	           JOptionPane.INFORMATION_MESSAGE,
+	           null, new String[] { "OK" }, "OK");
+            
+		}
+        
+        private JPanel createPanel()
+        {
+            JPanel panel = new JPanel();
+            
+            JTextArea text = new JTextArea();
+            //text.setAutoscrolls(true);
+
+            JScrollPane areaScrollPane = new JScrollPane(text);
+            areaScrollPane.setVerticalScrollBarPolicy(
+		             JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            areaScrollPane.setPreferredSize(new Dimension(500, 400));
+            
+            if( swordclient != null ) 
+            {
+               SwordValidationInfo info = swordclient.getLastUnmarshallInfo();
+               if( info != null )
+               {
+                  StringBuffer buffer = new StringBuffer();
+                  info.createString(info, buffer, "");
+                  text.setText(buffer.toString());
+               }
+               else
+               {
+                   text.setText("There is no validaiton information to display");
+               }
+            }
+            else
+            {
+               text.setText("There is no validaiton information to display");
+            }
+
+            panel.add(areaScrollPane, BorderLayout.CENTER);
+            panel.setSize(500, 400);
+            return panel;
+        }
+
+
+
+
+	}
+
 
 	/**
 	 * Action to process the toggle to show and hide the debug panel.
@@ -699,6 +792,20 @@ public class GuiClient extends JFrame implements ClientType,
 										.postFile(message);
 								Status status = swordclient.getStatus();
 								publish("The status is: " + status);
+
+                                SwordValidationInfo info = swordclient.getLastUnmarshallInfo();
+                                if( info != null &&
+                                    info.getType() == SwordValidationInfoType.VALID)
+                                {
+                                   publish("The document was valid");
+                                }
+                                else if( info != null )
+                                {
+                                   publish("This document did not validate.");
+                                   StringBuffer buffer = new StringBuffer();
+                                   info.createString(info, buffer, " ");
+                                   publish(buffer.toString());
+                                }
 
 								if (status.getCode() == 201
 										|| status.getCode() == 202) {
@@ -876,8 +983,8 @@ public class GuiClient extends JFrame implements ClientType,
 			JOptionPane
 					.showMessageDialog(
 							null,
-							"Demonstration client for SWORD Project\n"
-									+ "Copyright 2007 CASIS, University of Wales Aberystwyth\n\n"
+							"Demonstration client for SWORD Project - supporting SWORD Profile 1.3\n"
+									+ "Copyright 2007-2009 CASIS, University of Wales Aberystwyth\n\n"
 									+ "Version "
 									+ ClientConstants.CLIENT_VERSION, "About",
 							JOptionPane.INFORMATION_MESSAGE);
@@ -1130,7 +1237,8 @@ public class GuiClient extends JFrame implements ClientType,
 		 * @param service
 		 *            The service document.
 		 */
-		public void processServiceDocument(String url, ServiceDocument service) {
+		public void processServiceDocument(String url, 
+                                           ServiceDocument service) {
 			services.processServiceDocument(url, service);
 		}
 
@@ -1141,7 +1249,8 @@ public class GuiClient extends JFrame implements ClientType,
 		 * @param response
 		 *            The DepositResponse to process.
 		 */
-		public void processDespositResponse(String url, DepositResponse response) {
+		public void processDespositResponse(String url, 
+                                            DepositResponse response) {
 			services.processDepositResponse(url, response);
 		}
 

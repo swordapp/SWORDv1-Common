@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, Aberystwyth University
+ * Copyright (c) 2008-2009, Aberystwyth University
  *
  * All rights reserved.
  * 
@@ -36,14 +36,19 @@
  */
 package org.purl.sword.atom;
 
+import java.util.ArrayList;
+import java.util.Properties;
 import nu.xom.Attribute;
 import nu.xom.Element;
 
 import org.apache.log4j.Logger;
 import org.purl.sword.base.Namespaces;
 import org.purl.sword.base.SwordElementInterface;
+import org.purl.sword.base.SwordValidationInfo;
+import org.purl.sword.base.SwordValidationInfoType;
 import org.purl.sword.base.UnmarshallException;
 import org.purl.sword.base.XmlElement;
+import org.purl.sword.base.XmlName;
 
 /**
  * Represents an ATOM Link element. 
@@ -77,14 +82,15 @@ public class Link extends XmlElement implements SwordElementInterface
 	 */
 	public static final String ATTRIBUTE_TITLE = "title";
 
-/**
- * Label for the length attribute. 
- */
-public static final String ATTRIBUTE_LENGTH = "length";
+    /**
+     * Label for the length attribute.
+     */
+    public static final String ATTRIBUTE_LENGTH = "length";
 	
-	/**
+   /**
 	* Local name for the element. 
 	*/
+   @Deprecated
    public static final String ELEMENT_NAME = "link";
    
    /**
@@ -127,13 +133,21 @@ public static final String ATTRIBUTE_LENGTH = "length";
     */
    private static Logger log = Logger.getLogger(Link.class);
 
+   private static final XmlName XML_NAME = new XmlName(
+           Namespaces.PREFIX_ATOM, "link", Namespaces.NS_ATOM);
+
    /**
     * Create a new instance and set prefix and local name to 'atom' and 'link', 
     * respectively. 
     */
    public Link()
    {
-      super(Namespaces.PREFIX_ATOM, ELEMENT_NAME);
+      super(XML_NAME);
+   }
+
+   public static XmlName elementName()
+   {
+       return XML_NAME;
    }
 
    /**
@@ -143,7 +157,7 @@ public static final String ATTRIBUTE_LENGTH = "length";
     */
    public Element marshall()
    {
-      Element element = new Element(getQualifiedName(), Namespaces.NS_ATOM);
+      Element element = new Element(getQualifiedName(), xmlName.getNamespace());
 
       if( content != null )
       {
@@ -202,12 +216,20 @@ public static final String ATTRIBUTE_LENGTH = "length";
    public void unmarshall(Element link)
    throws UnmarshallException 
    {
-      if( ! isInstanceOf(link, localName, Namespaces.NS_ATOM))
+      unmarshall(link, null);
+   }
+
+   
+   public SwordValidationInfo unmarshall(Element link, Properties validationProperties)
+   throws UnmarshallException
+   {
+      if( ! isInstanceOf(link, xmlName) )
       {
-         log.error("Unexpected element. Expected: " + getQualifiedName() + ". Got: " + 
-               ((link != null ) ? link.getQualifiedName() : "null" ));
-         throw new UnmarshallException( "Not an atom:link element" );
+         return handleIncorrectElement(link, validationProperties);
       }
+
+      ArrayList<SwordValidationInfo> validationItems = new ArrayList<SwordValidationInfo>();
+      ArrayList<SwordValidationInfo> attributeItems = new ArrayList<SwordValidationInfo>();
 
       try
       {
@@ -220,27 +242,70 @@ public static final String ATTRIBUTE_LENGTH = "length";
             if( ATTRIBUTE_HREF.equals(attribute.getQualifiedName()))
             {
                href = attribute.getValue();
+               if( validationProperties != null)
+               {
+                   attributeItems.add(createValidAttributeInfo(ATTRIBUTE_HREF, href));
+               }
             }
             else if( ATTRIBUTE_REL.equals(attribute.getQualifiedName()))
             {
                rel = attribute.getValue();
+               if( validationProperties != null)
+               {
+                   attributeItems.add(createValidAttributeInfo(ATTRIBUTE_REL, rel));
+               }
             }
             else if( ATTRIBUTE_TYPE.equals(attribute.getQualifiedName()))
             {
                type = attribute.getValue();
+               if( validationProperties != null)
+               {
+                   attributeItems.add(createValidAttributeInfo(ATTRIBUTE_TYPE, type));
+               }
             }
             else if( ATTRIBUTE_HREF_LANG.equals(attribute.getQualifiedName()))
             {
                hreflang = attribute.getValue();
+               if( validationProperties != null)
+               {
+                   attributeItems.add(createValidAttributeInfo(ATTRIBUTE_HREF_LANG, hreflang));
+               }
             }
             else if( ATTRIBUTE_TITLE.equals(attribute.getQualifiedName()))
             {
                title = attribute.getValue();
+               if( validationProperties != null)
+               {
+                   attributeItems.add(createValidAttributeInfo(ATTRIBUTE_TITLE, title));
+               }
             }
             else if( ATTRIBUTE_LENGTH.equals(attribute.getQualifiedName()))
             {
                length = attribute.getValue();
+               if( validationProperties != null)
+               {
+                   attributeItems.add(createValidAttributeInfo(ATTRIBUTE_LENGTH, length));
+               }
             }
+            else
+            {
+               XmlName attributeName = new XmlName(attribute);
+
+               SwordValidationInfo unknown = new SwordValidationInfo(xmlName,
+                       attributeName, 
+                       SwordValidationInfo.UNKNOWN_ATTRIBUTE, 
+                       SwordValidationInfoType.INFO);
+               unknown.setContentDescription(attribute.getValue());
+               attributeItems.add(unknown);
+            }
+         }
+
+         if( link.getChildCount() > 0 )
+         {
+             SwordValidationInfo content = new SwordValidationInfo(xmlName,
+                     "This element has content, but it is not used by SWORD",
+                     SwordValidationInfoType.INFO);
+             validationItems.add(content);
          }
 
       }
@@ -249,6 +314,76 @@ public static final String ATTRIBUTE_LENGTH = "length";
          log.error("Unable to parse an element in Link: " + ex.getMessage());
          throw new UnmarshallException("Unable to parse element in link", ex);
       }
+
+      SwordValidationInfo result = null;
+      if( validationProperties != null )
+      {
+          result = validate(validationItems, attributeItems, validationProperties);
+      }
+      return result; 
+   }
+
+   public SwordValidationInfo validate(Properties validationContext)
+   {
+      return validate(null, null, validationContext);
+   }
+
+   public SwordValidationInfo validate(ArrayList<SwordValidationInfo> elements,
+           ArrayList<SwordValidationInfo> attributes,
+           Properties validationContext)
+   {
+       boolean validateAll = (elements == null);
+
+       SwordValidationInfo result = new SwordValidationInfo(xmlName);
+
+       if( href == null )
+       {
+          XmlName attributeName = new XmlName(xmlName.getPrefix(),
+                       ATTRIBUTE_HREF,
+                       xmlName.getNamespace());
+
+          SwordValidationInfo item = new SwordValidationInfo(xmlName, attributeName,
+                  SwordValidationInfo.MISSING_ATTRIBUTE_WARNING,
+                  SwordValidationInfoType.ERROR);
+          result.addAttributeValidationInfo(item);
+       }
+
+       if( validateAll )
+       {
+          if( href != null )
+          {
+              result.addAttributeValidationInfo(createValidAttributeInfo(ATTRIBUTE_HREF, href));
+          }
+
+          if( rel != null )
+          {
+              result.addAttributeValidationInfo(createValidAttributeInfo(ATTRIBUTE_REL, rel));
+          }
+
+          if( type != null )
+          {
+              result.addAttributeValidationInfo(createValidAttributeInfo(ATTRIBUTE_TYPE, type));
+          }
+
+          if( hreflang != null )
+          {
+              result.addAttributeValidationInfo(createValidAttributeInfo(ATTRIBUTE_HREF_LANG, hreflang));
+          }
+
+          if( title != null )
+          {
+              result.addAttributeValidationInfo(createValidAttributeInfo(ATTRIBUTE_TITLE, title));
+          }
+
+          if( length != null )
+          {
+              result.addAttributeValidationInfo(createValidAttributeInfo(ATTRIBUTE_LENGTH, length));
+          }
+          
+       }
+
+       result.addUnmarshallValidationInfo(elements, attributes);
+       return result; 
    }
 
    /**

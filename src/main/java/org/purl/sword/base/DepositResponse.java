@@ -39,6 +39,7 @@ package org.purl.sword.base;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import nu.xom.Builder;
@@ -105,7 +106,7 @@ public class DepositResponse
     *
     * @return The error document
     * @throws SWORDException If this DespositResponse does not contain a
-    *                        SWORDErrorDocument. If this is thrown, then
+    *                        SWORDErrorDocumentTest. If this is thrown, then
     *                        the document stores an Entry. 
     */
    public SWORDErrorDocument getErrorDocument( )
@@ -167,7 +168,6 @@ public class DepositResponse
          ByteArrayOutputStream stream = new ByteArrayOutputStream();
          Serializer serializer = new Serializer(stream, "UTF-8");
          serializer.setIndent(3);
-         //serializer.setMaxLength(64);
 
          if( entry != null ) 
          {
@@ -193,15 +193,20 @@ public class DepositResponse
     */
    public void unmarshall(String xml) throws UnmarshallException
    {
+      unmarshall(xml, null);
+   }
+
+   public SwordValidationInfo unmarshall(String xml, Properties validationContext)
+   throws UnmarshallException
+   {
       try
       {  
          Builder builder = new Builder(); 
-         Document doc = builder.build(xml, "http://www.w3.org/2005/Atom");
+         Document doc = builder.build(xml, Namespaces.NS_ATOM);
          Element root = doc.getRootElement(); 
 
          entry = new SWORDEntry( );
-         entry.unmarshall(root);
-
+         return entry.unmarshall(root, validationContext);
       }
       catch( ParsingException ex )
       {
@@ -213,23 +218,32 @@ public class DepositResponse
       }	   
    }
 
+   public void unmarshallErrorDocument(String xml)
+   throws UnmarshallException
+   {
+      unmarshallErrorDocument(xml, null);
+   }
+
    /**
     * Unmarshall the specified XML data into a SWORD error document. 
     * 
     * @param xml The XML data as a string. 
     * @throws UnmarshallException If there was an error unmarshalling the data. 
     */
-   public void unmarshallErrorDocument(String xml) throws UnmarshallException
+   public SwordValidationInfo unmarshallErrorDocument(String xml,
+                                       Properties validationContext )
+   throws UnmarshallException
    {
       try
       {  
          Builder builder = new Builder(); 
-         Document doc = builder.build(xml, "http://purl.org/net/sword/");
+         Document doc = builder.build(xml, Namespaces.NS_SWORD);
          Element root = doc.getRootElement(); 
 
          SWORDErrorDocument sed = new SWORDErrorDocument();
-         sed.unmarshall(root);
+         SwordValidationInfo info = sed.unmarshall(root, validationContext);
          entry = sed;
+         return info;
       }
       catch( ParsingException ex )
       {

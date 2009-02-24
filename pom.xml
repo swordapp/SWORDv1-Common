@@ -29,21 +29,11 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
-					<descriptorRefs>
-						<descriptorRef>
-							jar-with-dependencies
-						</descriptorRef>
-					</descriptorRefs>
-					<archive>
-						<manifest>
-							<mainClass>
-								org.purl.sword.client.ClientFactory
-							</mainClass>
-						</manifest>
-					</archive>
+					<descriptors>
+                        <descriptor>src/main/assembly/distribution.xml</descriptor>
+                    </descriptors>
 				</configuration>
 			</plugin>
-
 		</plugins>
 	</build>
 	<repositories>
@@ -57,7 +47,7 @@
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
 			<version>1.2</version>
-		</dependency>
+        </dependency>
 		<dependency>
 			<groupId>commons-httpclient</groupId>
 			<artifactId>commons-httpclient</artifactId>
@@ -133,6 +123,35 @@
 			http://spectra-chem.sourceforge.net/maven2/
 		</downloadUrl>
 	</distributionManagement>
-
+    <profiles>
+        <profile>
+            <id>distribution</id>
+            <build>
+                <plugins>
+                   <plugin>
+                       <groupId>org.apache.maven.plugins</groupId>
+                       <artifactId>maven-jar-plugin</artifactId>
+                       <configuration>
+                           <archive>
+                               <manifestEntries>
+                                 <Class-Path>. </Class-Path>
+                              </manifestEntries>
+                              <manifest>
+                                  <addClasspath>true</addClasspath>
+                                  <mainClass>org.purl.sword.client.ClientFactory</mainClass>
+                                  <classpathPrefix>libs/</classpathPrefix>
+                              </manifest>
+                           </archive>
+                           <excludes>
+                               <exclude>Licenses/**</exclude>
+                               <exclude>help/**</exclude>
+                               <exclude>*.properties</exclude>
+                           </excludes>
+                       </configuration>
+                   </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
 
