@@ -278,6 +278,11 @@ public class Collection extends XmlElement implements SwordElementInterface
     */
    public void setCollectionPolicy(String collectionPolicy) 
    {
+      if( collectionPolicy == null )
+      {
+          swordCollectionPolicy = null;
+          return;
+      }
       swordCollectionPolicy = new SwordCollectionPolicy(collectionPolicy);
    }
 
@@ -352,6 +357,11 @@ public class Collection extends XmlElement implements SwordElementInterface
     */
    public void setAbstract(String abstractString)
    {
+      if( abstractString == null )
+      {
+          dcTermsAbstract = null;
+          return;
+      }
       dcTermsAbstract = new DcAbstract(abstractString);
    }
 
@@ -376,6 +386,11 @@ public class Collection extends XmlElement implements SwordElementInterface
     */
    public void setService(String serviceString)
    {
+      if( serviceString == null )
+      {
+          swordService = null;
+          return; 
+      }
       swordService = new SwordService(serviceString);
    }
 
@@ -386,10 +401,12 @@ public class Collection extends XmlElement implements SwordElementInterface
     */
    public void setTitle( String title )
    {
-      if( this.title == null)
+      if( title == null ) 
       {
-         this.title = new Title();
+          this.title = null; 
+          return;
       }
+      this.title = new Title();
       this.title.setContent(title);
       this.title.setType(ContentType.TEXT);
    }
@@ -429,6 +446,11 @@ public class Collection extends XmlElement implements SwordElementInterface
     */
    public void setTreatment(String treatment) 
    {
+      if( treatment == null )
+      {
+          swordTreatment = null;
+          return;
+      }
       swordTreatment = new SwordTreatment(treatment);
    }  
 

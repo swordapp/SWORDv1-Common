@@ -45,9 +45,11 @@ import nu.xom.ParsingException;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Properties;
+import org.purl.sword.atom.Generator;
 /**
  *
  * @author Neil Taylor (nst@aber.ac.uk)
+ * @author Peter Todd (ppt@aber.ac.uk)
  */
 public class ServiceTest {
 
@@ -80,6 +82,21 @@ public class ServiceTest {
                                       "   </workspace>\n";
 
     private String serviceEnd = "</service>";
+
+
+    private static String TEST_VERSION = "test service";
+    private static int TEST_MAX_UPLOAD_SIZE = 100;
+
+    //These definitions are used to create a valid workspace to add to a test service
+    private static String TEST_LOCATION = "location example";
+    private static String TEST_TITLE = "title example";
+    private static String TEST_ACCEPT = "test accept ";
+    private static int TEST_ACCEPTS = 5;
+    private static boolean TEST_MEDIATION = true;
+
+    private static String TEST_GENERATOR_URI = "http://test";
+    private static String TEST_GENERATOR_VERSION = "test version";
+    private static String TEST_GENERATOR_CONTENT = "test content";
 
     /**
      * Utility method that will create an XML element that is loaded and ready
@@ -202,6 +219,168 @@ public class ServiceTest {
 
     }
 
-    
 
+    @Test
+    public void testCreate()
+    {
+        Service service = new Service();
+        service.setVersion(TEST_VERSION);
+        service.setVerbose(true);
+        service.setNoOp(true);
+        service.setMaxUploadSize(TEST_MAX_UPLOAD_SIZE);
+
+        Generator generator = new Generator();
+        Workspace workspace = new Workspace();
+
+        service.addWorkspace(workspace);
+        service.setGenerator(generator);
+
+        Assert.assertEquals(service.getVersion(), TEST_VERSION);
+        Assert.assertEquals(service.getMaxUploadSize(), TEST_MAX_UPLOAD_SIZE);
+        Assert.assertSame(service.getGenerator(), generator);
+        Assert.assertEquals(service.getWorkspacesList().size(), 1);
+    }
+
+    
+    @Test
+    public void testNullVersion()
+    {
+        Service service = createTestService(null, "true", "true", TEST_MAX_UPLOAD_SIZE, true, true, true, true);
+        Assert.assertEquals(true, testService(service, SwordValidationInfoType.WARNING));
+    }
+
+    @Test
+    public void testNullVerbose()
+    {
+        Service service = createTestService(TEST_VERSION, "null", "true", TEST_MAX_UPLOAD_SIZE, true, true, true, true);
+        Assert.assertEquals(true, testService(service, SwordValidationInfoType.VALID));
+    }
+
+    @Test
+    public void testNullNoOp()
+    {
+        Service service = createTestService(TEST_VERSION, "true", "null", TEST_MAX_UPLOAD_SIZE, true, true, true, true);
+        Assert.assertEquals(true, testService(service, SwordValidationInfoType.VALID));
+    }
+
+    @Test
+    public void testZeroUploadSize()
+    {
+        Service service = createTestService(TEST_VERSION, "true", "null", 0, true, true, true, true);
+        Assert.assertEquals(true, testService(service, SwordValidationInfoType.VALID));
+    }
+
+    @Test
+    public void testValidService()
+    {
+        Service service = createTestService(TEST_VERSION, "true", "true", TEST_MAX_UPLOAD_SIZE, true, true, true, true);
+        Assert.assertEquals(true, testService(service, SwordValidationInfoType.VALID));
+    }
+
+    @Test
+    public void testNoGenerator()
+    {
+        Service service = createTestService(TEST_VERSION, "true", "true", TEST_MAX_UPLOAD_SIZE, false, true, true, true);
+        Assert.assertEquals(true, testService(service, SwordValidationInfoType.WARNING));
+    }
+
+    @Test
+    public void testNoWorkspace()
+    {
+        Service service = createTestService(TEST_VERSION, "true", "true", TEST_MAX_UPLOAD_SIZE, true, false, true, true);
+        Assert.assertEquals(true, testService(service, SwordValidationInfoType.WARNING));
+    }
+
+    @Test
+    public void testInvalidGenerator()
+    {
+        Service service = createTestService(TEST_VERSION, "true", "true", TEST_MAX_UPLOAD_SIZE, true, true, false, true);
+        Assert.assertEquals(true, testService(service, SwordValidationInfoType.WARNING));
+    }
+
+    @Test
+    public void testInvalidWorkspace()
+    {
+        Service service = createTestService(TEST_VERSION, "true", "true", TEST_MAX_UPLOAD_SIZE, true, true, true, false);
+        Assert.assertEquals(true, testService(service, SwordValidationInfoType.WARNING));
+    }
+
+    public Service createTestService(String version, String verbose, String NoOp,
+            int maxUploadSize, boolean createGenerator, boolean createWorkspace, boolean validGenerator, boolean validWorkspace)
+    {
+        Service service = new Service();
+        service.setVersion(version);
+
+        if(verbose.equalsIgnoreCase("true"))
+        {
+            service.setVerbose(true);
+        }
+        else if(verbose.equalsIgnoreCase("false"))
+        {
+            service.setVerbose(false);
+        }
+
+        if(NoOp.equalsIgnoreCase("true"))
+        {
+            service.setNoOp(true);
+        }
+        else if(NoOp.equalsIgnoreCase("false"))
+        {
+            service.setNoOp(false);
+        }
+
+        service.setMaxUploadSize(maxUploadSize);
+
+        if(createGenerator == true)
+        {
+            Generator generator = new Generator();
+            if(validGenerator)
+            {
+                generator.setUri(TEST_GENERATOR_URI);
+                generator.setVersion(TEST_GENERATOR_VERSION);
+                generator.setContent(TEST_GENERATOR_CONTENT);
+            }
+            service.setGenerator(generator);
+        }
+
+        if(createWorkspace == true)
+        {
+            Workspace workspace = new Workspace();
+            if(validWorkspace)
+            {
+               workspace.setTitle(TEST_TITLE);
+               //Create an valid test collection
+               Collection collection = new Collection();
+               collection.addAccepts(TEST_ACCEPT + "0");
+               collection.setLocation(TEST_LOCATION);
+               collection.setMediation(true);
+
+               workspace.addCollection(collection);
+
+            }
+            service.addWorkspace(workspace);
+        }
+
+        return service;
+    }
+
+    public boolean testService(Service service, SwordValidationInfoType expectedResult)
+    {
+       SwordValidationInfo info = service.validate(new Properties());
+
+       System.out.print("Test is " + Thread.currentThread().getStackTrace()[2].getMethodName() + "   Expected Value was " + expectedResult.toString() + " Actual Value was " + info.getType().toString() + "       Test Result: ");
+
+       if(!info.getType().equals(expectedResult))
+       {
+           System.out.println("FAILED");
+           System.out.println("Details of the failed test:");
+           StringBuffer buffer = new StringBuffer();
+           info.createString(info, buffer, " ");
+           System.out.println(buffer.toString());
+           System.out.println("=================================================");
+           return false;
+       }
+       System.out.println("PASSED");
+       return true;
+   }
 }

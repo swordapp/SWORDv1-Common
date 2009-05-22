@@ -277,6 +277,16 @@ public class Service extends XmlElement implements SwordElementInterface
    }
    
    /**
+    * Determine if the max upload size is defined. 
+    * 
+    * @return True if the value is defined, otherwise false. 
+    */
+   public boolean maxUploadIsDefined()
+   {
+      return getMaxUploadSize() != Integer.MIN_VALUE;
+   }
+
+   /**
     * Get the maximum upload file size (in kB)
     *
     * @return the maximum file upload size. If no value has been set, this will
@@ -561,7 +571,7 @@ public class Service extends XmlElement implements SwordElementInterface
            Properties validationContext)
    {
 
-      boolean validateAll = (existing != null);
+      boolean validateAll = (existing == null);
       
       SwordValidationInfo result = new SwordValidationInfo(xmlName);
       

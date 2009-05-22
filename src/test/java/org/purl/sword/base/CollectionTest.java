@@ -45,9 +45,10 @@ import org.purl.sword.atom.Accept;
 
 /**
  *
- * @author neiltaylor
+ * @author Peter Todd (ppt@aber.ac.uk)
  */
-public class CollectionTest {
+public class CollectionTest
+{
 
     private static String TEST_LOCATION = "location example";
 
@@ -67,20 +68,9 @@ public class CollectionTest {
 
     private static String TEST_POLICY = "policy example";
 
-    private static String TEST_ACCEPT_PACKAGING = "test accept packaging ";
+    private static String TEST_ACCEPT_PACKAGING = "http://www.imsglobal.org/xsd/imscp_v1p1";
 
-    private static int TEST_ACCEPT_PACKS = 5;
-
-
-    public Collection createInstance()
-    {
-       Collection collection = new Collection();
-
-       collection.setAbstract(TEST_ABSTRACT);
-       collection.setTitle(TEST_TITLE);
-
-       return collection; 
-    }
+    private static int TEST_ACCEPT_PACKAGES = 5;
 
     @Test
     public void createTest()
@@ -108,7 +98,7 @@ public class CollectionTest {
 
         //Build AcceptPackage test list
         List<String> testAcceptPacks = new ArrayList<String>();
-        for(int i = 1;i < TEST_ACCEPT_PACKS;i++)
+        for(int i = 1;i < TEST_ACCEPT_PACKAGES;i++)
         {
             collection.addAcceptPackaging(TEST_ACCEPT_PACKAGING + Integer.toString(i));
             testAcceptPacks.add(TEST_ACCEPT_PACKAGING + Integer.toString(i));
@@ -117,8 +107,8 @@ public class CollectionTest {
 
         //EXECUTE THE TESTS
         //------------------------------------------------
-        assert(collection.getLocation().equals(TEST_LOCATION));
-        assert(collection.getTitle().equals(TEST_TITLE));
+        Assert.assertEquals(collection.getLocation(), TEST_LOCATION);
+        Assert.assertEquals(collection.getTitle(), TEST_TITLE);
 
         //Test Accept List
         List<Accept> acceptList = collection.getAcceptList();
@@ -128,11 +118,11 @@ public class CollectionTest {
         {
             assert(acceptListIterator.next().getContent().equals(testAcceptListIterator.next()));
         }
-        assert(collection.getMediation() == TEST_MEDIATION );
-        assert(collection.getService().equals(TEST_SERVICE));
-        assert(collection.getAbstract().equals(TEST_ABSTRACT));
-        assert(collection.getTreatment().equals(TEST_TREATMENT));
-        assert(collection.getCollectionPolicy().equals(TEST_POLICY));
+        Assert.assertEquals(collection.getMediation(), TEST_MEDIATION );
+        Assert.assertEquals(collection.getService(), TEST_SERVICE);
+        Assert.assertEquals(collection.getAbstract(), TEST_ABSTRACT);
+        Assert.assertEquals(collection.getTreatment(), TEST_TREATMENT);
+        Assert.assertEquals(collection.getCollectionPolicy(), TEST_POLICY);
 
         //Test Accept Package List
         List<SwordAcceptPackaging> acceptPacksList = collection.getAcceptPackaging();
@@ -140,50 +130,166 @@ public class CollectionTest {
         Iterator<String> testAcceptPacksListIterator = testAcceptPacks.iterator();
         while( acceptPacksListIterator.hasNext() )
         {
-            assert(acceptPacksListIterator.next().getContent().equals(testAcceptPacksListIterator.next()));
+            Assert.assertEquals(acceptPacksListIterator.next().getContent(), testAcceptPacksListIterator.next());
         }
 
     }
+ 
+    @Test
+    public void testNullLocation()
+    {
+      Collection collection = createTestCollection(null,TEST_TITLE,TEST_ACCEPTS,"true",
+              TEST_SERVICE,TEST_ABSTRACT,TEST_TREATMENT,TEST_POLICY,TEST_ACCEPT_PACKAGES,true);
+      Assert.assertEquals(true, testCollection(collection,SwordValidationInfoType.WARNING));
+    }
+
+    
+    
+    @Test
+    public void testNullTitle()
+    {
+      Collection collection = createTestCollection(TEST_LOCATION,null,TEST_ACCEPTS,"true",
+              TEST_SERVICE,TEST_ABSTRACT,TEST_TREATMENT,TEST_POLICY,TEST_ACCEPT_PACKAGES,true);
+      Assert.assertEquals(true, testCollection(collection,SwordValidationInfoType.VALID));
+    }
 
     @Test
-    public void validateIsValidTest()
+    public void testNoAccepts()
     {
+      Collection collection = createTestCollection(TEST_LOCATION,TEST_TITLE,0,"true",
+              TEST_SERVICE,TEST_ABSTRACT,TEST_TREATMENT,TEST_POLICY,TEST_ACCEPT_PACKAGES,true);
+      Assert.assertEquals(true, testCollection(collection,SwordValidationInfoType.WARNING));
+    }
+
+    @Test
+    public void testNullMediation()
+    {
+      Collection collection = createTestCollection(TEST_LOCATION,TEST_TITLE,TEST_ACCEPTS,"null",
+              TEST_SERVICE,TEST_ABSTRACT,TEST_TREATMENT,TEST_POLICY,TEST_ACCEPT_PACKAGES,true);
+      Assert.assertEquals(true, testCollection(collection,SwordValidationInfoType.WARNING));
+    }
+
+    @Test
+    public void testNullService()
+    {
+      Collection collection = createTestCollection(TEST_LOCATION,TEST_TITLE,TEST_ACCEPTS,"true",
+              null,TEST_ABSTRACT,TEST_TREATMENT,TEST_POLICY,TEST_ACCEPT_PACKAGES,true);
+      Assert.assertEquals(true, testCollection(collection,SwordValidationInfoType.VALID));
+    }
+
+    @Test
+    public void testNullAbstract()
+    {
+      Collection collection = createTestCollection(TEST_LOCATION,TEST_TITLE,TEST_ACCEPTS,"true",
+              TEST_SERVICE,null,TEST_TREATMENT,TEST_POLICY,TEST_ACCEPT_PACKAGES,true);
+      Assert.assertEquals(true, testCollection(collection,SwordValidationInfoType.VALID));
+    }
+
+    @Test
+    public void testNullTreatment()
+    {
+      Collection collection = createTestCollection(TEST_LOCATION,TEST_TITLE,TEST_ACCEPTS,"true",
+              TEST_SERVICE,TEST_ABSTRACT,null,TEST_POLICY,TEST_ACCEPT_PACKAGES,true);
+      Assert.assertEquals(true, testCollection(collection,SwordValidationInfoType.VALID));
+    }
+
+    @Test
+    public void testNullPolicy()
+    {
+      Collection collection = createTestCollection(TEST_LOCATION,TEST_TITLE,TEST_ACCEPTS,"true",
+              TEST_SERVICE,TEST_ABSTRACT,TEST_TREATMENT,null,TEST_ACCEPT_PACKAGES,true);
+      Assert.assertEquals(true, testCollection(collection,SwordValidationInfoType.VALID));
+    }
+
+
+    @Test
+    public void testNoAcceptPackages()
+    {
+      Collection collection = createTestCollection(TEST_LOCATION,TEST_TITLE,TEST_ACCEPTS,"true",
+              TEST_SERVICE,TEST_ABSTRACT,TEST_TREATMENT,TEST_POLICY,0,true);
+      Assert.assertEquals(true, testCollection(collection,SwordValidationInfoType.VALID));
+    }
+
+    @Test
+    public void testInvalidAcceptPackages()
+    {
+      Collection collection = createTestCollection(TEST_LOCATION,TEST_TITLE,TEST_ACCEPTS,"true",
+              TEST_SERVICE,TEST_ABSTRACT,TEST_TREATMENT,TEST_POLICY,TEST_ACCEPT_PACKAGES,false);
+      Assert.assertEquals(true, testCollection(collection,SwordValidationInfoType.WARNING));
+    }
+
+    @Test
+    public void testMinimalValidCollection()
+    {
+      Collection collection = createTestCollection(TEST_LOCATION,null,1,"true",
+              null,null,null,null,0,true);
+      Assert.assertEquals(true, testCollection(collection,SwordValidationInfoType.VALID));
+    }
+
+    public boolean testCollection(Collection collection, SwordValidationInfoType expectedResult)
+    {
+       SwordValidationInfo info = collection.validate(new Properties());
+
+       System.out.print("Test is " + Thread.currentThread().getStackTrace()[2].getMethodName() + "   Expected Value was " + expectedResult.toString() + " Actual Value was " + info.getType().toString() + "       Test Result: ");
+  
+       if(!info.getType().equals(expectedResult))
+       {
+           System.out.println("FAILED");
+           System.out.println("Details of the failed test:");
+           StringBuffer buffer = new StringBuffer();
+           info.createString(info, buffer, " ");
+           System.out.println(buffer.toString());
+           System.out.println("=================================================");
+           return false;
+       }
+       System.out.println("PASSED");
+       return true;
+    }
+
+   public Collection createTestCollection(String location,String title,int testAccepts,String mediationString,String service,String Abstract,String treatment,String policy,
+           int testAcceptPackages, boolean validAcceptPackages)
+   {
        Collection collection = new Collection();
 
         // SETUP THE TEST DATA
         //-------------------------------------------
-        collection.setLocation(TEST_LOCATION);
-        collection.setTitle(TEST_TITLE);
+        collection.setLocation(location);
+        collection.setTitle(title);
 
-        //Build Accept test list
-        List<String> testAccepts = new ArrayList<String>();
-        for(int i = 1;i < TEST_ACCEPTS;i++)
+        //Build Accepts
+        for(int i = 0;i < testAccepts;i++)
         {
             collection.addAccepts(TEST_ACCEPT + Integer.toString(i));
-            testAccepts.add(TEST_ACCEPT + Integer.toString(i));
         }
-        collection.setMediation(TEST_MEDIATION);
-        collection.setService(TEST_SERVICE);
-        collection.setAbstract(TEST_ABSTRACT);
-        collection.setTreatment(TEST_TREATMENT);
-        collection.setCollectionPolicy(TEST_POLICY);
 
-        //Build AcceptPackage test list
-        List<String> testAcceptPacks = new ArrayList<String>();
-        for(int i = 1;i < TEST_ACCEPT_PACKS;i++)
+        //Set mediation to true/false or leave as null
+        if (mediationString.equalsIgnoreCase("true"))
         {
-            //collection.addAcceptPackaging(TEST_ACCEPT_PACKAGING + Integer.toString(i));
-            collection.addAcceptPackaging("http://www.imsglobal.org/xsd/imscp_v1p1");
-            testAcceptPacks.add(TEST_ACCEPT_PACKAGING + Integer.toString(i));
+            collection.setMediation(true);
+        }
+        else if (mediationString.equalsIgnoreCase("false"))
+        {
+            collection.setMediation(false);
         }
 
+        collection.setService(service);
+        collection.setAbstract(Abstract);
+        collection.setTreatment(treatment);
+        collection.setCollectionPolicy(policy);
 
-       SwordValidationInfo info = collection.validate(new Properties());
-       StringBuffer buffer = new StringBuffer();
-       info.createString(info, buffer, " ");
-       System.out.println(buffer.toString());
-       System.out.println("****************************************************************");
-       assert(info.getType() == SwordValidationInfoType.VALID);
-    }
+        //Build AcceptPackages
+        for(int i = 0;i < testAcceptPackages;i++)
+        {
+            if(validAcceptPackages)
+            {
+                collection.addAcceptPackaging(TEST_ACCEPT_PACKAGING);
+            }
+            else
+            {
+                collection.addAcceptPackaging("invalid uri");
+            }
+        }
 
+       return collection;
+   }
 }

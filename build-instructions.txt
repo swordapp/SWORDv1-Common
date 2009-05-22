@@ -1,0 +1,54 @@
+SWORD Common Code, including the desktop client
+===============================================
+
+This project contains the code for the SWORD common library and the
+associated desktop client (gui and command line mode).
+
+The project is built as a MAVEN (http://maven.apache.org) project. The
+main configuration can be found in pom.xml.
+
+The output from this module is used by other projects that have been
+built during the SWORD projects. In order that the common code is available,
+once the code builds successfully, there is an install step that you need to
+run so that the library is available to other projects.
+
+This project was built and tested within Netbeans, but as a result of using
+maven you can either build the project at the command line or within another
+maven aware IDE.
+
+The following command can be used to install the jar file into the common
+maven repository on your machine so that it can be accessed by other projects.
+If typing at the command line, the following would all be on one line.
+
+mvn install:install-file -DgroupId=sword -Dfile=target/sword-java-common-1.1-SNAPSHOT.jar -Dpackaging=jar -DartifactId=java-common
+
+If you are running this goal within Netbeans, right click on the project name
+(in the projects view) and then select Custom > Goals...
+
+In the dialog that is displayed, enter the install:install-file into the Goal
+line. You do not need to enter anything into the Profiles line. In the
+properties box, enter the following:
+
+groupId=sword
+file=target/sword-java-common-1.1-SNAPSHOT.jar
+packaging=jar
+artifactId=java-common
+
+Building a Client Distribution
+==============================
+
+To build the client distribution, run the following:
+mvn -Pdistribution assembly:assembly
+
+If you are building within Netbeans, right click on the project and select
+Custom > Goals ...   In the dialog that is displayed, enter
+assembly:assembly into the Goal line and enter distribution in the profiles
+line.
+
+This goal will generate a directory within the target folder. This will contain
+a distribution within a sub-directory. To run the application, double click
+on the swordclient1.1.jar file that is generated.
+
+---
+For help and assistance when building this project, please contact the
+main sword-app email list

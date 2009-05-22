@@ -37,7 +37,6 @@
 package org.purl.sword.client;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -72,7 +71,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -170,13 +168,14 @@ public class GuiClient extends JFrame implements ClientType,
 	 * Load the properties from a file.
 	 */
 	private void loadProperties() {
-		log.info("Loading props");
+		log.debug("Loading props");
 		InputStream stream = null;
 		try {
 			props = new Properties();
-			URL propUrl = getClass().getClassLoader()
-					.getResource(PROPERTY_FILE);
-			if (propUrl == null) {
+			URL propUrl =
+                  Thread.currentThread().getContextClassLoader().getResource(PROPERTY_FILE);
+            log.debug("The property file url is: " + propUrl);
+            if (propUrl == null) {
 				throw new IOException("Could not find properties file.");
 			}
 			if ("file".equals(propUrl.getProtocol())) {
@@ -307,7 +306,7 @@ public class GuiClient extends JFrame implements ClientType,
 	 */
 	private void saveProperties() {
 		// if the properties is not null then save it to file
-		if (props != null && propFile != null) {
+        if (props != null && propFile != null) {
 			OutputStream out = null;
 			try {
 				out = new FileOutputStream(propFile);
@@ -448,7 +447,7 @@ public class GuiClient extends JFrame implements ClientType,
 		 */
 		public AddServiceAction() {
 			super("Add Service");
-			ClassLoader loader = ClassLoader.getSystemClassLoader();
+			ClassLoader loader = this.getClass().getClassLoader();
 			URL s = loader.getResource("images/AddServiceButton.gif");
 			Icon icon = new ImageIcon(s);
 			putValue(Action.SMALL_ICON, icon);
@@ -516,8 +515,7 @@ public class GuiClient extends JFrame implements ClientType,
                         }
 
 						if (status.getCode() == 200) {
-							mainPanel
-									.processServiceDocument(location, document);
+							mainPanel.processServiceDocument(location, document);
 							mainPanel.addMessage(document.marshall());
 							publish("Data received for location: " + location);
 						} else {
@@ -716,7 +714,7 @@ public class GuiClient extends JFrame implements ClientType,
 		 */
 		public PostAction() {
 			super("Post");
-			ClassLoader loader = ClassLoader.getSystemClassLoader();
+			ClassLoader loader = this.getClass().getClassLoader(); 
 			URL url = loader.getResource("images/PostButton.gif");
 			Icon icon = new ImageIcon(url);
 			putValue(Action.SMALL_ICON, icon);

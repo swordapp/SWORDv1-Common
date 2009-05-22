@@ -79,7 +79,7 @@ public class SWORDErrorDocumentTest
 
        printValues(info, "");
 
-       assert(info.getType() == SwordValidationInfoType.WARNING);
+       Assert.assertEquals(info.getType(), SwordValidationInfoType.WARNING);
    }
 
    @Test
@@ -95,7 +95,7 @@ public class SWORDErrorDocumentTest
        System.out.println("the test is: " + info);
        printValues(info, "");
 
-       assert(info.getType() == SwordValidationInfoType.VALID);
+       Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
    }
 
    @Test
@@ -111,7 +111,7 @@ public class SWORDErrorDocumentTest
        System.out.println("the test is: " + info);
        printValues(info, "");
 
-       assert(info.getType() == SwordValidationInfoType.VALID);
+       Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
    }
 
    @Test
@@ -127,7 +127,7 @@ public class SWORDErrorDocumentTest
        System.out.println("the test is: " + info);
        printValues(info, "");
 
-       assert(info.getType() == SwordValidationInfoType.VALID);
+       Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
    }
 
    @Test
@@ -143,7 +143,7 @@ public class SWORDErrorDocumentTest
        System.out.println("the test is: " + info);
        printValues(info, "");
 
-       assert(info.getType() == SwordValidationInfoType.VALID);
+       Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
    }
 
    @Test
@@ -159,7 +159,7 @@ public class SWORDErrorDocumentTest
        System.out.println("the test is: " + info);
        printValues(info, "");
 
-       assert(info.getType() == SwordValidationInfoType.VALID);
+       Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
    }
 
    @Test
@@ -175,7 +175,7 @@ public class SWORDErrorDocumentTest
        System.out.println("the test is: " + info);
        printValues(info, "");
 
-       assert(info.getType() == SwordValidationInfoType.VALID);
+       Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
    }
 
    @Test
@@ -191,7 +191,7 @@ public class SWORDErrorDocumentTest
        System.out.println("the test is: " + info);
        printValues(info, "");
 
-       assert(info.getType() == SwordValidationInfoType.ERROR);
+       Assert.assertEquals(info.getType(), SwordValidationInfoType.ERROR);
    }
 
    /**

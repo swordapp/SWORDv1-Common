@@ -46,7 +46,8 @@ import org.junit.*;
 
 /**
  *
- * @author neiltaylor
+ * @author Neil Taylor (nst@aber.ac.uk)
+ * @author Peter Todd (ppt@aber.ac.uk)
  */
 public class SwordVerboseTest {
 
@@ -54,26 +55,25 @@ public class SwordVerboseTest {
     public void elementNameTest()
     {
         XmlName name = SwordVerbose.elementName();
-        assert(name.getPrefix().equals(Namespaces.PREFIX_SWORD));
-        assert(name.getLocalName().equals("verbose"));
-        assert(name.getNamespace().endsWith(Namespaces.NS_SWORD));
+        Assert.assertEquals(name.getPrefix(), Namespaces.PREFIX_SWORD);
+        Assert.assertEquals(name.getLocalName(), "verbose");
+        Assert.assertTrue(name.getNamespace().endsWith(Namespaces.NS_SWORD));
     }
 
     @Test
     public void createWithNoContentTest()
     {
        SwordVerbose verbose = new SwordVerbose();
-       assert(verbose.getXmlName().getPrefix().equals(Namespaces.PREFIX_SWORD));
-       assert(verbose.getXmlName().getLocalName().equals("verbose"));
-       assert(verbose.getXmlName().getNamespace().endsWith(Namespaces.NS_SWORD));
-       
+        Assert.assertEquals(verbose.getXmlName().getPrefix(), Namespaces.PREFIX_SWORD);
+        Assert.assertEquals(verbose.getXmlName().getLocalName(), "verbose");
+        Assert.assertTrue(verbose.getXmlName().getNamespace().endsWith(Namespaces.NS_SWORD));
     }
 
     @Test
     public void createWithContentTest()
     {
        SwordVerbose verbose = new SwordVerbose(true);
-       assert(verbose.getContent());
+       Assert.assertTrue(verbose.getContent());
     }
 
     private static final String start = "<?xml version=\"1.0\" ?>\n" +
@@ -101,8 +101,8 @@ public class SwordVerboseTest {
         Element e = createElementForTest(start + startBracket + "true" + end);
         SwordValidationInfo info = verbose.unmarshall(e, new Properties());
 
-        assert(info.getType() == SwordValidationInfoType.VALID);
-    }
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
+     }
 
     @Test
     public void unmarshallFalseValidTest()
@@ -113,8 +113,8 @@ public class SwordVerboseTest {
         Element e = createElementForTest(start + startBracket + "false" + end);
         SwordValidationInfo info = verbose.unmarshall(e, new Properties());
 
-        assert(info.getType() == SwordValidationInfoType.VALID);
-    }
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
+   }
 
     @Test
     public void unmarshallSetTrueValidTest()
@@ -126,7 +126,7 @@ public class SwordVerboseTest {
         SwordValidationInfo info = verbose.unmarshall(e, new Properties());
         verbose.setContent(true);
         info = verbose.validate(new Properties());
-        assert(info.getType() == SwordValidationInfoType.VALID);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
     }
 
     @Test
@@ -139,7 +139,7 @@ public class SwordVerboseTest {
         SwordValidationInfo info = verbose.unmarshall(e, new Properties());
         verbose.setContent(false);
         info = verbose.validate(new Properties());
-        assert(info.getType() == SwordValidationInfoType.VALID);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class SwordVerboseTest {
         Element e = createElementForTest(start + startBracket + "other" + end);
         SwordValidationInfo info = verbose.unmarshall(e, new Properties());
 
-        assert(info.getType() == SwordValidationInfoType.ERROR);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.ERROR);
     }
 
     @Test
@@ -163,7 +163,7 @@ public class SwordVerboseTest {
         Element e = createElementForTest(start + " test=\"one\""+ startBracket + "true" + end);
         SwordValidationInfo info = verbose.unmarshall(e, new Properties());
 
-        assert(info.getType() == SwordValidationInfoType.INFO);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.INFO);
     }
 
     @Test
@@ -174,7 +174,7 @@ public class SwordVerboseTest {
 
         Element e = createElementForTest(start + startBracket + end);
         SwordValidationInfo info = verbose.unmarshall(e, new Properties());
-        assert(info.getType() == SwordValidationInfoType.WARNING);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.WARNING);
     }
 
 

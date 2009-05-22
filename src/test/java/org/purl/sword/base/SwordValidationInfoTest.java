@@ -41,6 +41,7 @@ import org.junit.*;
 /**
  *
  * @author Neil Taylor (nst@aber.ac.uk)
+ * @author Peter Todd 
  */
 public class SwordValidationInfoTest {
 
@@ -51,9 +52,9 @@ public class SwordValidationInfoTest {
                                    Namespaces.NS_SWORD);
         SwordValidationInfo info = new SwordValidationInfo(name, "Message", SwordValidationInfoType.INFO);
 
-        assert(info.getElement() == name);
-        assert(info.getMessage().equals("Message"));
-        assert(info.getType() == SwordValidationInfoType.INFO);
+        Assert.assertTrue(info.getElement() == name);
+        Assert.assertTrue(info.getMessage().equals("Message"));
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.INFO);
         
     }
 
@@ -68,10 +69,10 @@ public class SwordValidationInfoTest {
 
         SwordValidationInfo info = new SwordValidationInfo(name, attribute, "Message", SwordValidationInfoType.INFO);
 
-        assert(info.getElement() == name);
-        assert(info.getAttribute() == attribute); 
-        assert(info.getMessage().equals("Message"));
-        assert(info.getType() == SwordValidationInfoType.INFO);
+        Assert.assertEquals(info.getElement(), name);
+        Assert.assertEquals(info.getAttribute(), attribute);
+        Assert.assertTrue(info.getMessage().equals("Message"));
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.INFO);
     }
 
 

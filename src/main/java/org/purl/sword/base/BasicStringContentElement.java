@@ -45,7 +45,7 @@ import nu.xom.Element;
  */
 public class BasicStringContentElement extends BasicContentElement
 {
-    private String content;
+    protected String content;
 
     public BasicStringContentElement(String prefix, String localName, String namespaceUri)
     {

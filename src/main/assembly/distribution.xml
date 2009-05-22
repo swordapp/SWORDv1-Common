@@ -6,7 +6,7 @@
     </formats>
     <files>
         <file>
-            <source>target/sword-java-common-1.1-SNAPSHOT.jar</source>
+            <source>target/java-common-1.1-SNAPSHOT.jar</source>
             <destName>swordclient1.1.jar</destName>
         </file>
     </files>

@@ -46,7 +46,7 @@ import org.junit.*;
 
 /**
  *
- * @author neiltaylor
+ * @author Neil Taylor (nst@aber.ac.uk)
  */
 public class SwordVersionTest {
 
@@ -54,18 +54,18 @@ public class SwordVersionTest {
     public void elementNameTest()
     {
         XmlName name = SwordVersion.elementName(); 
-        assert(name.getPrefix().equals(Namespaces.PREFIX_SWORD));
-        assert(name.getLocalName().equals("version"));
-        assert(name.getNamespace().endsWith(Namespaces.NS_SWORD));
+        Assert.assertTrue(name.getPrefix().equals(Namespaces.PREFIX_SWORD));
+        Assert.assertTrue(name.getLocalName().equals("version"));
+        Assert.assertTrue(name.getNamespace().endsWith(Namespaces.NS_SWORD));
     }
 
     @Test
     public void createWithNoContentTest()
     {
        SwordVersion version = new SwordVersion();
-       assert(version.getXmlName().getPrefix().equals(Namespaces.PREFIX_SWORD));
-       assert(version.getXmlName().getLocalName().equals("version"));
-       assert(version.getXmlName().getNamespace().endsWith(Namespaces.NS_SWORD));
+       Assert.assertTrue(version.getXmlName().getPrefix().equals(Namespaces.PREFIX_SWORD));
+       Assert.assertTrue(version.getXmlName().getLocalName().equals("version"));
+       Assert.assertTrue(version.getXmlName().getNamespace().endsWith(Namespaces.NS_SWORD));
        
     }
 
@@ -73,7 +73,7 @@ public class SwordVersionTest {
     public void createWithContentTest()
     {
        SwordVersion version = new SwordVersion("1.3");
-       assert(version.getContent().equals("1.3"));
+       Assert.assertTrue(version.getContent().equals("1.3"));
     }
 
     private static final String start = "<?xml version=\"1.0\" ?>\n" +
@@ -101,7 +101,7 @@ public class SwordVersionTest {
         Element e = createElementForTest(start + startBracket + "1.3" + end);
         SwordValidationInfo info = version.unmarshall(e, new Properties());
 
-        assert(info.getType() == SwordValidationInfoType.VALID);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class SwordVersionTest {
         Element e = createElementForTest(start + " test=\"one\""+ startBracket + "1.3" + end);
         SwordValidationInfo info = version.unmarshall(e, new Properties());
 
-        assert(info.getType() == SwordValidationInfoType.INFO);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.INFO);
     }
 
     @Test
@@ -125,7 +125,7 @@ public class SwordVersionTest {
         Element e = createElementForTest(start + startBracket + end);
         SwordValidationInfo info = version.unmarshall(e, new Properties());
 
-        assert(info.getType() == SwordValidationInfoType.WARNING);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.WARNING);
     }
 
 

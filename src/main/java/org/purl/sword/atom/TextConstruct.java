@@ -108,8 +108,8 @@ implements SwordElementInterface
      */
     public TextConstruct(XmlName name)
     {
-        super(name); 
-    }
+       this(name.getPrefix(), name.getLocalName(), name.getNamespace());
+     }
 
     /**
      * 
@@ -269,16 +269,42 @@ implements SwordElementInterface
        return result; 
    }
 
+   /**
+    * Validate this element, checking that the content stored in the object
+    * matches the requirements for the object as defined in the SWORD profile.
+    *
+    * @param validationContext A property object that is used to pass any context
+    *                          information through the hierarchy of elements. This
+    *                          can be used to provide more appropriate validation
+    *                          information.
+    * @return A validation info object that represents the validation status
+    * for this element. 
+    */
    public SwordValidationInfo validate(Properties validationContext)
    {
        return validate(null, null, validationContext);
    }
 
    /**
+    * Validate this element, checking that the content stored in the object
+    * matches the requirements for the object as defined in the SWORD profile.
     *
-    * @param existing
-    * @param attributeItems
-    * @return
+    * If the list of existing element information is null, all of the content
+    * will be evaluated. 
+    *
+    * @param existing A list of any existing element information that is passed from
+    *                 an unmarshall process. If this method is not called
+    *                 following unmarshalling, this should be set to null.
+    * @param attributeItems A list of any existing attribute information that
+    *                 is passed from an unmarshall process. If this method is
+    *                 not called following unmarshalling, this should be set
+    *                 to null.
+    * @param validationContext A property object that is used to pass any context
+    *                          information through the hierarchy of elements. This
+    *                          can be used to provide more appropriate validation
+    *                          information. 
+    * @return A validation info object that represents the validation status
+    * for this element. 
     */
    protected SwordValidationInfo validate(ArrayList<SwordValidationInfo> existing,
            ArrayList<SwordValidationInfo> attributeItems,
@@ -303,7 +329,6 @@ implements SwordElementInterface
                   new XmlName(xmlName.getPrefix(), ATTRIBUTE_TYPE, xmlName.getNamespace()));
           info.setContentDescription(type.toString());
           result.addAttributeValidationInfo(info);
-
       }
 
       result.addUnmarshallValidationInfo(existing, attributeItems);

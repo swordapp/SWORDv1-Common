@@ -48,10 +48,10 @@ public class SwordContentPackageTypesTest {
     @Test
     public void testRetrieval()
     {
-        assert(SwordContentPackageTypes.instance().isValidType("http://www.imsglobal.org/xsd/imscp_v1p1") == true);
-        assert(SwordContentPackageTypes.instance().isValidType("http://www.imsglobal.org/xsd/imscp_v1p2") == true);
-        assert(SwordContentPackageTypes.instance().isValidType("http://www.loc.gov/METS/") == true);
-        assert(SwordContentPackageTypes.instance().isValidType("TBC") == true);
+        Assert.assertTrue(SwordContentPackageTypes.instance().isValidType("http://www.imsglobal.org/xsd/imscp_v1p1"));
+        Assert.assertTrue(SwordContentPackageTypes.instance().isValidType("http://www.imsglobal.org/xsd/imscp_v1p2"));
+        Assert.assertTrue(SwordContentPackageTypes.instance().isValidType("http://www.loc.gov/METS/"));
+        Assert.assertTrue(SwordContentPackageTypes.instance().isValidType("TBC"));
 
     }
 
@@ -64,7 +64,7 @@ public class SwordContentPackageTypesTest {
             System.out.println(e.nextElement());
             count++;
         }
-        assert(count == 4);
+        Assert.assertTrue(count == 4);
 
     }
 

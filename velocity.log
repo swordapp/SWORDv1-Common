@@ -1,0 +1,37 @@
+Tue May 19 23:57:48 BST 2009  [debug] AvalonLogChute initialized using file 'velocity.log'
+Tue May 19 23:57:48 BST 2009  [trace] *******************************************************************
+Tue May 19 23:57:48 BST 2009  [debug] Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+Tue May 19 23:57:48 BST 2009  [trace] RuntimeInstance initializing.
+Tue May 19 23:57:48 BST 2009  [debug] Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+Tue May 19 23:57:48 BST 2009  [debug] Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+Tue May 19 23:57:48 BST 2009  [debug] Using logger class org.apache.velocity.runtime.log.AvalonLogChute
+Tue May 19 23:57:48 BST 2009  [debug] Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+Tue May 19 23:57:48 BST 2009  [debug] ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.JarResourceLoader
+Tue May 19 23:57:48 BST 2009  [trace] JarResourceLoader : initialization starting.
+Tue May 19 23:57:48 BST 2009  [debug] JarResourceLoader # of paths : 1
+Tue May 19 23:57:48 BST 2009  [debug] JarResourceLoader : trying to load "jar:file:/Users/neiltaylor/.m2/repository/org/codehaus/mojo/webstart/webstart-maven-plugin/1.0-alpha-2/webstart-maven-plugin-1.0-alpha-2.jar!/"
+Tue May 19 23:57:48 BST 2009  [debug] JarHolder: attempting to connect to jar:file:/Users/neiltaylor/.m2/repository/org/codehaus/mojo/webstart/webstart-maven-plugin/1.0-alpha-2/webstart-maven-plugin-1.0-alpha-2.jar!/
+Tue May 19 23:57:48 BST 2009  [debug] JarHolder: initialized JAR: jar:file:/Users/neiltaylor/.m2/repository/org/codehaus/mojo/webstart/webstart-maven-plugin/1.0-alpha-2/webstart-maven-plugin-1.0-alpha-2.jar!/
+Tue May 19 23:57:48 BST 2009  [trace] JarResourceLoader : initialization complete.
+Tue May 19 23:57:48 BST 2009  [debug] ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+Tue May 19 23:57:48 BST 2009  [trace] Default ResourceManager initialization complete.
+Tue May 19 23:57:48 BST 2009  [debug] Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+Tue May 19 23:57:48 BST 2009  [debug] Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+Tue May 19 23:57:48 BST 2009  [debug] Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+Tue May 19 23:57:48 BST 2009  [debug] Loaded System Directive: org.apache.velocity.runtime.directive.Include
+Tue May 19 23:57:48 BST 2009  [debug] Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+Tue May 19 23:57:48 BST 2009  [debug] Created '20' parsers.
+Tue May 19 23:57:48 BST 2009  [trace] Velocimacro : initialization starting.
+Tue May 19 23:57:48 BST 2009  [debug] Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+Tue May 19 23:57:48 BST 2009  [debug] Velocimacro : Default library not found.
+Tue May 19 23:57:48 BST 2009  [debug] Velocimacro : allowInline = true : VMs can be defined inline in templates
+Tue May 19 23:57:48 BST 2009  [debug] Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+Tue May 19 23:57:48 BST 2009  [debug] Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+Tue May 19 23:57:48 BST 2009  [debug] Velocimacro : autoload off : VM system will not automatically reload global library macros
+Tue May 19 23:57:48 BST 2009  [trace] Velocimacro : Velocimacro : initialization complete.
+Tue May 19 23:57:48 BST 2009  [trace] RuntimeInstance successfully initialized.
+Tue May 19 23:57:48 BST 2009  [debug] ResourceManager : found default-jnlp-template.vm with loader org.apache.velocity.runtime.resource.loader.JarResourceLoader
+Tue May 19 23:57:48 BST 2009   [info] Null reference [template 'default-jnlp-template.vm', line 4, column 15] : $project.Url cannot be resolved.
+Tue May 19 23:57:48 BST 2009   [info] Null reference [template 'default-jnlp-template.vm', line 8, column 13] : $project.Organization.Name cannot be resolved.
+Tue May 19 23:57:48 BST 2009   [info] Null reference [template 'default-jnlp-template.vm', line 9, column 21] : $project.Url cannot be resolved.
+Tue May 19 23:57:48 BST 2009   [info] Null reference [template 'default-jnlp-template.vm', line 10, column 18] : $project.Description cannot be resolved.

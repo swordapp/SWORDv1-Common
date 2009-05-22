@@ -107,7 +107,6 @@ import org.purl.sword.base.SWORDEntry;
 import org.purl.sword.base.Service;
 import org.purl.sword.base.ServiceDocument;
 import org.purl.sword.base.Workspace;
-import org.purl.sword.base.QualityValue;
 import org.purl.sword.base.SwordAcceptPackaging;
 
 /**
@@ -200,7 +199,7 @@ implements TreeSelectionListener
        */
       public ServicePostTreeRenderer() 
       {
-          ClassLoader loader = ClassLoader.getSystemClassLoader();
+          ClassLoader loader = this.getClass().getClassLoader();
           workspaceIcon = new ImageIcon(loader.getResource("images/WorkspaceNodeImage.gif"));
           serviceIcon = new ImageIcon(loader.getResource("images/ServiceNodeImage.gif"));
           collectionIcon = new ImageIcon(loader.getResource("images/CollectionNodeImage.gif"));
@@ -479,6 +478,7 @@ implements TreeSelectionListener
       buffer.append(DisplayableValue(value));
       buffer.append("</td></tr>");
    }
+   
    /**
     * Show the specified service data in the details panel. 
     * 
@@ -495,9 +495,19 @@ implements TreeSelectionListener
       addTableRow(buffer, "SWORD Version", service.getVersion());
       addTableRow(buffer, "NoOp Support ", service.isNoOp());
       addTableRow(buffer, "Verbose Support ", service.isVerbose());
-      addTableRow(buffer, "Max File Upload Size ", service.getMaxUploadSize()+" kB");
-      //addTableRow(buffer, "Server Identity ", service.getServerIdentity());  // FIXME delete?
 
+      String maxSize = "";
+      if( service.maxUploadIsDefined() )
+      {
+          maxSize = "" + service.getMaxUploadSize() + "kB";
+      }
+      else
+      {
+          maxSize = "undefined";
+      }
+
+      addTableRow(buffer, "Max File Upload Size ", maxSize);
+      
       buffer.append("</table>");
 
       buffer.append("</body>");

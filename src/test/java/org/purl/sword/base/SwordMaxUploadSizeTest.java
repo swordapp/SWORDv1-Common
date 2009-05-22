@@ -46,7 +46,7 @@ import org.junit.*;
 
 /**
  *
- * @author neiltaylor
+ * @author Peter Todd (ppt@aber.ac.uk)
  */
 public class SwordMaxUploadSizeTest {
 
@@ -54,18 +54,18 @@ public class SwordMaxUploadSizeTest {
     public void elementNameTest()
     {
         XmlName name = SwordMaxUploadSize.elementName();
-        assert(name.getPrefix().equals(Namespaces.PREFIX_SWORD));
-        assert(name.getLocalName().equals("maxUploadSize"));
-        assert(name.getNamespace().endsWith(Namespaces.NS_SWORD));
+        Assert.assertEquals(name.getPrefix(), Namespaces.PREFIX_SWORD);
+        Assert.assertEquals(name.getLocalName(), "maxUploadSize");
+        Assert.assertTrue(name.getNamespace().endsWith(Namespaces.NS_SWORD));
     }
 
     @Test
     public void createWithNoContentTest()
     {
        SwordMaxUploadSize maxUploadSize = new SwordMaxUploadSize();
-       assert(maxUploadSize.getXmlName().getPrefix().equals(Namespaces.PREFIX_SWORD));
-       assert(maxUploadSize.getXmlName().getLocalName().equals("maxUploadSize"));
-       assert(maxUploadSize.getXmlName().getNamespace().endsWith(Namespaces.NS_SWORD));
+       Assert.assertEquals(maxUploadSize.getXmlName().getPrefix(), Namespaces.PREFIX_SWORD);
+       Assert.assertEquals(maxUploadSize.getXmlName().getLocalName(), "maxUploadSize");
+       Assert.assertTrue(maxUploadSize.getXmlName().getNamespace().endsWith(Namespaces.NS_SWORD));
        
     }
 
@@ -73,7 +73,7 @@ public class SwordMaxUploadSizeTest {
     public void createWithContentTest()
     {
        SwordMaxUploadSize maxUploadSize = new SwordMaxUploadSize(10);
-       assert(maxUploadSize.getContent() == 10 );
+       Assert.assertTrue(maxUploadSize.getContent() == 10 );
     }
 
     private static final String start = "<?xml version=\"1.0\" ?>\n" +
@@ -101,7 +101,7 @@ public class SwordMaxUploadSizeTest {
         Element e = createElementForTest(start + startBracket + "10" + end);
         SwordValidationInfo info = maxUploadSize.unmarshall(e, new Properties());
 
-        assert(info.getType() == SwordValidationInfoType.VALID);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class SwordMaxUploadSizeTest {
         SwordValidationInfo info = maxUploadSize.unmarshall(e, new Properties());
         maxUploadSize.setContent(10);
         info = maxUploadSize.validate(new Properties());
-        assert(info.getType() == SwordValidationInfoType.VALID);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.VALID);
     }
 
 
@@ -127,7 +127,7 @@ public class SwordMaxUploadSizeTest {
         Element e = createElementForTest(start + startBracket + "other" + end);
         SwordValidationInfo info = maxUploadSize.unmarshall(e, new Properties());
 
-        assert(info.getType() == SwordValidationInfoType.ERROR);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.ERROR);
     }
 
     @Test
@@ -139,7 +139,7 @@ public class SwordMaxUploadSizeTest {
         Element e = createElementForTest(start + " test=\"one\""+ startBracket + "10" + end);
         SwordValidationInfo info = maxUploadSize.unmarshall(e, new Properties());
 
-        assert(info.getType() == SwordValidationInfoType.INFO);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.INFO);
     }
 
     @Test
@@ -150,7 +150,7 @@ public class SwordMaxUploadSizeTest {
 
         Element e = createElementForTest(start + startBracket + end);
         SwordValidationInfo info = maxUploadSize.unmarshall(e, new Properties());
-        assert(info.getType() == SwordValidationInfoType.WARNING);
+        Assert.assertEquals(info.getType(), SwordValidationInfoType.WARNING);
     }
 
 

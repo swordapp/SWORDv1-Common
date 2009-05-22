@@ -53,7 +53,7 @@ public class ClientFactory {
 		// configure the logger from the property file. The GUI client will
 		// reload these properties if it is set to capture the output and
 		// display it in a panel.
-		PropertyConfigurator.configure(ClassLoader.getSystemClassLoader()
+        PropertyConfigurator.configure(this.getClass().getClassLoader()
 				.getResource(ClientConstants.LOGGING_PROPERTY_FILE));
 	}
 

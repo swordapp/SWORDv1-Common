@@ -51,9 +51,9 @@ public class XmlNameTest {
                                    "version",
                                    Namespaces.NS_SWORD);
 
-        assert(name.getPrefix().equals(Namespaces.PREFIX_SWORD));
-        assert(name.getLocalName().equals("version"));
-        assert(name.getNamespace().equals(Namespaces.NS_SWORD));
+        Assert.assertTrue(name.getPrefix().equals(Namespaces.PREFIX_SWORD));
+        Assert.assertTrue(name.getLocalName().equals("version"));
+        Assert.assertTrue(name.getNamespace().equals(Namespaces.NS_SWORD));
 
     }
 }
