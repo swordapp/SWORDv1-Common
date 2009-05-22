@@ -109,8 +109,7 @@ implements SwordElementInterface
     public TextConstruct(XmlName name)
     {
        this(name.getPrefix(), name.getLocalName(), name.getNamespace());
-     }
-
+    }
     /**
      * 
      * @param prefix
@@ -253,7 +252,6 @@ implements SwordElementInterface
 		   {
 			   content = unmarshallString(text);
            }
-
 	   }
 	   catch( Exception ex )
 	   {
@@ -326,7 +324,7 @@ implements SwordElementInterface
       if( validateAll )
       {
           SwordValidationInfo info = new SwordValidationInfo(xmlName,
-                  new XmlName(xmlName.getPrefix(), ATTRIBUTE_TYPE, xmlName.getNamespace()));
+                     new XmlName(xmlName.getPrefix(), ATTRIBUTE_TYPE, xmlName.getNamespace()));
           info.setContentDescription(type.toString());
           result.addAttributeValidationInfo(info);
       }

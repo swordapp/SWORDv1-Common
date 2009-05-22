@@ -36,6 +36,8 @@
  */
 package org.purl.sword.base;
 
+import java.util.Properties;
+
 /**
  *
  * @author Neil Taylor (nst@aber.ac.uk)
@@ -56,8 +58,41 @@ public class SwordPackaging extends BasicStringContentElement
         setContent(version); 
     }
 
+    /**
+     * Get the name of this element.
+     *
+     * @return
+     */
     public static XmlName elementName()
     {
         return XML_NAME;
+    }
+
+    /**
+     * Validate the content for this element.
+     *
+     * @param validationContext The context for this validation step. Not used
+     *                          in this object.
+     * @return A SwordValidationInfo object. This will be null if there is
+     * no validation information to return, i.e. the content does not contain
+     * any warnings or errors. 
+     */
+    @Override
+    protected SwordValidationInfo validateContent(Properties validationContext)
+    {
+        SwordValidationInfo result = super.validateContent(validationContext);
+        if( result == null )
+        {
+           // content is not empty, so check that the value is a valid value from
+           // sword Types
+           SwordContentPackageTypes types = SwordContentPackageTypes.instance();
+           if( types.isValidType(content) )
+           {
+              result = new SwordValidationInfo(xmlName,
+                               "The packaging type does not match one of the approved SWORD Types",
+                               SwordValidationInfoType.WARNING);
+           }
+        }
+        return result;
     }
 }
