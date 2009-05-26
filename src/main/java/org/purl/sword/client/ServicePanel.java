@@ -609,11 +609,15 @@ implements TreeSelectionListener
          String acceptPackagingList = "";
          for (Iterator i = acceptsPackaging.iterator(); i.hasNext();) {
              SwordAcceptPackaging accept = (SwordAcceptPackaging) i.next();
-             acceptPackagingList += accept.getContent() + " (" + accept.getQualityValue() + "), ";
+             acceptPackagingList += accept.getContent() + " (" + accept.getQualityValue() + ")";
+             
+             // add a , separator if there are any more items in the list 
+             if( i.hasNext() ) {
+                acceptPackagingList += ", ";
+             }
          }
 
-         addTableRow(buffer, "Accepts Packaging",
-                 acceptPackagingList.substring(0, acceptPackagingList.length() - 2));
+         addTableRow(buffer, "Accepts Packaging", acceptPackagingList);
 
          buffer.append("</table>");
       }
