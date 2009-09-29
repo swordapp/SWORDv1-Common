@@ -147,6 +147,10 @@ public class DepositServlet extends HttpServlet {
 		if ((tempDirectory == null) || (tempDirectory.equals(""))) {
 			tempDirectory = System.getProperty("java.io.tmpdir");
 		}
+		if (!tempDirectory.endsWith(System.getProperty("file.separator")))
+		{
+			tempDirectory += System.getProperty("file.separator");
+		}
 		File tempDir = new File(tempDirectory);
 		log.info("Upload temporary directory set to: " + tempDir);
 		if (!tempDir.exists()) {
