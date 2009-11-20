@@ -36,12 +36,7 @@
  */
 package org.purl.sword.client;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -53,6 +48,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.FileRequestEntity;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -370,7 +366,6 @@ public class Client implements SWORDClient {
 		}
 
 		DepositResponse response = null;
-		FileInputStream stream = null;
 
 		String messageBody = "";
 		
@@ -427,11 +422,10 @@ public class Client implements SWORDClient {
 				httppost.addRequestHeader(new Header(
 						HttpHeaders.USER_AGENT, userAgent));
 			}
-
-			stream = new FileInputStream(message.getFilepath());
-
-			InputStreamRequestEntity requestEntity = new InputStreamRequestEntity(
-					stream, message.getFiletype());
+			
+			
+			FileRequestEntity requestEntity = new FileRequestEntity(
+			   new File(message.getFilepath()), message.getFiletype());
 			httppost.setRequestEntity(requestEntity);
 
 			client.executeMethod(httppost);
@@ -448,7 +442,7 @@ public class Client implements SWORDClient {
 				response.setLocation(httppost.getResponseHeader("Location").getValue());
 				// added call for the status code.
 				lastUnmarshallInfo = response.unmarshall(messageBody, new Properties());
-            }
+			}
 			else {
 				messageBody = readResponse(httppost
 						.getResponseBodyAsStream());
@@ -468,17 +462,7 @@ public class Client implements SWORDClient {
 			throw new SWORDClientException(uex.getMessage() + "(<pre>" + messageBody + "</pre>)", uex);
 		} finally {
 			httppost.releaseConnection();
-
-			try {
-				if (stream != null) {
-					stream.close();
-				}
-			} catch (IOException ioe) {
-				log.error("Error closing a stream");
-				throw new SWORDClientException(ioe.getMessage(), ioe);
-			}
 		}
-
 	}
 
 	/**
